@@ -28,3 +28,7 @@ bin/
 
 ### Mac OS ###
 .DS_Store
+
+### Yerel Ide Ayar Dosyaları ###
+.idea/
+*.iml
