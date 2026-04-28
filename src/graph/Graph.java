@@ -13,7 +13,7 @@ public class Graph {
     // Her bir nodedan hangi kenarların çıktığını saklayan map yapısı
     private Map<Node, List<Edge>> nodeEdgeMap;
 
-    // Nodeları ID leri ile birlikte saklayan map yapısı
+    // Nodeları ID leri ile birlikte saklayan map yapısı ( O(1) zamanda aradığımız ID'yi bulabilmek için)
     private Map<Integer, Node> nodeIdMap;
 
     public Graph()
