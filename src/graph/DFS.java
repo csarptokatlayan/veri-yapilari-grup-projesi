@@ -6,7 +6,21 @@ import java.util.Set;
 import java.util.Stack;
 
 import node.Node;
-
+/**
+ * Bu sınıf, Graph (Çizge) üzerinde DFS (Derinlik Öncelikli Arama) algoritmalarını
+ * çalıştırmak için yazılmıştır.
+ *
+ * Kodun okunabilirliğini artırmak ve single responsibility kuralına
+ * uymak adına DFS işlemleri ana Graph sınıfından ayrılmıştır. Ayrıca Graph objesini
+ * her metoda tek tek parametre olarak göndermek yerine constructor üzerinden bir kez
+ * alıp sınıf içinde ortak kullanıyoruz.
+ *
+ * İki farklı arama yöntemi içerir:
+ * - Recursive: Klasik özyineli yöntemle derine iner.
+ * - Iterative: Java'nın kendi Stack yapısını kullanarak aynı işlemi döngüyle yapar.
+ *
+ *
+ */
 public class DFS {
 
     private Graph graph; // graphı yani haritayı bir kere alıp hep kullanacağız
