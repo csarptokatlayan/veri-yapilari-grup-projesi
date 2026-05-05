@@ -39,4 +39,12 @@ public NodeType getNodeType(){
 public void setNodeType(NodeType nodeType){
     this.nodeType=nodeType;
 }
+
+    public Map<String, Object> getProperties() {
+        return properties;
+    }
+
+    public void setProperties(Map<String, Object> properties) {
+        this.properties = properties;
+    }
 }

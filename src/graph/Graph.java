@@ -2,6 +2,7 @@ package graph;
 
 import edge.Edge;
 import node.Node;
+import node.NodeType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -54,6 +55,51 @@ public class Graph {
     public boolean ahmetEfe_nodeExist(int ID)
     {
         return nodeIdMap.containsKey(ID);
+    }
+
+    // Belirli bir türdeki düğümleri döndürür
+    public List<Node> ahmetEfe_findNodesByType(NodeType nodeType)
+    {
+        List<Node> result = new ArrayList<>();
+        // Tüm düğümleri tek tek kontrol ediyoruz ve aradığımız türde olanları sonuç listesine ekliyoruz
+        for (Node node : nodeIdMap.values()) {
+            if (node.getNodeType() == nodeType) {
+                result.add(node);
+            }
+        }
+        return result;
+    }
+
+    // Belirli bir anahtar-değer çiftine sahip düğümleri döndürür
+    public List<Node> ahmetEfe_findNodesByProperty(String key, Object value) {
+        List<Node> result = new ArrayList<>();
+        // Tüm düğümleri tek tek kontrol ediyoruz ve aradığımız anahtar-değer çiftine sahip olanları sonuç listesine ekliyoruz
+        for (Node node : nodeIdMap.values()) {
+            if (node.getProperties().containsKey(key) && node.getProperties().get(key).equals(value)) {
+                result.add(node);
+            }
+        }
+        return result;
+    }
+
+    // İki düğümün birbirine bağlı olup olmadığını kontrol eder
+    public boolean ahmetEfe_isConnected(Node node1, Node node2) {
+        if (!nodeEdgeMap.containsKey(node1) || !nodeEdgeMap.containsKey(node2)) {
+            return false; // Eğer düğümler grafta yoksa, bağlantı yoktur
+        }
+
+        for (Edge edge : nodeEdgeMap.get(node1)) {
+            if(!edge.isDirected() && edge.getSource().equals(node2) && edge.getDestination().equals(node1))
+            {
+                return true; // İki düğüm arasında bir kenar varsa, bağlıdırlar
+            }
+
+            if (edge.getSource().equals(node1) && edge.getDestination().equals(node2))
+            {
+                return true; // İki düğüm arasında bir kenar varsa, bağlıdırlar
+            }
+        }
+        return false; // Hiçbir kenar bulunmazsa, bağlı değiller
     }
 
 
