@@ -3,12 +3,10 @@ package graph;
 import edge.Edge;
 import node.Node;
 import node.NodeType;
+import edge.EdgeType;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.Iterator;
 
 public class Graph {
 
@@ -200,5 +198,67 @@ public class Graph {
             }
         }
         return result;
+    }
+
+// @ArdaAsan1448 us2-edge-search görevi
+
+    // Kenar Arama ve Ortak Komşu görevi
+
+    // Ö4-1: Belirtilen türdeki kenarları bulur.
+    public List<Edge> findEdgesByType(EdgeType t) {
+        List<Edge> result = new ArrayList<>();
+        for (List<Edge> edgeList : nodeEdgeMap.values()) {
+            for (Edge edge : edgeList) {
+                if (edge.getType() == t) {
+                    result.add(edge);
+                }
+            }
+        }
+        return result;
+    }
+
+    // Ö4-2: Kenarların dinamik özelliklerine göre arama yapar.
+    public List<Edge> findEdgesByProperty(String k, Object v) {
+        List<Edge> result = new ArrayList<>();
+        for (List<Edge> edgeList : nodeEdgeMap.values()) {
+            for (Edge edge : edgeList) {
+                if (edge.has(k) && edge.get(k).equals(v)) {
+                    result.add(edge);
+                }
+            }
+        }
+        return result;
+    }
+
+    // Ö4-3: İki düğümün ortak komşularını bulur.
+    public List<Node> getCommonNeighbors(Node a, Node b) {
+        List<Node> commonNeighbors = new ArrayList<>();
+
+        Set<Node> neighborsOfA = new HashSet<>(getNeighbors(a));
+        Set<Node> neighborsOfB = new HashSet<>(getNeighbors(b));
+
+        for (Node node : neighborsOfA) {
+            if (neighborsOfB.contains(node)) {
+                commonNeighbors.add(node);
+            }
+        }
+
+        return commonNeighbors;
+    }
+
+    // Yardımcı Metot: Map yapısına göre bir düğümün komşularını bulur
+    private List<Node> getNeighbors(Node node) {
+        List<Node> neighbors = new ArrayList<>();
+        if (nodeEdgeMap.containsKey(node)) {
+            for (Edge edge : nodeEdgeMap.get(node)) {
+                // Yönelim durumuna veya hedefe göre komşuyu ekleme
+                if (edge.getSource().equals(node)) {
+                    neighbors.add(edge.getDestination());
+                } else {
+                    neighbors.add(edge.getSource());
+                }
+            }
+        }
+        return neighbors;
     }
 }

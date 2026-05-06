@@ -1,6 +1,6 @@
-package edge; 
+package edge;
 
-import node.Node; 
+import node.Node;
 
 
 public class Edge {
@@ -8,6 +8,21 @@ public class Edge {
     private Node destination;
     private EdgeType type;
     private boolean directed;
+
+    // Dinamik özellikleri tutmak için gerekli alan ve metotlar
+    private final java.util.Map<String, Object> properties = new java.util.HashMap<>();
+
+    public void setProperty(String key, Object value) {
+        properties.put(key, value);
+    }
+
+    public boolean has(String key) {
+        return properties.containsKey(key);
+    }
+
+    public Object get(String key) {
+        return properties.get(key);
+    }
 
     public Edge(Node source, Node destination, EdgeType type, boolean directed) {
         this.source = source;
