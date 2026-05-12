@@ -15,190 +15,185 @@ public class Graph {
     // Her bir nodedan hangi kenarların çıktığını saklayan map yapısı
     private Map<Node, List<Edge>> nodeEdgeMap;
 
-    // Nodeları ID leri ile birlikte saklayan map yapısı ( O(1) zamanda aradığımız ID'yi bulabilmek için)
+    // Nodeları ID leri ile birlikte saklayan map yapısı
     private Map<Integer, Node> nodeIdMap;
 
-    public Graph()
-    {
+    public Graph() {
         nodeEdgeMap = new ConcurrentHashMap<>();
         nodeIdMap = new ConcurrentHashMap<>();
     }
 
-    public void ahmetEfe_addNode(Node node)
-    {
-        nodeEdgeMap.put(node,new ArrayList<>());
-        nodeIdMap.put(node.getID(), node);
-    }
-
-
-    public void ahmetEfe_addEdge(Edge edge,Node sourceNode, Node targetNode)
-    {
-
-        if(!nodeEdgeMap.containsKey(sourceNode) || !nodeEdgeMap.containsKey(targetNode))
-        {
-            throw new IllegalArgumentException("Düğüm veya düğümler grafta bulunamadı !");
+        public void ahmetEfe_addNode (Node node){
+            nodeEdgeMap.put(node, new ArrayList<>());
+            nodeIdMap.put(node.getID(), node);
         }
 
-        if (edge.isDirected())
-        {
-            // Node'u tutan mapten aradıpımız node'u alıp ona karşılık gelen listeye kenar ekliyoruz.
-            nodeEdgeMap.get(sourceNode).add(edge);
-        }
-        else
-        {
-            // Eğer yönsüz ise kenar, iki tarafada ekliyoruz.
-            nodeEdgeMap.get(sourceNode).add(edge);
-            nodeEdgeMap.get(targetNode).add(edge);
-        }
-    }
-
-    public boolean ahmetEfe_nodeExist(int ID)
-    {
-        return nodeIdMap.containsKey(ID);
-    }
-
-    // Belirli bir türdeki düğümleri döndürür
-    public List<Node> ahmetEfe_findNodesByType(NodeType nodeType)
-    {
-        List<Node> result = new ArrayList<>();
-        // Tüm düğümleri tek tek kontrol ediyoruz ve aradığımız türde olanları sonuç listesine ekliyoruz
-        for (Node node : nodeIdMap.values()) {
-            if (node.getNodeType() == nodeType) {
-                result.add(node);
-            }
-        }
-        return result;
-    }
-
-    // Belirli bir anahtar-değer çiftine sahip düğümleri döndürür
-    public List<Node> ahmetEfe_findNodesByProperty(String key, Object value) {
-        List<Node> result = new ArrayList<>();
-        // Tüm düğümleri tek tek kontrol ediyoruz ve aradığımız anahtar-değer çiftine sahip olanları sonuç listesine ekliyoruz
-        for (Node node : nodeIdMap.values()) {
-            if (node.getProperties().containsKey(key) && node.getProperties().get(key).equals(value)) {
-                result.add(node);
-            }
-        }
-        return result;
-    }
-
-    // İki düğümün birbirine bağlı olup olmadığını kontrol eder
-    public boolean ahmetEfe_isConnected(Node node1, Node node2) {
-        if (!nodeEdgeMap.containsKey(node1) || !nodeEdgeMap.containsKey(node2)) {
-            return false; // Eğer düğümler grafta yoksa, bağlantı yoktur
-        }
-
-        for (Edge edge : nodeEdgeMap.get(node1)) {
-            if(!edge.isDirected() && edge.getSource().equals(node2) && edge.getDestination().equals(node1))
-            {
-                return true; // İki düğüm arasında bir kenar varsa, bağlıdırlar
+        public void ahmetEfe_addEdge (Edge edge, Node sourceNode, Node targetNode){
+            if (!nodeEdgeMap.containsKey(sourceNode) || !nodeEdgeMap.containsKey(targetNode)) {
+                throw new IllegalArgumentException("Düğüm veya düğümler grafta bulunamadı !");
             }
 
-            if (edge.getSource().equals(node1) && edge.getDestination().equals(node2))
-            {
-                return true; // İki düğüm arasında bir kenar varsa, bağlıdırlar
+            if (edge.isDirected()) {
+                nodeEdgeMap.get(sourceNode).add(edge);
+            } else {
+                // Eğer yönsüz ise kenar, iki tarafa da ekliyoruz.
+                nodeEdgeMap.get(sourceNode).add(edge);
+                nodeEdgeMap.get(targetNode).add(edge);
             }
         }
-        return false; // Hiçbir kenar bulunmazsa, bağlı değiller
-    }
 
-
-// @fatihsoyer9008 o5 methods görevleri
-
-    // --- FATİH'İN Ö5 METOTLARI (GRAPH QUERIES) ---
-
-    /**
-     * Bir düğümün komşularını döndürür.
-     */
-    public List<Node> fatih_getNeighbors(Node node) {
-        // Komşuları tutacağımız boş bir liste oluşturuyoruz
-        List<Node> neighbors = new ArrayList<>();
-
-        // Eğer aradığımız düğüm grafta hiç yoksa, boş listeyi geri döndürüyoruz
-        if (!nodeEdgeMap.containsKey(node)) return neighbors;
-
-        // Düğümün bağlı olduğu tüm kenarları (edgeleri) tek tek geziyoruz
-        for (Edge edge : nodeEdgeMap.get(node)) {
-            // Eğer kenarın çıkış noktası (source) bizim düğümümüzse, demek ki hedef (destination) komşumuzdur
-            if (edge.getSource().equals(node)) {
-                neighbors.add(edge.getDestination());
-            }
-            // Eğer kenarın hedef noktası bizim düğümümüzse, demek ki çıkış noktası (source) komşumuzdur
-            else {
-                neighbors.add(edge.getSource());
-            }
+        public boolean ahmetEfe_nodeExist ( int ID){
+            return nodeIdMap.containsKey(ID);
         }
-        return neighbors;
-    }
 
-    /**
-     * Bir düğümü ve ona bağlı olan tüm kenarları graftan tamamen siler.
-     */
-    public void fatih_removeNode(Node node) {
-        // Eğer silinecek düğüm zaten grafta yoksa, hiçbir işlem yapmadan çıkıyoruz
-        if (!nodeEdgeMap.containsKey(node)) return;
-
-        // ÖNCE diğer tüm düğümlerin listelerini gezip, bu silinecek düğüme gelen/giden kenarları temizliyoruz
-        for (List<Edge> edges : nodeEdgeMap.values()) {
-
-            // Listeden eleman silerken hata almamak için klasik Iterator yapısını kullanıyoruz (Lambda kaldırıldı)
-            Iterator<Edge> iterator = edges.iterator();
-            while (iterator.hasNext()) {
-                Edge edge = iterator.next();
-                // Eğer kenarın ucu veya başı bizim silmek istediğimiz düğüme değiyorsa, o kenarı siliyoruz
-                if (edge.getSource().equals(node) || edge.getDestination().equals(node)) {
-                    iterator.remove();
+        public List<Node> ahmetEfe_findNodesByType (NodeType nodeType){
+            List<Node> result = new ArrayList<>();
+            for (Node node : nodeIdMap.values()) {
+                if (node.getNodeType() == nodeType) {
+                    result.add(node);
                 }
             }
+            return result;
         }
 
-        // Bütün bağlantılar koptuktan SONRA, düğümün kendisini haritalardan komple siliyoruz
-        nodeEdgeMap.remove(node);
-        nodeIdMap.remove(node.getID());
-    }
-
-    /**
-     * Belirli bir kenarı graftan siler.
-     */
-    public void fatih_removeEdge(Edge edge) {
-        // Kenarın başını ve sonunu alıyoruz
-        Node source = edge.getSource();
-        Node dest = edge.getDestination();
-
-        // Eğer kaynak düğüm grafta varsa, onun bağlantı listesinden bu kenarı siliyoruz
-        if (nodeEdgeMap.containsKey(source)) {
-            nodeEdgeMap.get(source).remove(edge);
+        public List<Node> ahmetEfe_findNodesByProperty (String key, Object value){
+            List<Node> result = new ArrayList<>();
+            for (Node node : nodeIdMap.values()) {
+                if (node.getProperties().containsKey(key) && node.getProperties().get(key).equals(value)) {
+                    result.add(node);
+                }
+            }
+            return result;
         }
 
-        // Eğer kenar yönsüz ise (iki taraflı eklendiyse), hedef düğümün bağlantı listesinden de siliyoruz
-        if (!edge.isDirected() && nodeEdgeMap.containsKey(dest)) {
-            nodeEdgeMap.get(dest).remove(edge);
+        public boolean ahmetEfe_isConnected (Node node1, Node node2){
+            if (!nodeEdgeMap.containsKey(node1) || !nodeEdgeMap.containsKey(node2)) {
+                return false;
+            }
+
+            for (Edge edge : nodeEdgeMap.get(node1)) {
+                if (!edge.isDirected() && edge.getSource().equals(node2) && edge.getDestination().equals(node1)) {
+                    return true;
+                }
+
+                if (edge.getSource().equals(node1) && edge.getDestination().equals(node2)) {
+                    return true;
+                }
+            }
+            return false;
         }
-    }
 
-    /**
-     * İki düğüm arasındaki kenarları (bağlantıları) döndürür.
-     */
-    public List<Edge> fatih_getEdgesBetween(Node source, Node target) {
-        // İki düğüm arasındaki kenarları tutacağımız boş liste
-        List<Edge> result = new ArrayList<>();
+        // --- FATİH'İN METOTLARI ---
 
-        // Kaynak düğüm grafta yoksa, boş listeyi döndür
-        if (!nodeEdgeMap.containsKey(source)) return result;
+        public List<Node> fatih_getNeighbors (Node node){
+            List<Node> neighbors = new ArrayList<>();
+            if (!nodeEdgeMap.containsKey(node)) return neighbors;
 
-        // Kaynak düğümden çıkan tüm kenarları tek tek kontrol ediyoruz
-        for (Edge edge : nodeEdgeMap.get(source)) {
-            // 1. Durum: Kenar source'dan çıkıp target'a gidiyorsa
-            boolean sourceToTarget = edge.getSource().equals(source) && edge.getDestination().equals(target);
+            for (Edge edge : nodeEdgeMap.get(node)) {
+                if (edge.getSource().equals(node)) {
+                    neighbors.add(edge.getDestination());
+                } else {
+                    neighbors.add(edge.getSource());
+                }
+            }
+            return neighbors;
+        }
 
-            // 2. Durum: Kenar yönsüzse ve target'tan çıkıp source'a geliyorsa
-            boolean targetToSourceUndirected = !edge.isDirected() && edge.getSource().equals(target) && edge.getDestination().equals(source);
+        public void fatih_removeNode (Node node){
+            if (!nodeEdgeMap.containsKey(node)) return;
 
-            // Eğer bu iki durumdan biri geçerliyse, aradığımız kenarı bulduk demektir, listeye ekliyoruz
-            if (sourceToTarget || targetToSourceUndirected) {
-                result.add(edge);
+            for (List<Edge> edges : nodeEdgeMap.values()) {
+                Iterator<Edge> iterator = edges.iterator();
+                while (iterator.hasNext()) {
+                    Edge edge = iterator.next();
+                    if (edge.getSource().equals(node) || edge.getDestination().equals(node)) {
+                        iterator.remove();
+                    }
+                }
+            }
+            nodeEdgeMap.remove(node);
+            nodeIdMap.remove(node.getID());
+        }
+
+        public void fatih_removeEdge (Edge edge){
+            Node source = edge.getSource();
+            Node dest = edge.getDestination();
+
+            if (nodeEdgeMap.containsKey(source)) {
+                nodeEdgeMap.get(source).remove(edge);
+            }
+
+            if (!edge.isDirected() && nodeEdgeMap.containsKey(dest)) {
+                nodeEdgeMap.get(dest).remove(edge);
             }
         }
-        return result;
+
+        public List<Edge> fatih_getEdgesBetween (Node source, Node target){
+            List<Edge> result = new ArrayList<>();
+            if (!nodeEdgeMap.containsKey(source)) return result;
+
+            for (Edge edge : nodeEdgeMap.get(source)) {
+                boolean sourceToTarget = edge.getSource().equals(source) && edge.getDestination().equals(target);
+                boolean targetToSourceUndirected = !edge.isDirected() && edge.getSource().equals(target) && edge.getDestination().equals(source);
+
+                if (sourceToTarget || targetToSourceUndirected) {
+                    result.add(edge);
+                }
+            }
+            return result;
+        }
+
+        // --- MURAT'IN  METOTLARI ---
+
+        /**
+         * Dışarı çıkan bağlantı sayısını verir (Kimi takip ediyor?)
+         */
+        public int murat_getOutDegree (Node n){
+            if (!nodeEdgeMap.containsKey(n)) {
+                return 0;
+            }
+            return nodeEdgeMap.get(n).size();
+        }
+
+        /**
+         * İçeri giren bağlantı sayısını verir (Kaç takipçisi var?)
+         */
+        public int murat_getInDegree (Node n){
+            if (!nodeEdgeMap.containsKey(n)) {
+                return 0;
+            }
+
+            int count = 0;
+            // Tüm düğümlerin kenar listelerini kontrol ediyoruz
+            for (List<Edge> edges : nodeEdgeMap.values()) {
+                for (Edge edge : edges) {
+                    // Eğer kenarın hedef noktası bizim düğümümüz ise sayacı artır
+                    if (edge.getDestination().equals(n)) {
+                        count++;
+                    }
+                }
+            }
+            return count;
+        }
+
+        /**
+         * Toplam dereceyi hesaplar (Yönlü/Yönsüz ayrımına dikkat ederek)
+         */
+        public int murat_getDegree (Node n,boolean isDirected){
+            if (!nodeEdgeMap.containsKey(n)) {
+                return 0;
+            }
+
+            if (isDirected) {
+                // Yönlü ağlarda (Örn: Twitter) Toplam Etkileşim = Takipçi (In) + Takip Edilen (Out)
+                return murat_getInDegree(n) + murat_getOutDegree(n);
+            } else {
+                // Yönsüz ağlarda  kenarlar zaten iki tarafa da eklendiği için kendi listesi yeterlidir
+                return nodeEdgeMap.get(n).size();
+            }
+        }
     }
-}
+
+
+
+
