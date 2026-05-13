@@ -201,4 +201,53 @@ public class Graph {
         }
         return result;
     }
+    // --- MURAT'IN Ö5 DERECE (DEGREE) METOTLARI ---
+
+    /**
+     * Dışarı çıkan bağlantı sayısını verir (Kimi takip ediyor?)
+     */
+    public int murat_getOutDegree(Node n) {
+        if (!nodeEdgeMap.containsKey(n)) {
+            return 0;
+        }
+        return nodeEdgeMap.get(n).size();
+    }
+
+    /**
+     * İçeri giren bağlantı sayısını verir (Kaç takipçisi var?)
+     */
+    public int murat_getInDegree(Node n) {
+        if (!nodeEdgeMap.containsKey(n)) {
+            return 0;
+        }
+
+        int count = 0;
+        // Tüm düğümlerin kenar listelerini kontrol ediyoruz
+        for (List<Edge> edges : nodeEdgeMap.values()) {
+            for (Edge edge : edges) {
+                // Eğer kenarın hedef noktası bizim düğümümüz ise sayacı artır
+                if (edge.getDestination().equals(n)) {
+                    count++;
+                }
+            }
+        }
+        return count;
+    }
+
+    /**
+     * Toplam dereceyi hesaplar (Yönlü/Yönsüz ayrımına dikkat ederek)
+     */
+    public int murat_getDegree(Node n, boolean isDirected) {
+        if (!nodeEdgeMap.containsKey(n)) {
+            return 0;
+        }
+
+        if (isDirected) {
+            // Yönlü ağlarda (Örn: Twitter) Toplam Etkileşim = Takipçi (In) + Takip Edilen (Out)
+            return murat_getInDegree(n) + murat_getOutDegree(n);
+        } else {
+            // Yönsüz ağlarda (Örn: Facebook) kenarlar zaten iki tarafa da eklendiği için kendi listesi yeterlidir
+            return nodeEdgeMap.get(n).size();
+        }
+    }
 }
