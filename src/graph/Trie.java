@@ -5,7 +5,11 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Locale;
+
+import node.NodeRegistry;
 import node.TrieNode;
+import node.NodeType;
+import node.Node;
 
 public class Trie {
     private TrieNode root = new TrieNode();
@@ -46,5 +50,27 @@ public class Trie {
         for (TrieNode child : node.children.values()) {
             collectAllIds(child, results);
         }
+    }
+    // --- K4 GÖREVİ: TİP FİLTRELİ ARAMA ---
+    public List<String> searchByPrefix(String prefix, NodeType type) {
+        // 1. Mevcut K3 metodunu kullanarak tüm ID'leri çekiyoruz
+        List<String> allIds = searchByPrefix(prefix);
+
+        // 2. Filtre belirtilmemişse direkt listeyi dön (Edge case kontrolü)
+        if (type == null) {
+            return allIds;
+        }
+
+        // 3. Tip filtresini uyguluyoruz
+        List<String> filteredResults = new ArrayList<>();
+        for (String id : allIds) {
+            Node nodeObj = NodeRegistry.findById(id);
+
+            // Düğüm mevcutsa ve tipi istenen tiple eşleşiyorsa listeye ekle
+            if (nodeObj != null && nodeObj.getNodeType() == type) {
+                filteredResults.add(id);
+            }
+        }
+        return filteredResults;
     }
 }
