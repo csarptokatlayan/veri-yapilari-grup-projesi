@@ -51,26 +51,38 @@ public class Trie {
             collectAllIds(child, results);
         }
     }
-    // --- K4 GÖREVİ: TİP FİLTRELİ ARAMA ---
-    public List<String> searchByPrefix(String prefix, NodeType type) {
-        // 1. Mevcut K3 metodunu kullanarak tüm ID'leri çekiyoruz
-        List<String> allIds = searchByPrefix(prefix);
+    //  @ArdaAsan1448 k4 görevi tip filtresi ve test (overload)
+    private NodeRegistry registry;
 
-        // 2. Filtre belirtilmemişse direkt listeyi dön (Edge case kontrolü)
+    public void setNodeRegistry(NodeRegistry registry) {
+        this.registry = registry;
+    }
+
+    public List<String> searchByPrefix(String prefix, NodeType type) {
+
+
+        //  Arama algoritmasını çağırıyoruz.
+        List<String> allIds = this.searchByPrefix(prefix);
+        // Eğer dışarıdan tip parametresi gönderilmemişse (null), elimizdeki tüm listeyi direkt döndürüyoruz.
         if (type == null) {
             return allIds;
         }
+        // 3. Tip kontrolünden geçen (filtrelenen) ID'leri tutacağımız yeni liste.
+        List<String> filteredIds = new ArrayList<>();
 
-        // 3. Tip filtresini uyguluyoruz
-        List<String> filteredResults = new ArrayList<>();
+        // 4. Bulunan tüm ID'leri tek tek dönüyoruz.
         for (String id : allIds) {
-            Node nodeObj = NodeRegistry.findById(id);
 
-            // Düğüm mevcutsa ve tipi istenen tiple eşleşiyorsa listeye ekle
-            if (nodeObj != null && nodeObj.getNodeType() == type) {
-                filteredResults.add(id);
+
+            if (this.registry != null) {
+                Node node = this.registry.findById(id);
+
+                // Eğer Node bulunduysa ve Tipi (USER, POST, EVENT) bizim aradığımız tipe eşitse listeye ekliyoruz.
+                if (node != null && node.getNodeType() == type) {
+                    filteredIds.add(id);
+                }
             }
         }
-        return filteredResults;
+        return filteredIds;
     }
 }
