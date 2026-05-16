@@ -1,12 +1,14 @@
-import edge.Edge;
-import edge.EdgeType;
-import graph.Graph;
-import node.Node;
-import node.NodeType;
+package com.grup15.socialnetwork;
+
+import com.grup15.socialnetwork.edge.Edge;
+import com.grup15.socialnetwork.edge.EdgeType;
+import com.grup15.socialnetwork.graph.Graph;
+import com.grup15.socialnetwork.node.Node;
+import com.grup15.socialnetwork.node.NodeType;
 
 import java.util.List;
 
-public class Main {
+public class NodeTest {
     public static void main(String[] args) {
         Graph graph = new Graph();
 

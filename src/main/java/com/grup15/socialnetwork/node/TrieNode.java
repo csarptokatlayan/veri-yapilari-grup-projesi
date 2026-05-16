@@ -1,4 +1,4 @@
-package node;
+package com.grup15.socialnetwork.node;
 
 import java.util.*;
 
@@ -8,6 +8,6 @@ public class TrieNode {
             children= new HashMap<>();
     //Kelimenin (veya prefix'in) bittiği yer mi?
     public boolean isEnd;
-    //node id'lerini leaf'te tutma kuralı
+    //main.java.com.grup15.socialnetwork.node id'lerini leaf'te tutma kuralı
     public List<String> ids =new ArrayList<>();
 }

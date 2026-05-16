@@ -1,4 +1,4 @@
-package hashtable;
+package com.grup15.socialnetwork.hashtable;
 
 import java.util.Iterator;
 import java.util.LinkedList;

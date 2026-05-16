@@ -1,11 +1,11 @@
-package graph;
+package com.grup15.socialnetwork.graph;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.Stack;
 
-import node.Node;
+import com.grup15.socialnetwork.node.Node;
 /**
  * Bu sınıf, Graph (Çizge) üzerinde DFS (Derinlik Öncelikli Arama) algoritmalarını
  * çalıştırmak için yazılmıştır.
@@ -39,7 +39,7 @@ public class DFS {
         List<Node> result = new ArrayList<>();
         Set<Node> visited = new HashSet<>();
 
-        // Yardımcı fonksiyona da graph göndermiyoruz
+        // Yardımcı fonksiyona da main.java.com.grup15.socialnetwork.graph göndermiyoruz
         fatih_dfsRecursiveHelper(start, visited, result);
         return result;
     }
@@ -49,7 +49,7 @@ public class DFS {
         visited.add(current);
         result.add(current);
 
-        // graph sınıfının kendi hafızasındaki haritayı kullanacak
+        // main.java.com.grup15.socialnetwork.graph sınıfının kendi hafızasındaki haritayı kullanacak
         List<Node> neighbors = this.graph.fatih_getNeighbors(current);
 
         for (Node neighbor : neighbors) {

@@ -1,7 +1,7 @@
-package edge; 
+package com.grup15.socialnetwork.edge;
 
-import node.Node; 
 
+import com.grup15.socialnetwork.node.Node;
 
 public class Edge {
     private Node source;

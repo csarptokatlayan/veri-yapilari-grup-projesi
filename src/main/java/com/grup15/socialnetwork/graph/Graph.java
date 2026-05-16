@@ -1,8 +1,8 @@
-package graph;
+package com.grup15.socialnetwork.graph;
 
-import edge.Edge;
-import node.Node;
-import node.NodeType;
+import com.grup15.socialnetwork.edge.Edge;
+import com.grup15.socialnetwork.node.Node;
+import com.grup15.socialnetwork.node.NodeType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,7 +41,7 @@ public class Graph {
 
         if (edge.isDirected())
         {
-            // Node'u tutan mapten aradıpımız node'u alıp ona karşılık gelen listeye kenar ekliyoruz.
+            // Node'u tutan mapten aradıpımız main.java.com.grup15.socialnetwork.node'u alıp ona karşılık gelen listeye kenar ekliyoruz.
             nodeEdgeMap.get(sourceNode).add(edge);
         }
         else
