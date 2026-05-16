@@ -1,6 +1,6 @@
-package node;
+package com.grup15.socialnetwork.node;
 
-import hashtable.HashTable;
+import com.grup15.socialnetwork.hashtable.HashTable;
 
 public class NodeRegistry {
 

@@ -1,6 +1,6 @@
-package graph;
+package com.grup15.socialnetwork.graph;
 
-import node.Node;
+import com.grup15.socialnetwork.node.Node;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -25,7 +25,7 @@ public class BFS {
     
      //  @author Semih Tuncel
      /*
-      * bir node'nin baglantisi olan butun nodeleri dondurur, merkezden uzaga dogru ilerler
+      * bir main.java.com.grup15.socialnetwork.node'nin baglantisi olan butun nodeleri dondurur, merkezden uzaga dogru ilerler
      */
     public List<Node> bfsTraversal(Node start) {
        
@@ -62,7 +62,7 @@ public class BFS {
 
     //  @author Semih Tuncel
     /*
-      * 2 node arasindaki en kisa yolu dondurur, ornek 1 den 5 e gidiyoruz 2 3 4 diye kaydeder bunu dondurur
+      * 2 main.java.com.grup15.socialnetwork.node arasindaki en kisa yolu dondurur, ornek 1 den 5 e gidiyoruz 2 3 4 diye kaydeder bunu dondurur
      */
 
     public List<Node> shortestPath(Node src, Node tgt) {
@@ -113,7 +113,7 @@ public class BFS {
 
    //  @author Semih Tuncel
    /*
-      * bir node'nin baglantisi olan butun nodeleri dondurur
+      * bir main.java.com.grup15.socialnetwork.node'nin baglantisi olan butun nodeleri dondurur
      */
     private List<Node> buildPath(Node src, Node tgt, Map<Node, Node> parentMap) {
        

@@ -32,3 +32,6 @@ bin/
 ### Yerel Ide Ayar Dosyaları ###
 .idea/
 *.iml
+
+### Derlenmiş Maven Dosyaları
+target/

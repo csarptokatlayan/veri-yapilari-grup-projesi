@@ -1,8 +1,9 @@
-package graph;
+package com.grup15.socialnetwork;
 
-import node.Node;
-import node.NodeRegistry;
-import node.NodeType;
+import com.grup15.socialnetwork.graph.Trie;
+import com.grup15.socialnetwork.node.Node;
+import com.grup15.socialnetwork.node.NodeRegistry;
+import com.grup15.socialnetwork.node.NodeType;
 
 import java.util.List;
 

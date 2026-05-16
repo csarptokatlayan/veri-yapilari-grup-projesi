@@ -1,4 +1,8 @@
-package node;
+package com.grup15.socialnetwork;
+
+import com.grup15.socialnetwork.node.Node;
+import com.grup15.socialnetwork.node.NodeRegistry;
+import com.grup15.socialnetwork.node.NodeType;
 
 public class NodeRegistryTest {
     public static void main(String[] args) {

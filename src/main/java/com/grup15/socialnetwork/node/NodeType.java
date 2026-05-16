@@ -1,4 +1,4 @@
-package node;
+package com.grup15.socialnetwork.node;
 
 public enum NodeType {
     USER,

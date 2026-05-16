@@ -1,4 +1,4 @@
-package property;
+package com.grup15.socialnetwork.property;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -9,7 +9,7 @@ public class PropertyMap {
     private final Map<String, Object> properties;
 
     /**
-     * Thread-safe hash map ile bos bir property store olusturuyor.
+     * Thread-safe hash map ile bos bir main.java.com.grup15.socialnetwork.property store olusturuyor.
      */
     //  @author Semih Tuncel
     public PropertyMap() {
@@ -17,7 +17,7 @@ public class PropertyMap {
     }
 
     /**
-     * Bir property ekliyor veya guncelliyor.
+     * Bir main.java.com.grup15.socialnetwork.property ekliyor veya guncelliyor.
      */
     //  @author Semih Tuncel
     public void put(String key, Object value) {
@@ -40,7 +40,7 @@ public class PropertyMap {
     }
 
     /**
-     * Keyin property'ler arasinda var olup olmadigini kontrol ediyor.
+     * Keyin main.java.com.grup15.socialnetwork.property'ler arasinda var olup olmadigini kontrol ediyor.
      */
     //  @author Semih Tuncel
     public boolean has(String key) {

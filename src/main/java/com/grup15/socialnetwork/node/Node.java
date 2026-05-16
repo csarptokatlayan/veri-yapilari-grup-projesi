@@ -1,10 +1,6 @@
-package node;
+package com.grup15.socialnetwork.node;
 
-import edge.Edge;
-
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class Node {
