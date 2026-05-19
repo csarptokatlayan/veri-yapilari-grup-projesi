@@ -1,7 +1,5 @@
 📌 Summary (Özet)
-Mimari: Java backend/core + web frontend. AI simülasyon motoru backend içinde @Async çalışan anlamlı bir modül olacak, ayrı servis/container kurulmayacak.
-
-AI Kapsamı: Sade ama çalışır durumda. Graph verisine bakarak sosyal ağ senaryosu üretir, önerilen node/edge değişikliklerini ve kısa açıklamayı döner.
+Mimari: Java backend/core + web frontend.
 
 Scope Dışı: Job queue, broker, snapshot sistemi, deterministik seed engine, formal benchmark presetleri.
 
@@ -18,11 +16,7 @@ POST /api/query/traverse: Sınırlı zincirleme sorgu şablonları.
 
 POST /api/algorithms/bfs|dfs|shortest-path|degrees: Algoritma paneli.
 
-POST /api/ai/simulate: Async AI simülasyonunu başlatır.
-
-GET /api/ai/simulate/{jobId}: Simülasyon sonucunu döner.
-
-DTO’lar: GraphNodeDto, GraphEdgeDto, GraphViewDto, QueryRequestDto, AlgorithmResultDto, AiSimulationResultDto.
+DTO’lar: GraphNodeDto, GraphEdgeDto, GraphViewDto, QueryRequestDto, AlgorithmResultDto.
 
 🚀 Epic 1: Faz 1 - Veri Yapıları
 F1-US1
@@ -55,7 +49,7 @@ Task'lar: Sabit JSON veya Java builder ile yaklaşık 150-200 node; ilişkiler: 
 
 Kabul Kriterleri: Seed engine kurulmaz; veri UI ve algoritma demosuna yeterlidir; takım üye isimleri Türkçe karakter içermeyen formatta metadata’ya eklenir.
 
-🧠 Epic 2: Faz 2 - Algoritmalar, Sorgular ve AI Simülasyonu
+🧠 Epic 2: Faz 2 - Algoritmalar ve Sorgular
 F2-US1
 
 Task'lar: BFS custom queue ile; DFS iterative/recursive; visited kontrolü; depth limit.
@@ -79,12 +73,6 @@ F2-US4
 Task'lar: Node type filtresi; relation type filtresi; property bazlı basit filtre.
 
 Kabul Kriterleri: Filtreli traversal doğru sonuç verir; boş sonuç durumu UI/API’da düzgün döner; test senaryosu vardır.
-
-F2-US5
-
-Task'lar: Backend içinde AiSimulationService; @Async metot; mevcut graph’tan 5-10 önerilen sosyal etkileşim üretme; (örn. arkadaş önerisi, yeni post/event fikri, olası LIKE/ATTENDS ilişkileri); prompt ve çıktı loglama.
-
-Kabul Kriterleri: Ayrı servis/container, broker ve snapshot sistemi kurulmaz; simülasyon async çalışır; sonuç AiSimulationResultDto ile UI’a döner; çıktı en az önerilen node/edge listesi + kısa gerekçe içerir; prompt ve response rapora eklenir.
 
 F2-US6
 
@@ -117,30 +105,24 @@ Task'lar: BFS/DFS/shortest path/degrees formları; sonuç path highlight; loadin
 
 Kabul Kriterleri: Her algoritma UI’dan çalışır; path canvas’ta vurgulanır; yanlış input case’leri test edilir.
 
-F3-US5
-
-Task'lar: Sol panelde “AI Simülasyon” aksiyonu; async durum göstergesi; önerilen node/edge listesini canvas’a önizleme olarak ekleme.
-
-Kabul Kriterleri: Kullanıcı simülasyonu başlatır, UI bloklanmaz; sonuçlar onay bekleyen öneriler olarak gösterilir; prompt/response log kaydı oluşur.
-
 F3-US6
 
-Task'lar: Backend Dockerfile; frontend Dockerfile; docker-compose.yml; backend içinde async AI simülasyon modülü.
+Task'lar: Backend Dockerfile; frontend Dockerfile; docker-compose.yml.
 
-Kabul Kriterleri: docker-compose up frontend ve backend’i başlatır; AI modülünün backend içinde async çalıştığı README’de açıklanır.
+Kabul Kriterleri: docker-compose up frontend ve backend’i başlatır.
 
 F3-US7
 
-Task'lar: README mimari; UML diyagramları; Big-O tablosu; AI prompt/response dökümü; demo video senaryosu.
+Task'lar: README mimari; UML diyagramları; Big-O tablosu; demo video senaryosu.
 
-Kabul Kriterleri: En fazla 10 dakikalık demo akışı hazırlanır; her ekip üyesi core veri yapılarını ve AI simülasyon akışını açıklayabilir.
+Kabul Kriterleri: En fazla 10 dakikalık demo akışı hazırlanır; her ekip üyesi core veri yapılarını açıklayabilir.
 
 🧪 Test Plan
 Unit: HashTable, Trie normalizasyonu, Queue, Graph adjacency, BFS, DFS, shortest path.
 
-Integration: Search, inspector, expand, fixed chain query, algoritma endpointleri, async AI simülasyon endpointleri.
+Integration: Search, inspector, expand, fixed chain query, algoritma endpointleri.
 
-UI Demo: “Ah” araması, maksimum 50 node render, expand-on-click, inspector fetch, BFS/DFS/path highlight, AI öneri önizleme.
+UI Demo: “Ah” araması, maksimum 50 node render, expand-on-click, inspector fetch, BFS/DFS/path highlight.
 
 Performance Evidence: Tek yaklaşık 150-200 node veri setinde temel çalışma gösterilir; formal benchmark değil, Big-O analizi raporda verilir.
 
@@ -151,6 +133,3 @@ Java 21 ve Spring Boot API katmanı kullanılabilir; core veri yapıları sıfı
 
 Frontend web tabanlıdır; render kütüphanesi sadece görselleştirme içindir.
 
-AI simülasyonu backend içinde @Async çalışan modüldür; harici servis/container kurulmaz.
-
-AI çıktısı, graph’a uygulanmadan önce UI’da öneri/önizleme olarak gösterilir.
