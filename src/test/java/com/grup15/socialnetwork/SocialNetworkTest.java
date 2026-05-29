@@ -1,10 +1,10 @@
 package com.grup15.socialnetwork;
 
-import com.grup15.socialnetwork.edge.Edge;
-import com.grup15.socialnetwork.edge.EdgeType;
-import com.grup15.socialnetwork.graph.Graph;
-import com.grup15.socialnetwork.node.Node;
-import com.grup15.socialnetwork.node.NodeType;
+import com.grup15.socialnetwork.model.Edge;
+import com.grup15.socialnetwork.model.EdgeType;
+import com.grup15.socialnetwork.datastructures.graph.graph.Graph;
+import com.grup15.socialnetwork.model.Node;
+import com.grup15.socialnetwork.model.NodeType;
 
 public class SocialNetworkTest {
 

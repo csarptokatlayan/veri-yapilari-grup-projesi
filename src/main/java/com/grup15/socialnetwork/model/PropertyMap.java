@@ -1,4 +1,4 @@
-package com.grup15.socialnetwork.property;
+package com.grup15.socialnetwork.model;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;

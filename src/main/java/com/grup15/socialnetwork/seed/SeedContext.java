@@ -1,8 +1,8 @@
 package com.grup15.socialnetwork.seed;
 
-import com.grup15.socialnetwork.graph.Graph;
-import com.grup15.socialnetwork.graph.Trie;
-import com.grup15.socialnetwork.node.NodeRegistry;
+import com.grup15.socialnetwork.datastructures.graph.graph.Graph;
+import com.grup15.socialnetwork.datastructures.graph.trie.Trie;
+import com.grup15.socialnetwork.datastructures.graph.NodeRegistry;
 
 import java.util.Objects;
 

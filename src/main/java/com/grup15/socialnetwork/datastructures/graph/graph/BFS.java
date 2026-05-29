@@ -1,6 +1,6 @@
-package com.grup15.socialnetwork.graph;
+package com.grup15.socialnetwork.datastructures.graph.graph;
 
-import com.grup15.socialnetwork.node.Node;
+import com.grup15.socialnetwork.model.Node;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;

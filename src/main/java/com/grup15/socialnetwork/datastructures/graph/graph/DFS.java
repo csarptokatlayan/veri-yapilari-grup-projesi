@@ -1,11 +1,11 @@
-package com.grup15.socialnetwork.graph;
+package com.grup15.socialnetwork.datastructures.graph.graph;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.Stack;
 
-import com.grup15.socialnetwork.node.Node;
+import com.grup15.socialnetwork.model.Node;
 /**
  * Bu sınıf, Graph (Çizge) üzerinde DFS (Derinlik Öncelikli Arama) algoritmalarını
  * çalıştırmak için yazılmıştır.
