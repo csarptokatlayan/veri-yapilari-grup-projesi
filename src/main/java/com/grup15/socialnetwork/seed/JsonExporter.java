@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.grup15.socialnetwork.model.Edge;
 import com.grup15.socialnetwork.model.Node;
-import com.grup15.socialnetwork.datastructures.graph.graph.Graph;
+import com.grup15.socialnetwork.datastructures.graph.Graph;
 
 import java.io.File;
 import java.lang.reflect.Field;

@@ -70,6 +70,11 @@ public class Graph {
         return result;
     }
 
+    public Node ahmetEfe_findNodeById(int id) {
+        // nodeIdMap içinde bu ID tanımlıysa doğrudan nesneyi getirir, yoksa null döner.
+        return nodeIdMap.get(id);
+    }
+
     // Belirli bir anahtar-değer çiftine sahip düğümleri döndürür
     public List<Node> ahmetEfe_findNodesByProperty(String key, Object value) {
         List<Node> result = new ArrayList<>();
