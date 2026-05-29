@@ -1,6 +1,6 @@
 package com.grup15.socialnetwork;
 
-import com.grup15.socialnetwork.datastructures.graph.hashtable.HashTable;
+import com.grup15.socialnetwork.datastructures.hashtable.HashTable;
 
 public class HashTableTest {
     public static void main(String[] args) {

@@ -1,7 +1,7 @@
 package com.grup15.socialnetwork;
 
 import com.grup15.socialnetwork.model.Node;
-import com.grup15.socialnetwork.datastructures.graph.NodeRegistry;
+import com.grup15.socialnetwork.datastructures.NodeRegistry;
 import com.grup15.socialnetwork.model.NodeType;
 
 public class NodeRegistryTest {

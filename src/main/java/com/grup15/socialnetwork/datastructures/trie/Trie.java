@@ -1,10 +1,10 @@
-package com.grup15.socialnetwork.datastructures.graph.trie;
+package com.grup15.socialnetwork.datastructures.trie;
 
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Locale;
 
-import com.grup15.socialnetwork.datastructures.graph.NodeRegistry;
+import com.grup15.socialnetwork.datastructures.NodeRegistry;
 import com.grup15.socialnetwork.model.NodeType;
 import com.grup15.socialnetwork.model.Node;
 

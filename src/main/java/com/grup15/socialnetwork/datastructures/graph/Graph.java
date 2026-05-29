@@ -1,4 +1,4 @@
-package com.grup15.socialnetwork.datastructures.graph.graph;
+package com.grup15.socialnetwork.datastructures.graph;
 
 import com.grup15.socialnetwork.model.Edge;
 import com.grup15.socialnetwork.model.Node;
