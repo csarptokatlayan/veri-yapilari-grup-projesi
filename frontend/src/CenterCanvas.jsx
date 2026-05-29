@@ -1,6 +1,16 @@
 import cytoscape from 'cytoscape';
 import { Fragment, useEffect, useRef, useState } from 'react';
 
+const ROOT_NODE_ID = '1';
+const MAX_VISIBLE_NODES = 50;
+const ZOOM_STEP = 1.2;
+const FIT_PADDING = 40;
+const INITIAL_CAMERA = {
+  x: 0,
+  y: 0,
+  zoom: 1,
+};
+
 const TOOLS = [
   {
     id: 'select',
@@ -167,6 +177,14 @@ async function fetchSeedGraph(signal) {
 }
 
 /**
+ * Seed edge icin tek tip id uretir; Cytoscape duplicate edge eklemesini bu id ile engeller.
+ * @author Semih Tuncel
+ */
+function createEdgeId(edge, index) {
+  return `edge-${index}-${edge.source}-${edge.target}-${edge.type}`;
+}
+
+/**
  * Seed node kaydini Cytoscape node elementine cevirir; render motoru string id bekler.
  * @author Semih Tuncel
  */
@@ -188,7 +206,7 @@ function createNodeElement(node) {
 function createEdgeElement(edge, index) {
   return {
     data: {
-      id: `edge-${index}-${edge.source}-${edge.target}-${edge.type}`,
+      id: createEdgeId(edge, index),
       source: String(edge.source),
       target: String(edge.target),
       type: edge.type,
@@ -198,23 +216,214 @@ function createEdgeElement(edge, index) {
 }
 
 /**
- * Seed graph verisini Cytoscape element dizisine cevirir; node ve edge akisi ayni formata iner.
+ * Edge kaydini node indeksine ekler; Map uzerinden komsu edge aramasi hizli kalir.
  * @author Semih Tuncel
  */
-function createCytoscapeElements(graph) {
-  const nodes = Array.isArray(graph.nodes) ? graph.nodes.map(createNodeElement) : [];
-  const edges = Array.isArray(graph.edges) ? graph.edges.map(createEdgeElement) : [];
+function appendEdgeToNodeIndex(edgesByNodeId, nodeId, indexedEdge) {
+  const edges = edgesByNodeId.get(nodeId) ?? [];
 
-  return [...nodes, ...edges];
+  edges.push(indexedEdge);
+  edgesByNodeId.set(nodeId, edges);
 }
 
 /**
- * Elementleri sahneye ekleyip cose layout calistirir; overlap azaltan ayarlar kullanilir.
+ * Seed graph icin node ve komsu edge indekslerini kurar; lazy expand icin Map secilir.
  * @author Semih Tuncel
  */
-function renderSeedGraph(cy, graph) {
-  cy.add(createCytoscapeElements(graph));
+function createGraphIndex(graph) {
+  // Insert: O(1)  Search: O(1)  Delete: O(1)
+  const nodesById = new Map();
+  // Insert: O(1)  Search: O(1)  Delete: O(1)
+  const edgesByNodeId = new Map();
+  const nodes = Array.isArray(graph.nodes) ? graph.nodes : [];
+  const edges = Array.isArray(graph.edges) ? graph.edges : [];
+
+  nodes.forEach((node) => {
+    nodesById.set(String(node.id), node);
+  });
+
+  edges.forEach((edge, index) => {
+    const indexedEdge = { edge, index };
+    const sourceId = String(edge.source);
+    const targetId = String(edge.target);
+
+    appendEdgeToNodeIndex(edgesByNodeId, sourceId, indexedEdge);
+
+    if (sourceId !== targetId) {
+      appendEdgeToNodeIndex(edgesByNodeId, targetId, indexedEdge);
+    }
+  });
+
+  return {
+    nodesById,
+    edgesByNodeId,
+  };
+}
+
+/**
+ * Ilk sahnede sadece root node'u ekler; devamindaki graph parcalari tiklama ile gelir.
+ * @author Semih Tuncel
+ */
+function renderSeedGraph(cy, graphIndex) {
+  const rootNode = graphIndex.nodesById.get(ROOT_NODE_ID);
+
+  if (!rootNode) {
+    return;
+  }
+
+  cy.add(createNodeElement(rootNode));
   cy.layout(COSE_LAYOUT).run();
+}
+
+/**
+ * Edge'in tiklanan node disindaki ucunu bulur; expand akisi komsu node'a buradan ulasir.
+ * @author Semih Tuncel
+ */
+function getOppositeNodeId(edge, nodeId) {
+  const sourceId = String(edge.source);
+  const targetId = String(edge.target);
+
+  return sourceId === nodeId ? targetId : sourceId;
+}
+
+/**
+ * Cytoscape sahnesindeki mevcut node id'lerini toplar; Set duplicate kontrolunu sabit tutar.
+ * @author Semih Tuncel
+ */
+function createVisibleNodeIdSet(cy) {
+  // Insert: O(1)  Search: O(1)  Delete: O(1)
+  const visibleNodeIds = new Set();
+
+  cy.nodes().forEach((node) => {
+    visibleNodeIds.add(node.id());
+  });
+
+  return visibleNodeIds;
+}
+
+/**
+ * Tiklanan node icin eklenecek node ve edge elementlerini secer; 50 node limitini korur.
+ * @author Semih Tuncel
+ */
+function collectExpandableElements(cy, graphIndex, nodeId) {
+  const neighborEdges = graphIndex.edgesByNodeId.get(nodeId) ?? [];
+  const visibleNodeIds = createVisibleNodeIdSet(cy);
+  const elements = [];
+  let didHitLimit = false;
+
+  neighborEdges.forEach(({ edge, index }) => {
+    const oppositeNodeId = getOppositeNodeId(edge, nodeId);
+    const oppositeNode = graphIndex.nodesById.get(oppositeNodeId);
+
+    if (!oppositeNode) {
+      return;
+    }
+
+    if (!visibleNodeIds.has(oppositeNodeId)) {
+      if (visibleNodeIds.size >= MAX_VISIBLE_NODES) {
+        didHitLimit = true;
+        return;
+      }
+
+      elements.push(createNodeElement(oppositeNode));
+      visibleNodeIds.add(oppositeNodeId);
+    }
+
+    const edgeId = createEdgeId(edge, index);
+    const sourceId = String(edge.source);
+    const targetId = String(edge.target);
+
+    if (
+      cy.getElementById(edgeId).empty()
+      && visibleNodeIds.has(sourceId)
+      && visibleNodeIds.has(targetId)
+    ) {
+      elements.push(createEdgeElement(edge, index));
+    }
+  });
+
+  return {
+    elements,
+    didHitLimit,
+  };
+}
+
+/**
+ * Tiklanan node'u genisletir; yeni element varsa layout tekrar calistirilir.
+ * @author Semih Tuncel
+ */
+function expandNode(cy, graphIndex, nodeId) {
+  const { elements, didHitLimit } = collectExpandableElements(cy, graphIndex, nodeId);
+
+  if (didHitLimit) {
+    console.log('Max 50 node limitine ulaşıldı');
+  }
+
+  if (elements.length === 0) {
+    return;
+  }
+
+  cy.add(elements);
+  cy.layout(COSE_LAYOUT).run();
+}
+
+/**
+ * Cytoscape kamerasi icin guncel pan ve zoom degerlerini sade state formatina cevirir.
+ * @author Semih Tuncel
+ */
+function createCameraSnapshot(cy) {
+  const pan = cy.pan();
+
+  return {
+    x: pan.x,
+    y: pan.y,
+    zoom: cy.zoom(),
+  };
+}
+
+/**
+ * Toolbar zoom komutunu uygular; zoom merkezi kanvasin ortasi secilir.
+ * @author Semih Tuncel
+ */
+function zoomCanvas(cy, factor) {
+  if (!cy) {
+    return;
+  }
+
+  cy.zoom({
+    level: cy.zoom() * factor,
+    renderedPosition: {
+      x: cy.width() / 2,
+      y: cy.height() / 2,
+    },
+  });
+}
+
+/**
+ * Tum gorunur elementleri ekrana sigdirir; padding sabit tutularak UI dengesi korunur.
+ * @author Semih Tuncel
+ */
+function fitCanvas(cy) {
+  if (!cy) {
+    return;
+  }
+
+  cy.fit(cy.elements(), FIT_PADDING);
+}
+
+/**
+ * Select ve pan modlarini Cytoscape motoruna uygular; zoom araclari anlik komuttur.
+ * @author Semih Tuncel
+ */
+function applyCanvasMode(cy, activeTool) {
+  if (!cy) {
+    return;
+  }
+
+  const isPanMode = activeTool === 'pan';
+
+  cy.userPanningEnabled(isPanMode);
+  cy.boxSelectionEnabled(!isPanMode);
 }
 
 /**
@@ -233,8 +442,10 @@ function reportSeedLoadError(error) {
  */
 export default function CenterCanvas() {
   const [activeTool, setActiveTool] = useState('select');
+  const [cameraState, setCameraState] = useState(INITIAL_CAMERA);
   const canvasRef = useRef(null);
   const cyRef = useRef(null);
+  const graphIndexRef = useRef(null);
 
   useEffect(() => {
     const container = canvasRef.current;
@@ -250,14 +461,43 @@ export default function CenterCanvas() {
     cyRef.current = cy;
 
     /**
+     * Kamera degisince React state'i gunceller; HUD ve toolbar ayni kaynaktan beslenir.
+     * @author Semih Tuncel
+     */
+    function handleCameraChanged() {
+      setCameraState(createCameraSnapshot(cy));
+    }
+
+    /**
+     * Node tiklamasinda seed indeksinden yalnizca komsulari sahneye ekler.
+     * @author Semih Tuncel
+     */
+    function handleNodeTap(event) {
+      const graphIndex = graphIndexRef.current;
+
+      if (!graphIndex) {
+        return;
+      }
+
+      expandNode(cy, graphIndex, event.target.id());
+    }
+
+    /**
      * Gelen seed graph verisini guvenli sekilde render eder; unmount sonrasi DOM'a dokunmaz.
      * @author Semih Tuncel
      */
     function handleSeedGraphLoaded(graph) {
       if (isMounted) {
-        renderSeedGraph(cy, graph);
+        const graphIndex = createGraphIndex(graph);
+
+        graphIndexRef.current = graphIndex;
+        renderSeedGraph(cy, graphIndex);
+        handleCameraChanged();
       }
     }
+
+    cy.on('pan zoom', handleCameraChanged);
+    cy.on('tap', 'node', handleNodeTap);
 
     fetchSeedGraph(abortController.signal)
       .then(handleSeedGraphLoaded)
@@ -268,8 +508,41 @@ export default function CenterCanvas() {
       abortController.abort();
       cy.destroy();
       cyRef.current = null;
+      graphIndexRef.current = null;
     };
   }, []);
+
+  useEffect(() => {
+    applyCanvasMode(cyRef.current, activeTool);
+  }, [activeTool]);
+
+  /**
+   * Toolbar tiklamalarini motor komutuna cevirir; select ve pan mod olarak saklanir.
+   * @author Semih Tuncel
+   */
+  function handleToolClick(toolId) {
+    const cy = cyRef.current;
+
+    if (toolId === 'zoomin') {
+      zoomCanvas(cy, ZOOM_STEP);
+      return;
+    }
+
+    if (toolId === 'zoomout') {
+      zoomCanvas(cy, 1 / ZOOM_STEP);
+      return;
+    }
+
+    if (toolId === 'fit') {
+      fitCanvas(cy);
+      return;
+    }
+
+    setActiveTool(toolId);
+  }
+
+  const hudText = `x: ${Math.round(cameraState.x)}  y: ${Math.round(cameraState.y)}  zoom: ${cameraState.zoom.toFixed(2)}x`;
+  const zoomPercent = `${Math.round(cameraState.zoom * 100)}%`;
 
   return (
     <main className="center-canvas">
@@ -282,7 +555,7 @@ export default function CenterCanvas() {
             <button
               className={`canvas-tool-btn${activeTool === tool.id ? ' active' : ''}`}
               title={tool.title}
-              onClick={() => setActiveTool(tool.id)}
+              onClick={() => handleToolClick(tool.id)}
             >
               {tool.icon}
             </button>
@@ -295,7 +568,7 @@ export default function CenterCanvas() {
         <button
           className="canvas-tool-btn"
           title="Ekrana sığdır"
-          onClick={() => setActiveTool('fit')}
+          onClick={() => handleToolClick('fit')}
         >
           <FitIcon />
         </button>
@@ -303,13 +576,13 @@ export default function CenterCanvas() {
         <span className="canvas-tool-label">GRAPH CANVAS</span>
 
         <div className="canvas-zoom">
-          <span className="zoom-val">100%</span>
+          <span className="zoom-val">{zoomPercent}</span>
         </div>
       </div>
 
       {/* Cytoscape mount point */}
       <div id="cy-canvas" ref={canvasRef}>
-        <div className="canvas-hud">x: - &nbsp; y: - &nbsp;&nbsp; zoom: 1.00</div>
+        <div className="canvas-hud">{hudText}</div>
       </div>
     </main>
   );
