@@ -1,5 +1,6 @@
 package com.grup15.socialnetwork.queue;
 
+import com.grup15.socialnetwork.datastructures.graph.queue.GenericQueue;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

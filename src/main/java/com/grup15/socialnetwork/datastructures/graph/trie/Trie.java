@@ -1,13 +1,12 @@
-package com.grup15.socialnetwork.graph;
+package com.grup15.socialnetwork.datastructures.graph.trie;
 
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Locale;
 
-import com.grup15.socialnetwork.node.NodeRegistry;
-import com.grup15.socialnetwork.node.TrieNode;
-import com.grup15.socialnetwork.node.NodeType;
-import com.grup15.socialnetwork.node.Node;
+import com.grup15.socialnetwork.datastructures.graph.NodeRegistry;
+import com.grup15.socialnetwork.model.NodeType;
+import com.grup15.socialnetwork.model.Node;
 
 public class Trie {
     private TrieNode root = new TrieNode();
