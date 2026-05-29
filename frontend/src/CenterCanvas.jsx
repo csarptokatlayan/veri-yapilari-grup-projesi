@@ -2,9 +2,17 @@ import cytoscape from 'cytoscape';
 import { Fragment, useEffect, useRef, useState } from 'react';
 
 const ROOT_NODE_ID = '1';
-const MAX_VISIBLE_NODES = 50;
+const MAX_VISIBLE_NODES = 500;
 const ZOOM_STEP = 1.2;
 const FIT_PADDING = 40;
+const EXPAND_SPAWN_DURATION = 700;
+const EXPAND_SPAWN_RADIUS = 120;
+const EXPAND_SPAWN_RING_GAP = 76;
+const EXPAND_SPAWN_RING_COUNT = 7;
+const EXPAND_SPAWN_ANGLE_COUNT = 24;
+const EXPAND_SPAWN_MIN_DISTANCE = 96;
+const EXPAND_SPAWN_PROBE_DISTANCE = 230;
+const EXPAND_SPAWN_FALLBACK_ANGLE = -Math.PI / 2;
 const INITIAL_CAMERA = {
   x: 0,
   y: 0,
@@ -188,13 +196,25 @@ function createEdgeId(edge, index) {
  * Seed node kaydini Cytoscape node elementine cevirir; render motoru string id bekler.
  * @author Semih Tuncel
  */
-function createNodeElement(node) {
-  return {
+function createNodeElement(node, spawnPosition) {
+  const element = {
     data: {
       id: String(node.id),
       title: node.title,
       nodeType: node.nodeType,
       properties: node.properties ?? {},
+    },
+  };
+
+  if (!spawnPosition) {
+    return element;
+  }
+
+  return {
+    ...element,
+    position: {
+      x: spawnPosition.x,
+      y: spawnPosition.y,
     },
   };
 }
@@ -302,13 +322,262 @@ function createVisibleNodeIdSet(cy) {
 }
 
 /**
+ * Expand sirasinda mevcut kamerayi korur; layout kaynakli viewport ziplama etkisini bastirir.
+ * @author Semih Tuncel
+ */
+function createViewportSnapshot(cy) {
+  const pan = cy.pan();
+
+  return {
+    pan: {
+      x: pan.x,
+      y: pan.y,
+    },
+    zoom: cy.zoom(),
+  };
+}
+
+/**
+ * Snapshot alinmis pan ve zoom'u Cytoscape viewport'una geri uygular.
+ * @author Semih Tuncel
+ */
+function restoreViewport(cy, viewportSnapshot) {
+  cy.viewport({
+    pan: viewportSnapshot.pan,
+    zoom: viewportSnapshot.zoom,
+  });
+}
+
+/**
+ * Spatial memory icin eski node'lari animasyon boyunca sabitler ve onceki lock durumlarini saklar.
+ * @author Semih Tuncel
+ */
+function lockNodesForAnimation(nodes) {
+  const nodeLockStates = [];
+
+  nodes.forEach((node) => {
+    nodeLockStates.push({
+      node,
+      wasLocked: node.locked(),
+    });
+    node.lock();
+  });
+
+  return () => {
+    nodeLockStates.forEach(({ node, wasLocked }) => {
+      if (wasLocked) {
+        node.lock();
+        return;
+      }
+
+      node.unlock();
+    });
+  };
+}
+
+/**
+ * Iki pozisyon arasindaki uzakligin karesini hesaplar; kok alma maliyetine gerek yoktur.
+ * @author Semih Tuncel
+ */
+function getDistanceSquared(firstPosition, secondPosition) {
+  const distanceX = firstPosition.x - secondPosition.x;
+  const distanceY = firstPosition.y - secondPosition.y;
+
+  return distanceX * distanceX + distanceY * distanceY;
+}
+
+/**
+ * Parent merkezinden verilen aci ve yaricapla yeni bir hedef pozisyon uretir.
+ * @author Semih Tuncel
+ */
+function createRadialPosition(parentPosition, angle, radius) {
+  return {
+    x: parentPosition.x + Math.cos(angle) * radius,
+    y: parentPosition.y + Math.sin(angle) * radius,
+  };
+}
+
+/**
+ * Bosluk ararken parent'in kendisini ve ayni noktadaki node'lari engel listesinden ayirir.
+ * @author Semih Tuncel
+ */
+function collectBlockingNodePositions(nodes, parentPosition) {
+  const blockingPositions = [];
+
+  nodes.forEach((node) => {
+    const position = node.position();
+
+    if (getDistanceSquared(position, parentPosition) > 1) {
+      blockingPositions.push(position);
+    }
+  });
+
+  return blockingPositions;
+}
+
+/**
+ * Parent cevresinde mevcut node'lardan en uzak kalan aciyi secer.
+ * @author Semih Tuncel
+ */
+function findOpenSpawnAngle(parentPosition, blockingPositions) {
+  if (blockingPositions.length === 0) {
+    return EXPAND_SPAWN_FALLBACK_ANGLE;
+  }
+
+  let bestAngle = EXPAND_SPAWN_FALLBACK_ANGLE;
+  let bestScore = -Infinity;
+
+  for (let angle = 0; angle < Math.PI * 2; angle += Math.PI / 12) {
+    const probePosition = createRadialPosition(parentPosition, angle, EXPAND_SPAWN_PROBE_DISTANCE);
+    const closestDistance = blockingPositions.reduce(
+      (closest, position) => Math.min(closest, getDistanceSquared(probePosition, position)),
+      Infinity,
+    );
+
+    if (closestDistance > bestScore) {
+      bestScore = closestDistance;
+      bestAngle = angle;
+    }
+  }
+
+  return bestAngle;
+}
+
+/**
+ * Base aciya yakin acilari once deneyerek cicek hissini korur.
+ * @author Semih Tuncel
+ */
+function createOrderedSpawnAngles(baseAngle) {
+  const angleStep = (Math.PI * 2) / EXPAND_SPAWN_ANGLE_COUNT;
+  const angles = [baseAngle];
+
+  for (let offset = 1; angles.length < EXPAND_SPAWN_ANGLE_COUNT; offset++) {
+    angles.push(baseAngle + angleStep * offset);
+
+    if (angles.length < EXPAND_SPAWN_ANGLE_COUNT) {
+      angles.push(baseAngle - angleStep * offset);
+    }
+  }
+
+  return angles;
+}
+
+/**
+ * Parent etrafinda yakin halkalardan baslayarak aday slotlar uretir.
+ * @author Semih Tuncel
+ */
+function createSpawnSlotCandidates(parentPosition, baseAngle) {
+  const candidates = [];
+  const angles = createOrderedSpawnAngles(baseAngle);
+
+  for (let ringIndex = 0; ringIndex < EXPAND_SPAWN_RING_COUNT; ringIndex++) {
+    const radius = EXPAND_SPAWN_RADIUS + ringIndex * EXPAND_SPAWN_RING_GAP;
+
+    angles.forEach((angle) => {
+      candidates.push(createRadialPosition(parentPosition, angle, radius));
+    });
+  }
+
+  return candidates;
+}
+
+/**
+ * Aday noktanin mevcut ve bu expand icinde secilen hedeflere ne kadar yakin oldugunu olcer.
+ * @author Semih Tuncel
+ */
+function getClosestDistanceSquared(candidatePosition, occupiedPositions) {
+  return occupiedPositions.reduce(
+    (closest, position) => Math.min(closest, getDistanceSquared(candidatePosition, position)),
+    Infinity,
+  );
+}
+
+/**
+ * Adaylar arasindan carpisma yapmayan en yakin slotu, yoksa en genis boslugu secer.
+ * @author Semih Tuncel
+ */
+function findAvailableSpawnSlot(candidates, occupiedPositions) {
+  const minDistanceSquared = EXPAND_SPAWN_MIN_DISTANCE * EXPAND_SPAWN_MIN_DISTANCE;
+  let fallbackCandidate = candidates[0];
+  let fallbackScore = -Infinity;
+
+  for (const candidate of candidates) {
+    const closestDistanceSquared = getClosestDistanceSquared(candidate, occupiedPositions);
+
+    if (closestDistanceSquared >= minDistanceSquared) {
+      return candidate;
+    }
+
+    if (closestDistanceSquared > fallbackScore) {
+      fallbackScore = closestDistanceSquared;
+      fallbackCandidate = candidate;
+    }
+  }
+
+  return fallbackCandidate;
+}
+
+/**
+ * Yeni node id'leri icin parent cevresindeki gercek bos slotlari secer.
+ * @author Semih Tuncel
+ */
+function createSpawnTargetPositions(parentPosition, existingNodes, newNodeIds) {
+  const blockingPositions = collectBlockingNodePositions(existingNodes, parentPosition);
+  const baseAngle = findOpenSpawnAngle(parentPosition, blockingPositions);
+  const slotCandidates = createSpawnSlotCandidates(parentPosition, baseAngle);
+  const occupiedPositions = [];
+  const targetPositions = new Map();
+
+  existingNodes.forEach((node) => {
+    occupiedPositions.push(node.position());
+  });
+
+  newNodeIds.forEach((nodeId) => {
+    const targetPosition = findAvailableSpawnSlot(slotCandidates, occupiedPositions);
+
+    targetPositions.set(nodeId, targetPosition);
+    occupiedPositions.push(targetPosition);
+  });
+
+  return targetPositions;
+}
+
+/**
+ * Yeni node'lari parent'tan fan hedeflerine dogru kisa ve gorunur bir acilimla tasir.
+ * @author Semih Tuncel
+ */
+function animateSpawnedNodes(cy, newNodeIds, targetPositions) {
+  const animations = [];
+
+  newNodeIds.forEach((nodeId) => {
+    const node = cy.getElementById(nodeId);
+    const position = targetPositions.get(nodeId);
+
+    if (node.empty() || !position) {
+      return;
+    }
+
+    animations.push(
+      node.animation({
+        position,
+        duration: EXPAND_SPAWN_DURATION,
+        easing: 'ease-out-cubic',
+      }).play().promise(),
+    );
+  });
+
+  return Promise.all(animations);
+}
+
+/**
  * Tiklanan node icin eklenecek node ve edge elementlerini secer; 50 node limitini korur.
  * @author Semih Tuncel
  */
-function collectExpandableElements(cy, graphIndex, nodeId) {
+function collectExpandableElements(cy, graphIndex, nodeId, spawnPosition) {
   const neighborEdges = graphIndex.edgesByNodeId.get(nodeId) ?? [];
   const visibleNodeIds = createVisibleNodeIdSet(cy);
   const elements = [];
+  const newNodeIds = [];
   let didHitLimit = false;
 
   neighborEdges.forEach(({ edge, index }) => {
@@ -325,7 +594,8 @@ function collectExpandableElements(cy, graphIndex, nodeId) {
         return;
       }
 
-      elements.push(createNodeElement(oppositeNode));
+      elements.push(createNodeElement(oppositeNode, spawnPosition));
+      newNodeIds.push(oppositeNodeId);
       visibleNodeIds.add(oppositeNodeId);
     }
 
@@ -344,27 +614,49 @@ function collectExpandableElements(cy, graphIndex, nodeId) {
 
   return {
     elements,
+    newNodeIds,
     didHitLimit,
   };
 }
 
 /**
- * Tiklanan node'u genisletir; yeni element varsa layout tekrar calistirilir.
+ * Tiklanan node'u genisletir; yeni node'lar bos yone dogru fan halinde acilir.
  * @author Semih Tuncel
  */
-function expandNode(cy, graphIndex, nodeId) {
-  const { elements, didHitLimit } = collectExpandableElements(cy, graphIndex, nodeId);
+function expandNode(cy, graphIndex, nodeId, spawnPosition) {
+  const { elements, newNodeIds, didHitLimit } = collectExpandableElements(cy, graphIndex, nodeId, spawnPosition);
 
   if (didHitLimit) {
     console.log('Max 50 node limitine ulaşıldı');
   }
 
   if (elements.length === 0) {
-    return;
+    return Promise.resolve();
   }
 
+  const viewportSnapshot = createViewportSnapshot(cy);
+
+  if (newNodeIds.length === 0) {
+    cy.add(elements);
+    restoreViewport(cy, viewportSnapshot);
+    return Promise.resolve();
+  }
+
+  const existingNodes = cy.nodes();
+  const restoreNodeLocks = lockNodesForAnimation(existingNodes);
+  const spawnTargetPositions = createSpawnTargetPositions(spawnPosition, existingNodes, newNodeIds);
+
   cy.add(elements);
-  cy.layout(COSE_LAYOUT).run();
+  restoreViewport(cy, viewportSnapshot);
+
+  return animateSpawnedNodes(cy, newNodeIds, spawnTargetPositions).then(() => {
+    if (cy.destroyed()) {
+      return;
+    }
+
+    restoreNodeLocks();
+    restoreViewport(cy, viewportSnapshot);
+  });
 }
 
 /**
@@ -446,6 +738,7 @@ export default function CenterCanvas() {
   const canvasRef = useRef(null);
   const cyRef = useRef(null);
   const graphIndexRef = useRef(null);
+  const isExpandingRef = useRef(false);
 
   useEffect(() => {
     const container = canvasRef.current;
@@ -475,11 +768,15 @@ export default function CenterCanvas() {
     function handleNodeTap(event) {
       const graphIndex = graphIndexRef.current;
 
-      if (!graphIndex) {
+      if (!graphIndex || isExpandingRef.current) {
         return;
       }
 
-      expandNode(cy, graphIndex, event.target.id());
+      isExpandingRef.current = true;
+      expandNode(cy, graphIndex, event.target.id(), event.target.position())
+        .finally(() => {
+          isExpandingRef.current = false;
+        });
     }
 
     /**
