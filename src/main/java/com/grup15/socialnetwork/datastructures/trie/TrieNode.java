@@ -1,4 +1,4 @@
-package com.grup15.socialnetwork.datastructures.graph.trie;
+package com.grup15.socialnetwork.datastructures.trie;
 
 import java.util.*;
 

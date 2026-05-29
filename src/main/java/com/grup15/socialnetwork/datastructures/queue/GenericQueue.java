@@ -1,4 +1,4 @@
-package com.grup15.socialnetwork.datastructures.graph.queue;
+package com.grup15.socialnetwork.datastructures.queue;
 
 /*
  * Insert/enqueue: O(1)

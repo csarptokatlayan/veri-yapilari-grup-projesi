@@ -1,6 +1,6 @@
-package com.grup15.socialnetwork.datastructures.graph;
+package com.grup15.socialnetwork.datastructures;
 
-import com.grup15.socialnetwork.datastructures.graph.hashtable.HashTable;
+import com.grup15.socialnetwork.datastructures.hashtable.HashTable;
 import com.grup15.socialnetwork.model.Node;
 
 public class NodeRegistry {

@@ -1,9 +1,9 @@
 package com.grup15.socialnetwork.seed;
 
 import com.grup15.socialnetwork.model.EdgeType;
-import com.grup15.socialnetwork.datastructures.graph.graph.Graph;
+import com.grup15.socialnetwork.datastructures.graph.Graph;
 import com.grup15.socialnetwork.model.Node;
-import com.grup15.socialnetwork.datastructures.graph.NodeRegistry;
+import com.grup15.socialnetwork.datastructures.NodeRegistry;
 import com.grup15.socialnetwork.model.NodeType;
 import org.junit.jupiter.api.Test;
 

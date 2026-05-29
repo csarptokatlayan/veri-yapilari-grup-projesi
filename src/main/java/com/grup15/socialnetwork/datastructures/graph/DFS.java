@@ -1,11 +1,13 @@
-package com.grup15.socialnetwork.datastructures.graph.graph;
-import java.util.ArrayList;
+package com.grup15.socialnetwork.datastructures.graph;
+
+import com.grup15.socialnetwork.datastructures.list.CustomLinkedList;
+import com.grup15.socialnetwork.datastructures.stack.GenericStack;
+import com.grup15.socialnetwork.model.Node;
+
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.Stack;
 
-import com.grup15.socialnetwork.model.Node;
 /**
  * Bu sınıf, Graph (Çizge) üzerinde DFS (Derinlik Öncelikli Arama) algoritmalarını
  * çalıştırmak için yazılmıştır.
@@ -35,23 +37,21 @@ public class DFS {
      * DFS - Recursive (Özyineli) Yaklaşım
      * Artık sadece başlangıç düğümünü alması yeterli!
      */
-    public List<Node> fatih_dfsRecursive(Node start) {
-        List<Node> result = new ArrayList<>();
+    public CustomLinkedList<Node> fatih_dfsRecursive(Node start) {
+        CustomLinkedList<Node> result = new CustomLinkedList<>();
         Set<Node> visited = new HashSet<>();
-
-        // Yardımcı fonksiyona da main.java.com.grup15.socialnetwork.graph göndermiyoruz
         fatih_dfsRecursiveHelper(start, visited, result);
         return result;
     }
 
     // Recursive işlem için yardımcı fonksiyon
-    private void fatih_dfsRecursiveHelper(Node current, Set<Node> visited, List<Node> result) {
+    private void fatih_dfsRecursiveHelper(Node current,
+                                          Set<Node> visited,
+                                          CustomLinkedList<Node> result) {
         visited.add(current);
         result.add(current);
 
-        // main.java.com.grup15.socialnetwork.graph sınıfının kendi hafızasındaki haritayı kullanacak
         List<Node> neighbors = this.graph.fatih_getNeighbors(current);
-
         for (Node neighbor : neighbors) {
             if (!visited.contains(neighbor)) {
                 fatih_dfsRecursiveHelper(neighbor, visited, result);
@@ -63,11 +63,11 @@ public class DFS {
      * DFS - Iterative (Yinelemeli / Stack Kullanarak) Yaklaşım
      * Artık sadece başlangıç düğümünü alması yeterli!
      */
-    public List<Node> fatih_dfsIterative(Node start) {
-        List<Node> result = new ArrayList<>();
+    public CustomLinkedList<Node> fatih_dfsIterative(Node start) {
+        CustomLinkedList<Node> result = new CustomLinkedList<>();
         Set<Node> visited = new HashSet<>();
 
-        Stack<Node> stack = new Stack<>();
+        GenericStack<Node> stack = new GenericStack<>();
         stack.push(start);
 
         while (!stack.isEmpty()) {
@@ -77,9 +77,7 @@ public class DFS {
                 visited.add(current);
                 result.add(current);
 
-                // Yine sınıfın hafızasındaki harita devrede
                 List<Node> neighbors = this.graph.fatih_getNeighbors(current);
-
                 for (Node neighbor : neighbors) {
                     if (!visited.contains(neighbor)) {
                         stack.push(neighbor);
