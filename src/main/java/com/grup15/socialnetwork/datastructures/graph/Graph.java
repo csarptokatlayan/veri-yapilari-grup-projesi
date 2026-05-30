@@ -3,13 +3,14 @@ package com.grup15.socialnetwork.datastructures.graph;
 import com.grup15.socialnetwork.model.Edge;
 import com.grup15.socialnetwork.model.Node;
 import com.grup15.socialnetwork.model.NodeType;
+import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.Iterator;
-
+@Component
 public class Graph {
 
     // Her bir nodedan hangi kenarların çıktığını saklayan map yapısı

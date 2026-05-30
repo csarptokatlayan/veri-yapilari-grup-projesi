@@ -26,5 +26,6 @@ public class AppBeans {
     {
         return new BFS(graph());
     }
+    
 
 }

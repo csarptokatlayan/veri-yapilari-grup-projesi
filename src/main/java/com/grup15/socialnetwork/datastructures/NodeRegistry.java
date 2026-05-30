@@ -2,7 +2,9 @@ package com.grup15.socialnetwork.datastructures;
 
 import com.grup15.socialnetwork.datastructures.hashtable.HashTable;
 import com.grup15.socialnetwork.model.Node;
+import org.springframework.stereotype.Component;
 
+@Component
 public class NodeRegistry {
 
     private HashTable<String, Node> table;
