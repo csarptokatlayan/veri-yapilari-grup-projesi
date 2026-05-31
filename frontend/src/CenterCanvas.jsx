@@ -732,13 +732,18 @@ function reportSeedLoadError(error) {
  * Orta kanvas alaninin UI iskeleti ve arac cubugu yonetimi.
  * @author Semih Tuncel
  */
-export default function CenterCanvas() {
+export default function CenterCanvas({ onNodeSelect }) {
   const [activeTool, setActiveTool] = useState('select');
   const [cameraState, setCameraState] = useState(INITIAL_CAMERA);
   const canvasRef = useRef(null);
   const cyRef = useRef(null);
   const graphIndexRef = useRef(null);
   const isExpandingRef = useRef(false);
+  const onNodeSelectRef = useRef(onNodeSelect);
+
+  useEffect(() => {
+    onNodeSelectRef.current = onNodeSelect;
+  }, [onNodeSelect]);
 
   useEffect(() => {
     const container = canvasRef.current;
@@ -766,14 +771,17 @@ export default function CenterCanvas() {
      * @author Semih Tuncel
      */
     function handleNodeTap(event) {
+      const nodeId = event.target.id();
       const graphIndex = graphIndexRef.current;
+
+      onNodeSelectRef.current?.(nodeId);
 
       if (!graphIndex || isExpandingRef.current) {
         return;
       }
 
       isExpandingRef.current = true;
-      expandNode(cy, graphIndex, event.target.id(), event.target.position())
+      expandNode(cy, graphIndex, nodeId, event.target.position())
         .finally(() => {
           isExpandingRef.current = false;
         });

@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import './App.css';
 import Topbar from './Topbar';
 import LeftPanel from './LeftPanel';
@@ -10,12 +11,14 @@ import RightInspector from './RightInspector';
  * @author Semih Tuncel
  */
 export default function App() {
+  const [selectedNodeId, setSelectedNodeId] = useState(null);
+
   return (
     <div className="app-shell">
       <Topbar />
       <LeftPanel />
-      <CenterCanvas />
-      <RightInspector />
+      <CenterCanvas onNodeSelect={setSelectedNodeId} />
+      <RightInspector selectedNodeId={selectedNodeId} />
     </div>
   );
 }
