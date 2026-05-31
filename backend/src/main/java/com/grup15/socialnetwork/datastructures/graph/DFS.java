@@ -4,6 +4,7 @@ import com.grup15.socialnetwork.datastructures.list.CustomLinkedList;
 import com.grup15.socialnetwork.datastructures.stack.GenericStack;
 import com.grup15.socialnetwork.model.Node;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -37,8 +38,8 @@ public class DFS {
      * DFS - Recursive (Özyineli) Yaklaşım
      * Artık sadece başlangıç düğümünü alması yeterli!
      */
-    public CustomLinkedList<Node> fatih_dfsRecursive(Node start) {
-        CustomLinkedList<Node> result = new CustomLinkedList<>();
+    public List<Node> fatih_dfsRecursive(Node start) {
+        List<Node> result = new ArrayList<>();
         Set<Node> visited = new HashSet<>();
         fatih_dfsRecursiveHelper(start, visited, result);
         return result;
@@ -47,7 +48,7 @@ public class DFS {
     // Recursive işlem için yardımcı fonksiyon
     private void fatih_dfsRecursiveHelper(Node current,
                                           Set<Node> visited,
-                                          CustomLinkedList<Node> result) {
+                                          List<Node> result) {
         visited.add(current);
         result.add(current);
 
@@ -63,8 +64,8 @@ public class DFS {
      * DFS - Iterative (Yinelemeli / Stack Kullanarak) Yaklaşım
      * Artık sadece başlangıç düğümünü alması yeterli!
      */
-    public CustomLinkedList<Node> fatih_dfsIterative(Node start) {
-        CustomLinkedList<Node> result = new CustomLinkedList<>();
+    public List<Node> fatih_dfsIterative(Node start) {
+        List<Node> result = new ArrayList<>();
         Set<Node> visited = new HashSet<>();
 
         GenericStack<Node> stack = new GenericStack<>();
