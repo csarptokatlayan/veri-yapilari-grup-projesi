@@ -79,8 +79,34 @@ export default function LeftPanel() {
     const [depth, setDepth] = useState(1);
 
     const handleMockQuery = () => {
-        console.log("Mock Veri İstediği:", { startNode, edgeType, targetType, depth });
-        alert("Kişi 2'nin F2-US3 endpoint'i bekleniyor. Mock çalışıyor!");
+        // 1. Kullanıcının seçtiği targetType değerine göre adresi belirle
+        let endpoint = "";
+
+        //  (POST) seçilirse
+        if (targetType === "POST") {
+            endpoint = "http://localhost:8080/chain/1/friends-likes";
+        }
+        // Etkinlik (EVENT)
+        else if (targetType === "EVENT") {
+            endpoint = "http://localhost:8080/chain/1/friends-events";
+        }
+        // Backend'in desteklemediği bir şey seçilirse uyar
+        else {
+            alert("Bu arama henüz backend tarafından desteklenmiyor (Sadece POST ve EVENT).");
+            return;
+        }
+
+        //  (mock -> real )
+        fetch(endpoint)
+            .then(response => response.json())
+            .then(data => {
+                console.log("Gelen Veri:", data);
+                alert("Gerçek veritabanı sorgusu başarılı! Sonuçlar konsolda.");
+            })
+            .catch(error => {
+                console.error("Bağlantı hatası:", error);
+                alert("Backend'e ulaşılamadı. Spring Boot açık mı?");
+            });
     };
 
   return (
