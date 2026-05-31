@@ -69,6 +69,19 @@ const STATS = [
  */
 export default function LeftPanel() {
   const [activeAlgo, setActiveAlgo] = useState('bfs');
+    /**
+     * Zincirleme sorgu state'leri ve Mock fonksiyonu
+     * @author Arda Aşan
+     */
+    const [startNode, setStartNode] = useState('');
+    const [edgeType, setEdgeType] = useState('');
+    const [targetType, setTargetType] = useState('');
+    const [depth, setDepth] = useState(1);
+
+    const handleMockQuery = () => {
+        console.log("Mock Veri İstediği:", { startNode, edgeType, targetType, depth });
+        alert("Kişi 2'nin F2-US3 endpoint'i bekleniyor. Mock çalışıyor!");
+    };
 
   return (
     <nav className="left-panel">
@@ -97,39 +110,72 @@ export default function LeftPanel() {
         ))}
       </div>
 
-      {/* Queries */}
-      <div className="panel-section">
-        <div className="panel-section-header">
-          <svg width="11" height="11" viewBox="0 0 11 11" fill="none">
-            <path d="M1.5 3h8M1.5 5.5h5.5M1.5 8h7" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
-          </svg>
-          Sorgular
+        {/* F3-US1: Zincirleme Sorgu Paneli */}
+
+        <div className="panel-section">
+            <div className="panel-section-header">
+                <svg width="11" height="11" viewBox="0 0 11 11" fill="none">
+                    <path d="M1.5 3h8M1.5 5.5h5.5M1.5 8h7" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
+                </svg>
+                Zincirleme Sorgular
+            </div>
+
+            <div className="query-row">
+                <span className="query-label">Başlangıç (Kök)</span>
+                <input
+                    className="query-input"
+                    type="text"
+                    placeholder="örn: Kullanıcı A"
+                    value={startNode}
+                    onChange={(e) => setStartNode(e.target.value)}
+                    spellCheck={false}
+                />
+            </div>
+
+            <div className="query-row">
+                <span className="query-label">İlişki (Edge) Tipi</span>
+                <select
+                    className="query-select"
+                    value={edgeType}
+                    onChange={(e) => setEdgeType(e.target.value)}
+                >
+                    <option value="" disabled>— Bağlantı Seç —</option>
+                    <option value="FOLLOWS">Takip Ediyor</option>
+                    <option value="LIKES">Beğendi</option>
+                    <option value="KNOWS">Tanıyor</option>
+                </select>
+            </div>
+
+            <div className="query-row">
+                <span className="query-label">Hedef Filtresi</span>
+                <select
+                    className="query-select"
+                    value={targetType}
+                    onChange={(e) => setTargetType(e.target.value)}
+                >
+                    <option value="" disabled>— Hedef Türü —</option>
+                    <option value="USER">Kullanıcı Düğümü</option>
+                    <option value="POST">Gönderi Düğümü</option>
+                    <option value="PAGE">Sayfa Düğümü</option>
+                </select>
+            </div>
+
+            <div className="query-row">
+                <span className="query-label">Derinlik (Step)</span>
+                <input
+                    className="query-input"
+                    type="number"
+                    min="1"
+                    max="5"
+                    value={depth}
+                    onChange={(e) => setDepth(e.target.value)}
+                />
+            </div>
+
+            <button className="run-btn" onClick={handleMockQuery}>
+                ▶ Zinciri Çalıştır
+            </button>
         </div>
-
-        <div className="query-row">
-          <span className="query-label">Sorgu Tipi</span>
-          <select className="query-select" defaultValue="">
-            <option value="" disabled>— seçin —</option>
-            <option>Düğüm Filtresi</option>
-            <option>Kenar Filtresi</option>
-            <option>Label Eşleşmesi</option>
-            <option>Özellik Aralığı</option>
-          </select>
-        </div>
-
-        <div className="query-row">
-          <span className="query-label">Başlangıç Düğümü</span>
-          <input className="query-input" type="text" placeholder="node_id" spellCheck={false} />
-        </div>
-
-        <div className="query-row">
-          <span className="query-label">Bitiş Düğümü</span>
-          <input className="query-input" type="text" placeholder="node_id" spellCheck={false} />
-        </div>
-
-        <button className="run-btn">▶ Çalıştır</button>
-      </div>
-
       {/* Stats footer */}
       <div className="panel-footer">
         {STATS.map((s) => (
