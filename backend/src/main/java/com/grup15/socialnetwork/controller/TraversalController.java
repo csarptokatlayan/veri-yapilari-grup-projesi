@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/traversal")
@@ -22,7 +23,8 @@ public class TraversalController {
     @GetMapping("/bfs/{startId}")
     public ResponseEntity bfs(@PathVariable Integer startId)
     {
-        List<Node> result = traversalService.runBFS(startId);
+
+        Map<String,Object> result = traversalService.runBFS(startId);
 
         return ResponseEntity.ok().body(result);
     }
@@ -30,7 +32,7 @@ public class TraversalController {
     @GetMapping("/dfs/{startId}")
     public ResponseEntity dfs(@PathVariable Integer startId)
     {
-        List<Node> result = traversalService.runDFS(startId);
+        Map<String,Object> result = traversalService.runDFS(startId);
 
         return ResponseEntity.ok().body(result);
     }

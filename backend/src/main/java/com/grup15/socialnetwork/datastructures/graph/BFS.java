@@ -1,6 +1,5 @@
 package com.grup15.socialnetwork.datastructures.graph;
 
-import com.grup15.socialnetwork.datastructures.list.CustomLinkedList;
 import com.grup15.socialnetwork.datastructures.queue.GenericQueue;
 import com.grup15.socialnetwork.model.Node;
 
@@ -33,20 +32,20 @@ public class BFS {
         Set<Node> visited = new HashSet<>();
 
 
-        Queue<Node> frontier = new ArrayDeque<>();
+       GenericQueue<Node> frontier = new GenericQueue<>();
 
         visited.add(start);
-        frontier.add(start);
+        frontier.enqueue(start);
 
         while (!frontier.isEmpty()) {
-            Node current = frontier.remove();
+            Node current = frontier.dequeue();
             traversalOrder.add(current);
 
             List<Node> neighbors = this.graph.fatih_getNeighbors(current);
             for (Node neighbor : neighbors) {
                 if (!visited.contains(neighbor)) {
                     visited.add(neighbor);
-                    frontier.add(neighbor);
+                    frontier.enqueue(neighbor);
                 }
             }
         }
@@ -76,16 +75,16 @@ public class BFS {
         Set<Node> visited = new HashSet<>();
 
 
-        Queue<Node> frontier = new ArrayDeque<>();
+        GenericQueue<Node> frontier = new GenericQueue<>();
 
 
         Map<Node, Node> parentMap = new HashMap<>();
 
         visited.add(src);
-        frontier.add(src);
+        frontier.enqueue(src);
 
         while (!frontier.isEmpty()) {
-            Node current = frontier.remove();
+            Node current = frontier.dequeue();
             List<Node> neighbors = this.graph.fatih_getNeighbors(current);
 
             for (Node neighbor : neighbors) {
@@ -97,7 +96,7 @@ public class BFS {
                         return buildPath(src, tgt, parentMap);
                     }
 
-                    frontier.add(neighbor);
+                    frontier.enqueue(neighbor);
                 }
             }
         }
