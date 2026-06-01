@@ -123,6 +123,9 @@ public class BFS {
             if (!parentMap.containsKey(current) && current != src) {
                 return new ArrayList<>(); // guard
             }
+
+            current = parentMap.get(current);
+
         }
 
         Collections.reverse(path);

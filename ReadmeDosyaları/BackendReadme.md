@@ -43,3 +43,24 @@ Path: /chain/{userId}/friends-events
 Örnek İstek: http://localhost:8080/chain/1/friends-events
 
 Açıklama: Önce belirtilen kullanıcının arkadaşlarını bulur, ardından o arkadaşların katıldığı etkinlikleri (Event) getirir. Bu yolculuktaki tüm düğümleri ve aralarındaki bağlantıları (Edge) döndürür.
+
+3. İki düğüm arasındaki en kısa yol
+
+Method: GET
+
+Path: /traversal/shortest-path?from={from}&to={to}
+
+Örnek İstek: http://localhost:8080/traversal/shortest-path?from=1&to=5
+
+Örnek çıktı: 
+
+{
+"path": [
+1,
+2,
+3,
+4,
+5
+],
+"distance": 4
+}
