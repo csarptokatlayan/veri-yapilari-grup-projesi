@@ -7,7 +7,7 @@ Method: GET
 
 Path: /traversal/bfs/{id}
 
-Çıktı: List<Node>
+Çıktı: Map<String, Object>
 
 Açıklama: Belirtilen ID'deki düğümden başlayarak tüm ağı BFS algoritması ile dalga dalga tarar ve ziyaret edilen düğümleri sırasıyla döndürür.
 
@@ -17,7 +17,7 @@ Method: GET
 
 Path: /traversal/dfs/{id}
 
-Çıktı: List<Node>
+Çıktı: Map<String, Object>
 
 Açıklama: Belirtilen ID'deki düğümden başlayarak ağı DFS algoritması ile derinlemesine tarar ve ziyaret edilen düğümleri sırasıyla döndürür.
 
@@ -44,7 +44,7 @@ Path: /chain/{userId}/friends-events
 
 Açıklama: Önce belirtilen kullanıcının arkadaşlarını bulur, ardından o arkadaşların katıldığı etkinlikleri (Event) getirir. Bu yolculuktaki tüm düğümleri ve aralarındaki bağlantıları (Edge) döndürür.
 
-3. İki düğüm arasındaki en kısa yol
+3. İki düğüm arasındaki en kısa yol 
 
 Method: GET
 
@@ -64,3 +64,18 @@ Path: /traversal/shortest-path?from={from}&to={to}
 ],
 "distance": 4
 }
+
+4. Düğüm (Node) İşlemleri
+   Bu endpointler, belirli bir düğümün detaylarını veya doğrudan bağlantılarını anlık olarak çekmek (Lazy Loading) için kullanılır.
+
+Komşuları Getir (Tıklama / Expand)
+
+Method: GET
+
+Path: /api/nodes/{id}/neighbors
+
+Örnek İstek: http://localhost:8080/api/nodes/3/neighbors
+
+Çıktı: nodes ve edges objesi (Map)
+
+Açıklama: Arayüzde (Cytoscape) bir düğüme tıklandığında, o düğümün sadece 1. derece (doğrudan bağlı) komşularını getirir. Grafın tamamını yüklemek yerine sadece tıklanan kişinin ağını açmak için kullanılır.
