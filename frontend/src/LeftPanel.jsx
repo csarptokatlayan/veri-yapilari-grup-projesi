@@ -79,29 +79,33 @@ export default function LeftPanel() {
     const [depth, setDepth] = useState(1);
 
     const handleMockQuery = () => {
-        // 1. Kullanıcının seçtiği targetType değerine göre adresi belirle
-        let endpoint = "";
-
-        //  (POST) seçilirse
-        if (targetType === "POST") {
-            endpoint = "http://localhost:8080/chain/1/friends-likes";
-        }
-        // Etkinlik (EVENT)
-        else if (targetType === "EVENT") {
-            endpoint = "http://localhost:8080/chain/1/friends-events";
-        }
-        // Backend'in desteklemediği bir şey seçilirse uyar
-        else {
-            alert("Bu arama henüz backend tarafından desteklenmiyor (Sadece POST ve EVENT).");
+        // 1. Kullanıcı ID girmeyi unutursa uyaralım
+        if (!startNode) {
+            alert("Lütfen bir Başlangıç Düğümü (ID) girin!");
             return;
         }
 
-        //  (mock -> real )
+        let endpoint = "";
+
+        // 2. Sabit '1' yerine dinamik ${startNode} ekledik.
+        // 3. depth ve edgeType değerlerini de URL sonuna ekliyoruz.
+        if (targetType === "POST") {
+            endpoint = `http://localhost:8080/chain/${startNode}/friends-likes?depth=${depth}&edgeType=${edgeType}`;
+        }
+        else if (targetType === "EVENT") {
+            endpoint = `http://localhost:8080/chain/${startNode}/friends-events?depth=${depth}&edgeType=${edgeType}`;
+        }
+        else {
+            alert("Bu arama henüz backend tarafından desteklenmiyor.");
+            return;
+        }
+
+        // Gerçek isteği at (GET olarak)
         fetch(endpoint)
             .then(response => response.json())
             .then(data => {
                 console.log("Gelen Veri:", data);
-                alert("Gerçek veritabanı sorgusu başarılı! Sonuçlar konsolda.");
+                alert("Sorgu başarılı! Sonuçlar konsola yazdırıldı.");
             })
             .catch(error => {
                 console.error("Bağlantı hatası:", error);
@@ -182,7 +186,7 @@ export default function LeftPanel() {
                     <option value="" disabled>— Hedef Türü —</option>
                     <option value="USER">Kullanıcı Düğümü</option>
                     <option value="POST">Gönderi Düğümü</option>
-                    <option value="PAGE">Sayfa Düğümü</option>
+                    <option value="EVENT">Etkinlik Düğümü</option>
                 </select>
             </div>
 
