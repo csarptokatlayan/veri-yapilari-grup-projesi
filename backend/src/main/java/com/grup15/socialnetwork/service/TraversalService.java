@@ -95,6 +95,28 @@ public class TraversalService {
         return new ShortestPathResponse(pathIds, distance);
     }
 
+    public Map<String, Object> getNeighbors(Integer nodeId) {
+        Node centerNode = seedContext.getGraph().ahmetEfe_findNodeById(nodeId);
+        if (centerNode == null) {
+            return emptyResult();
+        }
+
+        Set<Node> nodes = new HashSet<>();
+        Set<Edge> edges = new HashSet<>();
+
+        nodes.add(centerNode);
+
+        List<Node> neighbors = seedContext.getGraph().fatih_getNeighbors(centerNode);
+        nodes.addAll(neighbors);
+
+        for (Node neighbor : neighbors) {
+            List<Edge> edgesBetween = seedContext.getGraph().fatih_getEdgesBetween(centerNode, neighbor);
+            edges.addAll(edgesBetween);
+        }
+
+        return formatForFrontend(nodes, edges);
+    }
+
     private Map<String, Object> formatForFrontend(Set<Node> nodes, Set<Edge> edges) {
         Map<String, Object> response = new HashMap<>();
 
