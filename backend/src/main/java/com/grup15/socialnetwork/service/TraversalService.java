@@ -71,6 +71,30 @@ public class TraversalService {
         return formatForFrontend(visitedNodes, traversedEdges);
     }
 
+    public ShortestPathResponse shortestPath(Integer fromId, Integer toId) {
+        Node fromNode = seedContext.getGraph().ahmetEfe_findNodeById(fromId);
+        Node toNode = seedContext.getGraph().ahmetEfe_findNodeById(toId);
+
+        if (fromNode == null || toNode == null) {
+            return new ShortestPathResponse(new ArrayList<>(), -1);
+        }
+
+        List<Node> pathNodes = bfs.shortestPath(fromNode, toNode);
+
+        if (pathNodes == null || pathNodes.isEmpty()) {
+            return new ShortestPathResponse(new ArrayList<>(), -1);
+        }
+
+        List<Integer> pathIds = pathNodes.stream()
+                .map(Node::getID)
+                .toList();
+
+
+        int distance = pathIds.size() - 1;
+
+        return new ShortestPathResponse(pathIds, distance);
+    }
+
     private Map<String, Object> formatForFrontend(Set<Node> nodes, Set<Edge> edges) {
         Map<String, Object> response = new HashMap<>();
 
