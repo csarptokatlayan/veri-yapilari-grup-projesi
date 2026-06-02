@@ -44,24 +44,11 @@ const ALGORITHMS = [
             </svg>
         ),
     },
-    {
-        id: 'degrees',
-        label: 'Degrees',
-        shortcut: 'G',
-        icon: (
-            <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
-                <circle cx="6.5" cy="6.5" r="2" stroke="currentColor" strokeWidth="1.1" />
-                <circle cx="6.5" cy="6.5" r="5" stroke="currentColor" strokeWidth="0.8" strokeDasharray="2 1.5" />
-            </svg>
-        ),
-    },
 ];
 
 const STATS = [
-    { key: 'DUGUM' },
-    { key: 'KENAR' },
-    { key: 'BILESEN' },
-    { key: 'DERINLIK' },
+    { key: 'DUGUM', label: 'DUGUM SAYISI' },
+    { key: 'EDGE', label: 'EDGE SAYISI' },
 ];
 
 /**
@@ -72,11 +59,12 @@ const STATS = [
  */
 export default function LeftPanel({ onAlgorithmResult, graphStats }) {
     const [activeAlgo, setActiveAlgo] = useState('bfs');
-    const [algoStartNode, setAlgoStartNode] = useState('');
+    const [startNode, setStartNode] = useState('');
     const [algoEndNode, setAlgoEndNode] = useState('');
     const [algorithmLoading, setAlgorithmLoading] = useState(false);
     const [algorithmError, setAlgorithmError] = useState(null);
 
+    const [chainMode, setChainMode] = useState('bfs');
     const [chainStartNode, setChainStartNode] = useState('');
     const [edgeType, setEdgeType] = useState('');
     const [targetType, setTargetType] = useState('');
@@ -115,7 +103,7 @@ export default function LeftPanel({ onAlgorithmResult, graphStats }) {
     };
 
     const handleRunAlgorithm = async () => {
-        const trimmedStartNode = algoStartNode.trim();
+        const trimmedStartNode = startNode.trim();
         const trimmedEndNode = algoEndNode.trim();
 
         setAlgorithmError(null);
@@ -127,11 +115,6 @@ export default function LeftPanel({ onAlgorithmResult, graphStats }) {
 
         if (activeAlgo === 'shortest' && !trimmedEndNode) {
             setAlgorithmError('Shortest Path icin Bitis Dugumu zorunludur.');
-            return;
-        }
-
-        if (activeAlgo === 'degrees') {
-            setAlgorithmError('Degrees icin backend endpointi tanimli degil.');
             return;
         }
 
@@ -177,7 +160,7 @@ export default function LeftPanel({ onAlgorithmResult, graphStats }) {
         return `/traversal/dynamic-chain-${mode}?${params.toString()}`;
     };
 
-    const handleRunChainQuery = async (chainType) => {
+    const handleRunChainQuery = async () => {
         const trimmedChainStartNode = chainStartNode.trim();
 
         setChainError(null);
@@ -190,21 +173,11 @@ export default function LeftPanel({ onAlgorithmResult, graphStats }) {
         setChainLoading(true);
 
         try {
-            let path = '';
-
-            if (chainType === 'dynamic-bfs') {
-                path = createDynamicChainPath('bfs', trimmedChainStartNode);
-            } else if (chainType === 'dynamic-dfs') {
-                path = createDynamicChainPath('dfs', trimmedChainStartNode);
-            } else if (chainType === 'friends-likes') {
-                path = `/chain/${encodeURIComponent(trimmedChainStartNode)}/friends-likes`;
-            } else if (chainType === 'friends-events') {
-                path = `/chain/${encodeURIComponent(trimmedChainStartNode)}/friends-events`;
-            }
-
+            const path = createDynamicChainPath(chainMode, trimmedChainStartNode);
             const data = await fetchJson(path);
+            const resultType = `dynamic-chain-${chainMode}`;
 
-            emitGraphResult(chainType, data, trimmedChainStartNode);
+            emitGraphResult(resultType, data, trimmedChainStartNode);
         } catch (error) {
             setChainError(error.message);
         } finally {
@@ -255,8 +228,8 @@ export default function LeftPanel({ onAlgorithmResult, graphStats }) {
                         type="text"
                         placeholder="Orn: 1"
                         spellCheck={false}
-                        value={algoStartNode}
-                        onChange={(event) => setAlgoStartNode(event.target.value)}
+                        value={startNode}
+                        onChange={(event) => setStartNode(event.target.value)}
                     />
                 </div>
 
@@ -299,14 +272,14 @@ export default function LeftPanel({ onAlgorithmResult, graphStats }) {
                 </div>
 
                 <div className="query-row">
-                    <span className="query-label">Baslangic (Kok)</span>
+                    <span className="query-label">Baslangic Dugumu</span>
                     <input
                         className="query-input"
                         type="text"
                         placeholder="Orn: 1"
+                        spellCheck={false}
                         value={chainStartNode}
                         onChange={(event) => setChainStartNode(event.target.value)}
-                        spellCheck={false}
                     />
                 </div>
 
@@ -350,23 +323,34 @@ export default function LeftPanel({ onAlgorithmResult, graphStats }) {
                     />
                 </div>
 
+                <div className="query-row">
+                    <span className="query-label">Arama Modu</span>
+                    <div className="chain-mode-toggle">
+                        <button
+                            className={`chain-mode-btn${chainMode === 'bfs' ? ' active' : ''}`}
+                            type="button"
+                            onClick={() => setChainMode('bfs')}
+                        >
+                            BFS
+                        </button>
+                        <button
+                            className={`chain-mode-btn${chainMode === 'dfs' ? ' active' : ''}`}
+                            type="button"
+                            onClick={() => setChainMode('dfs')}
+                        >
+                            DFS
+                        </button>
+                    </div>
+                </div>
+
                 {chainError && (
                     <div className="error-message">
                         {chainError}
                     </div>
                 )}
 
-                <button className="run-btn" onClick={() => handleRunChainQuery('dynamic-bfs')} disabled={chainLoading}>
-                    Dynamic BFS
-                </button>
-                <button className="run-btn" onClick={() => handleRunChainQuery('dynamic-dfs')} disabled={chainLoading}>
-                    Dynamic DFS
-                </button>
-                <button className="run-btn" onClick={() => handleRunChainQuery('friends-likes')} disabled={chainLoading}>
-                    Friends Likes
-                </button>
-                <button className="run-btn" onClick={() => handleRunChainQuery('friends-events')} disabled={chainLoading}>
-                    Friends Events
+                <button className="run-btn" onClick={handleRunChainQuery} disabled={chainLoading}>
+                    {chainLoading ? 'Hesaplaniyor...' : 'Zincirleme Sorgu Calistir'}
                 </button>
             </div>
 
@@ -374,9 +358,9 @@ export default function LeftPanel({ onAlgorithmResult, graphStats }) {
                 {STATS.map((stat) => (
                     <div key={stat.key} className="stat-block">
                         <span className="stat-val">
-                            {graphStats?.[stat.key] ?? '-'}
+                            {graphStats?.[stat.key] ?? 0}
                         </span>
-                        <span className="stat-key">{stat.key}</span>
+                        <span className="stat-key">{stat.label}</span>
                     </div>
                 ))}
             </div>
