@@ -11,14 +11,14 @@ import RightInspector from './RightInspector';
  * @author Semih Tuncel
  */
 export default function App() {
-  const [selectedNodeId, setSelectedNodeId] = useState(null);
+  const [selectedNode, setSelectedNode] = useState(null);
 
   return (
     <div className="app-shell">
       <Topbar />
       <LeftPanel />
-      <CenterCanvas onNodeSelect={setSelectedNodeId} />
-      <RightInspector selectedNodeId={selectedNodeId} />
+      <CenterCanvas onNodeSelect={setSelectedNode} />
+      <RightInspector selectedNode={selectedNode} />
     </div>
   );
 }

@@ -1,7 +1,6 @@
 import cytoscape from 'cytoscape';
 import { Fragment, useEffect, useRef, useState } from 'react';
 
-const ROOT_NODE_ID = '1';
 const MAX_VISIBLE_NODES = 500;
 const ZOOM_STEP = 1.2;
 const FIT_PADDING = 40;
@@ -22,7 +21,7 @@ const INITIAL_CAMERA = {
 const TOOLS = [
   {
     id: 'select',
-    title: 'Seç',
+    title: 'Sec',
     icon: (
       <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
         <path d="M2 2l3.5 9.5 2-4 4.5 4.5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
@@ -31,7 +30,7 @@ const TOOLS = [
   },
   {
     id: 'pan',
-    title: 'Kaydır',
+    title: 'Kaydir',
     icon: (
       <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
         <path d="M7 1v12M1 7h12M3.5 3.5l7 7M10.5 3.5l-7 7" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
@@ -40,7 +39,7 @@ const TOOLS = [
   },
   {
     id: 'zoomin',
-    title: 'Yakınlaştır',
+    title: 'Yakinlastir',
     icon: (
       <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
         <circle cx="6" cy="6" r="4" stroke="currentColor" strokeWidth="1.2" />
@@ -52,7 +51,7 @@ const TOOLS = [
   },
   {
     id: 'zoomout',
-    title: 'Uzaklaştır',
+    title: 'Uzaklastir',
     icon: (
       <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
         <circle cx="6" cy="6" r="4" stroke="currentColor" strokeWidth="1.2" />
@@ -171,39 +170,153 @@ function createCytoscapeInstance(container) {
 }
 
 /**
- * Seed graph dosyasini indirir; AbortSignal ile unmount durumunda islem kesilir.
+ * Graph endpoint cevabini okur; ortak fetch akisi hata mesajini sade tutar.
  * @author Semih Tuncel
  */
-async function fetchSeedGraph(signal) {
-  const response = await fetch('/seed_data.json', { signal });
+async function fetchGraphEndpoint(path, signal) {
+  const response = await fetch(path, { signal });
 
   if (!response.ok) {
-    throw new Error(`Seed graph yuklenemedi: ${response.status}`);
+    throw new Error(`Graph yuklenemedi: ${response.status}`);
   }
 
   return response.json();
 }
 
 /**
- * Seed edge icin tek tip id uretir; Cytoscape duplicate edge eklemesini bu id ile engeller.
+ * Ilk graph parcasini backend init endpointinden getirir.
  * @author Semih Tuncel
  */
-function createEdgeId(edge, index) {
-  return `edge-${index}-${edge.source}-${edge.target}-${edge.type}`;
+function fetchInitialGraph(signal) {
+  return fetchGraphEndpoint('/api/nodes/init', signal);
 }
 
 /**
- * Seed node kaydini Cytoscape node elementine cevirir; render motoru string id bekler.
+ * Tiklanan dugumun komsu graph parcasini backend endpointinden getirir.
+ * @author Semih Tuncel
+ */
+function fetchNodeNeighbors(nodeId, signal) {
+  const encodedNodeId = encodeURIComponent(nodeId);
+
+  return fetchGraphEndpoint(`/api/nodes/${encodedNodeId}/neighbors`, signal);
+}
+
+/**
+ * Backend dugum kimligini string Cytoscape id formatina indirger.
+ * @author Semih Tuncel
+ */
+function getNodeIdValue(node) {
+  return node?.id ?? node?.ID ?? node?.nodeId;
+}
+
+/**
+ * Backend tip alanini tek nodeType degerine indirger.
+ * @author Semih Tuncel
+ */
+function getNodeTypeValue(node) {
+  return node?.nodeType ?? node?.type ?? 'UNKNOWN';
+}
+
+/**
+ * Property degerini hash map gorunumune uygun guvenli nesneye cevirir.
+ * @author Semih Tuncel
+ */
+function normalizeProperties(properties) {
+  if (!properties || typeof properties !== 'object' || Array.isArray(properties)) {
+    return {};
+  }
+
+  return properties;
+}
+
+/**
+ * Backend node kaydini secim ve Cytoscape icin ortak node payloadina cevirir.
+ * @author Semih Tuncel
+ */
+function normalizeNode(node) {
+  const id = String(getNodeIdValue(node));
+  const title = node?.title ? String(node.title) : id;
+  const nodeType = String(getNodeTypeValue(node));
+
+  return {
+    id,
+    title,
+    nodeType,
+    properties: normalizeProperties(node?.properties),
+  };
+}
+
+/**
+ * Edge ucundaki id veya node nesnesinden string id alir.
+ * @author Semih Tuncel
+ */
+function getEdgeEndpointId(endpoint) {
+  if (endpoint && typeof endpoint === 'object') {
+    return String(getNodeIdValue(endpoint));
+  }
+
+  return String(endpoint);
+}
+
+/**
+ * Edge icin backend id yoksa deterministik duplicate onleyici id uretir.
+ * @author Semih Tuncel
+ */
+function createDeterministicEdgeId(edge) {
+  const sourceId = getEdgeEndpointId(edge.source);
+  const targetId = getEdgeEndpointId(edge.target ?? edge.destination);
+  const type = edge.type ?? 'EDGE';
+  const directed = Boolean(edge.directed);
+
+  return `${sourceId}-${targetId}-${type}-${directed}`;
+}
+
+/**
+ * Backend edge kaydini Cytoscape edge payloadina cevirir.
+ * @author Semih Tuncel
+ */
+function normalizeEdge(edge) {
+  const source = getEdgeEndpointId(edge?.source);
+  const target = getEdgeEndpointId(edge?.target ?? edge?.destination);
+  const type = String(edge?.type ?? 'EDGE');
+  const directed = Boolean(edge?.directed);
+  const id = edge?.id ? String(edge.id) : createDeterministicEdgeId({
+    source,
+    target,
+    type,
+    directed,
+  });
+
+  return {
+    id,
+    source,
+    target,
+    type,
+    directed,
+  };
+}
+
+/**
+ * Graph cevabini guvenli node ve edge dizilerine ayirir.
+ * @author Semih Tuncel
+ */
+function normalizeGraphResponse(graph) {
+  const rawNodes = Array.isArray(graph?.nodes) ? graph.nodes : [];
+  const rawEdges = Array.isArray(graph?.edges) ? graph.edges : [];
+
+  return {
+    nodes: rawNodes.map(normalizeNode),
+    edges: rawEdges.map(normalizeEdge),
+  };
+}
+
+/**
+ * Node payloadini Cytoscape elementine cevirir; spawn varsa pozisyon ekler.
  * @author Semih Tuncel
  */
 function createNodeElement(node, spawnPosition) {
   const element = {
-    data: {
-      id: String(node.id),
-      title: node.title,
-      nodeType: node.nodeType,
-      properties: node.properties ?? {},
-    },
+    data: node,
   };
 
   if (!spawnPosition) {
@@ -220,90 +333,28 @@ function createNodeElement(node, spawnPosition) {
 }
 
 /**
- * Seed edge kaydini Cytoscape edge elementine cevirir; benzersiz id coklu edge durumunu korur.
+ * Edge payloadini Cytoscape elementine cevirir.
  * @author Semih Tuncel
  */
-function createEdgeElement(edge, index) {
+function createEdgeElement(edge) {
   return {
-    data: {
-      id: createEdgeId(edge, index),
-      source: String(edge.source),
-      target: String(edge.target),
-      type: edge.type,
-      directed: Boolean(edge.directed),
-    },
+    data: edge,
   };
 }
 
 /**
- * Edge kaydini node indeksine ekler; Map uzerinden komsu edge aramasi hizli kalir.
+ * Cytoscape node datasini inspector icin sade payloada cevirir.
  * @author Semih Tuncel
  */
-function appendEdgeToNodeIndex(edgesByNodeId, nodeId, indexedEdge) {
-  const edges = edgesByNodeId.get(nodeId) ?? [];
-
-  edges.push(indexedEdge);
-  edgesByNodeId.set(nodeId, edges);
-}
-
-/**
- * Seed graph icin node ve komsu edge indekslerini kurar; lazy expand icin Map secilir.
- * @author Semih Tuncel
- */
-function createGraphIndex(graph) {
-  // Insert: O(1)  Search: O(1)  Delete: O(1)
-  const nodesById = new Map();
-  // Insert: O(1)  Search: O(1)  Delete: O(1)
-  const edgesByNodeId = new Map();
-  const nodes = Array.isArray(graph.nodes) ? graph.nodes : [];
-  const edges = Array.isArray(graph.edges) ? graph.edges : [];
-
-  nodes.forEach((node) => {
-    nodesById.set(String(node.id), node);
-  });
-
-  edges.forEach((edge, index) => {
-    const indexedEdge = { edge, index };
-    const sourceId = String(edge.source);
-    const targetId = String(edge.target);
-
-    appendEdgeToNodeIndex(edgesByNodeId, sourceId, indexedEdge);
-
-    if (sourceId !== targetId) {
-      appendEdgeToNodeIndex(edgesByNodeId, targetId, indexedEdge);
-    }
-  });
+function createSelectedNodePayload(cyNode) {
+  const data = cyNode.data();
 
   return {
-    nodesById,
-    edgesByNodeId,
+    id: data.id,
+    title: data.title,
+    nodeType: data.nodeType,
+    properties: normalizeProperties(data.properties),
   };
-}
-
-/**
- * Ilk sahnede sadece root node'u ekler; devamindaki graph parcalari tiklama ile gelir.
- * @author Semih Tuncel
- */
-function renderSeedGraph(cy, graphIndex) {
-  const rootNode = graphIndex.nodesById.get(ROOT_NODE_ID);
-
-  if (!rootNode) {
-    return;
-  }
-
-  cy.add(createNodeElement(rootNode));
-  cy.layout(COSE_LAYOUT).run();
-}
-
-/**
- * Edge'in tiklanan node disindaki ucunu bulur; expand akisi komsu node'a buradan ulasir.
- * @author Semih Tuncel
- */
-function getOppositeNodeId(edge, nodeId) {
-  const sourceId = String(edge.source);
-  const targetId = String(edge.target);
-
-  return sourceId === nodeId ? targetId : sourceId;
 }
 
 /**
@@ -319,6 +370,51 @@ function createVisibleNodeIdSet(cy) {
   });
 
   return visibleNodeIds;
+}
+
+/**
+ * Backend graph parcasindan yalnizca yeni elementleri secer.
+ * @author Semih Tuncel
+ */
+function collectGraphElementsForAdd(cy, graph, spawnPosition) {
+  const visibleNodeIds = createVisibleNodeIdSet(cy);
+  const elements = [];
+  const newNodeIds = [];
+  let didHitLimit = false;
+
+  graph.nodes.forEach((node) => {
+    const existingNode = cy.getElementById(node.id);
+
+    if (!existingNode.empty()) {
+      existingNode.data(node);
+      return;
+    }
+
+    if (visibleNodeIds.size >= MAX_VISIBLE_NODES) {
+      didHitLimit = true;
+      return;
+    }
+
+    elements.push(createNodeElement(node, spawnPosition));
+    newNodeIds.push(node.id);
+    visibleNodeIds.add(node.id);
+  });
+
+  graph.edges.forEach((edge) => {
+    if (
+      cy.getElementById(edge.id).empty()
+      && visibleNodeIds.has(edge.source)
+      && visibleNodeIds.has(edge.target)
+    ) {
+      elements.push(createEdgeElement(edge));
+    }
+  });
+
+  return {
+    elements,
+    newNodeIds,
+    didHitLimit,
+  };
 }
 
 /**
@@ -444,7 +540,7 @@ function findOpenSpawnAngle(parentPosition, blockingPositions) {
 }
 
 /**
- * Base aciya yakin acilari once deneyerek cicek hissini korur.
+ * Base aciya yakin acilari once deneyerek fan hissini korur.
  * @author Semih Tuncel
  */
 function createOrderedSpawnAngles(baseAngle) {
@@ -570,64 +666,33 @@ function animateSpawnedNodes(cy, newNodeIds, targetPositions) {
 }
 
 /**
- * Tiklanan node icin eklenecek node ve edge elementlerini secer; 50 node limitini korur.
+ * Ilk backend graph parcasini sahneye koyar ve layout calistirir.
  * @author Semih Tuncel
  */
-function collectExpandableElements(cy, graphIndex, nodeId, spawnPosition) {
-  const neighborEdges = graphIndex.edgesByNodeId.get(nodeId) ?? [];
-  const visibleNodeIds = createVisibleNodeIdSet(cy);
-  const elements = [];
-  const newNodeIds = [];
-  let didHitLimit = false;
+function renderInitialGraph(cy, graph) {
+  const { elements, didHitLimit } = collectGraphElementsForAdd(cy, graph);
 
-  neighborEdges.forEach(({ edge, index }) => {
-    const oppositeNodeId = getOppositeNodeId(edge, nodeId);
-    const oppositeNode = graphIndex.nodesById.get(oppositeNodeId);
+  if (didHitLimit) {
+    console.log(`Maksimum ${MAX_VISIBLE_NODES} node limitine ulasildi`);
+  }
 
-    if (!oppositeNode) {
-      return;
-    }
+  if (elements.length === 0) {
+    return;
+  }
 
-    if (!visibleNodeIds.has(oppositeNodeId)) {
-      if (visibleNodeIds.size >= MAX_VISIBLE_NODES) {
-        didHitLimit = true;
-        return;
-      }
-
-      elements.push(createNodeElement(oppositeNode, spawnPosition));
-      newNodeIds.push(oppositeNodeId);
-      visibleNodeIds.add(oppositeNodeId);
-    }
-
-    const edgeId = createEdgeId(edge, index);
-    const sourceId = String(edge.source);
-    const targetId = String(edge.target);
-
-    if (
-      cy.getElementById(edgeId).empty()
-      && visibleNodeIds.has(sourceId)
-      && visibleNodeIds.has(targetId)
-    ) {
-      elements.push(createEdgeElement(edge, index));
-    }
-  });
-
-  return {
-    elements,
-    newNodeIds,
-    didHitLimit,
-  };
+  cy.add(elements);
+  cy.layout(COSE_LAYOUT).run();
 }
 
 /**
- * Tiklanan node'u genisletir; yeni node'lar bos yone dogru fan halinde acilir.
+ * Backend komsu graph parcasini mevcut sahneye duplicate olmadan ekler.
  * @author Semih Tuncel
  */
-function expandNode(cy, graphIndex, nodeId, spawnPosition) {
-  const { elements, newNodeIds, didHitLimit } = collectExpandableElements(cy, graphIndex, nodeId, spawnPosition);
+function mergeExpandedGraph(cy, graph, spawnPosition) {
+  const { elements, newNodeIds, didHitLimit } = collectGraphElementsForAdd(cy, graph, spawnPosition);
 
   if (didHitLimit) {
-    console.log('Max 50 node limitine ulaşıldı');
+    console.log(`Maksimum ${MAX_VISIBLE_NODES} node limitine ulasildi`);
   }
 
   if (elements.length === 0) {
@@ -719,17 +784,17 @@ function applyCanvasMode(cy, activeTool) {
 }
 
 /**
- * Abort disindaki seed yukleme hatalarini bildirir; iptal beklenen cleanup davranisidir.
+ * Abort disindaki backend graph hatalarini bildirir; mevcut sahne korunur.
  * @author Semih Tuncel
  */
-function reportSeedLoadError(error) {
+function reportGraphLoadError(error, label) {
   if (error.name !== 'AbortError') {
-    console.error('Seed graph yuklenemedi', error);
+    console.error(`${label} yuklenemedi`, error);
   }
 }
 
 /**
- * Orta kanvas alaninin UI iskeleti ve arac cubugu yonetimi.
+ * Orta kanvas alaninin UI iskeleti ve backend graph yonetimi.
  * @author Semih Tuncel
  */
 export default function CenterCanvas({ onNodeSelect }) {
@@ -737,7 +802,6 @@ export default function CenterCanvas({ onNodeSelect }) {
   const [cameraState, setCameraState] = useState(INITIAL_CAMERA);
   const canvasRef = useRef(null);
   const cyRef = useRef(null);
-  const graphIndexRef = useRef(null);
   const isExpandingRef = useRef(false);
   const onNodeSelectRef = useRef(onNodeSelect);
 
@@ -767,53 +831,63 @@ export default function CenterCanvas({ onNodeSelect }) {
     }
 
     /**
-     * Node tiklamasinda seed indeksinden yalnizca komsulari sahneye ekler.
+     * Node tiklamasinda secimi yukari yollar ve backend komsularini ister.
      * @author Semih Tuncel
      */
     function handleNodeTap(event) {
       const nodeId = event.target.id();
-      const graphIndex = graphIndexRef.current;
+      const spawnPosition = event.target.position();
 
-      onNodeSelectRef.current?.(nodeId);
+      onNodeSelectRef.current?.(createSelectedNodePayload(event.target));
 
-      if (!graphIndex || isExpandingRef.current) {
+      if (isExpandingRef.current) {
         return;
       }
 
       isExpandingRef.current = true;
-      expandNode(cy, graphIndex, nodeId, event.target.position())
+      fetchNodeNeighbors(nodeId, abortController.signal)
+        .then((graph) => {
+          if (!isMounted || cy.destroyed()) {
+            return Promise.resolve();
+          }
+
+          return mergeExpandedGraph(cy, normalizeGraphResponse(graph), spawnPosition);
+        })
+        .catch((error) => {
+          reportGraphLoadError(error, 'Komsu graph');
+        })
         .finally(() => {
           isExpandingRef.current = false;
         });
     }
 
     /**
-     * Gelen seed graph verisini guvenli sekilde render eder; unmount sonrasi DOM'a dokunmaz.
+     * Gelen init graph verisini guvenli sekilde render eder.
      * @author Semih Tuncel
      */
-    function handleSeedGraphLoaded(graph) {
-      if (isMounted) {
-        const graphIndex = createGraphIndex(graph);
-
-        graphIndexRef.current = graphIndex;
-        renderSeedGraph(cy, graphIndex);
-        handleCameraChanged();
+    function handleInitialGraphLoaded(graph) {
+      if (!isMounted || cy.destroyed()) {
+        return;
       }
+
+      renderInitialGraph(cy, normalizeGraphResponse(graph));
+      handleCameraChanged();
     }
 
     cy.on('pan zoom', handleCameraChanged);
     cy.on('tap', 'node', handleNodeTap);
 
-    fetchSeedGraph(abortController.signal)
-      .then(handleSeedGraphLoaded)
-      .catch(reportSeedLoadError);
+    fetchInitialGraph(abortController.signal)
+      .then(handleInitialGraphLoaded)
+      .catch((error) => {
+        reportGraphLoadError(error, 'Init graph');
+      });
 
     return () => {
       isMounted = false;
       abortController.abort();
       cy.destroy();
       cyRef.current = null;
-      graphIndexRef.current = null;
     };
   }, []);
 
@@ -856,7 +930,6 @@ export default function CenterCanvas({ onNodeSelect }) {
       <div className="canvas-toolbar">
         {TOOLS.map((tool, i) => (
           <Fragment key={tool.id}>
-            {/* Separator after zoom-out (index 3) would be after pan (1), insert manually */}
             <button
               className={`canvas-tool-btn${activeTool === tool.id ? ' active' : ''}`}
               title={tool.title}
@@ -872,7 +945,7 @@ export default function CenterCanvas({ onNodeSelect }) {
 
         <button
           className="canvas-tool-btn"
-          title="Ekrana sığdır"
+          title="Ekrana sigdir"
           onClick={() => handleToolClick('fit')}
         >
           <FitIcon />
