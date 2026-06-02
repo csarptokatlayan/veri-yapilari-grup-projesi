@@ -50,4 +50,32 @@ public class TraversalController {
         return ResponseEntity.ok(response);
     }
 
+    @GetMapping("/dynamic-chain-bfs")
+    public ResponseEntity<Map<String, Object>> getDynamicChain(
+            @RequestParam("startId") Integer startId,
+            @RequestParam(value = "edgeType", required = false) String edgeType,
+            @RequestParam(value = "targetType", required = false) String targetType,
+            @RequestParam(value = "depth", defaultValue = "1") Integer depth) {
+
+        if ("".equals(edgeType)) edgeType = null;
+        if ("".equals(targetType)) targetType = null;
+
+        Map<String, Object> result = traversalService.getDynamicChainBfs(startId, edgeType, targetType, depth);
+        return ResponseEntity.ok(result);
+    }
+
+    @GetMapping("/dynamic-chain-dfs")
+    public ResponseEntity<Map<String, Object>> getDynamicChainDfs(
+            @RequestParam("startId") Integer startId,
+            @RequestParam(value = "edgeType", required = false) String edgeType,
+            @RequestParam(value = "targetType", required = false) String targetType,
+            @RequestParam(value = "depth", defaultValue = "1") Integer depth) {
+
+        if ("".equals(edgeType)) edgeType = null;
+        if ("".equals(targetType)) targetType = null;
+
+        Map<String, Object> result = traversalService.getDynamicChainDfs(startId, edgeType, targetType, depth);
+        return ResponseEntity.ok(result);
+    }
+
 }

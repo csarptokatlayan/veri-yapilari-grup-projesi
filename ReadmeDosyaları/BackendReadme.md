@@ -1,5 +1,8 @@
+📖 Social Network API Dokümantasyonu
+Bu API, sosyal ağ üzerindeki düğümler (Kullanıcı, Post, Event) ve aralarındaki ilişkiler (FRIEND, LIKES, ATTENDS) üzerinde gezinme, filtreleme ve analiz işlemleri sunar. Grafik arayüz (Cytoscape) için çıktıların çoğu { nodes, edges } JSON formatında döner.
+
 1. Gezinme (Traversal) Algoritmaları
-   Bu endpointler, verilen bir düğümden (Node) başlayarak graf üzerindeki bağlantıları tarar.
+   Verilen bir düğümden başlayarak graf üzerindeki bağlantıları hiçbir filtreleme yapmadan sonuna kadar tarar.
 
 BFS (Genişlik Öncelikli Arama)
 
@@ -7,9 +10,9 @@ Method: GET
 
 Path: /traversal/bfs/{id}
 
-Çıktı: Map<String, Object>
+Çıktı: { nodes, edges } objesi (Map)
 
-Açıklama: Belirtilen ID'deki düğümden başlayarak tüm ağı BFS algoritması ile dalga dalga tarar ve ziyaret edilen düğümleri sırasıyla döndürür.
+Açıklama: Belirtilen ID'den başlayarak ağı dalga dalga (seviye seviye) tarar.
 
 DFS (Derinlik Öncelikli Arama)
 
@@ -17,12 +20,37 @@ Method: GET
 
 Path: /traversal/dfs/{id}
 
-Çıktı: Map<String, Object>
+Çıktı: { nodes, edges } objesi (Map)
 
-Açıklama: Belirtilen ID'deki düğümden başlayarak ağı DFS algoritması ile derinlemesine tarar ve ziyaret edilen düğümleri sırasıyla döndürür.
+Açıklama: Belirtilen ID'den başlayarak ağı derinlemesine tarar.
 
-2. Zincirleme (Chain) Filtreli Sorgular
-   Bu endpointler, birden fazla adımlı (User -> Friend -> Content) ilişkisel sorguları çalıştırır. Çıktı olarak Canvas'ta çizilmeye hazır nodes ve edges listelerini içeren bir obje (Map) döner.
+2. Dinamik Ağ Keşfi (Filtreli Gezinme)
+   Arayüzden gelen parametrelere göre kısıtlanmış (Derinlik, İlişki Tipi, Hedef Tipi) akıllı arama algoritmalarıdır.
+
+Dinamik Zincir (BFS Tabanlı)
+
+Method: GET
+
+Path: /traversal/dynamic-chain-bfs
+
+Parametreler: startId (Zorunlu), edgeType (Ops), targetType (Ops), depth (Ops, Default: 1)
+
+Örnek: /traversal/dynamic-chain-bfs?startId=1&depth=2&edgeType=FRIEND
+
+Çıktı: { nodes, edges } objesi (Map)
+
+Dinamik Zincir (DFS Tabanlı)
+
+Method: GET
+
+Path: /traversal/dynamic-chain-dfs
+
+Parametreler: Yukarıdaki ile birebir aynı parametreleri alır.
+
+Çıktı: { nodes, edges } objesi (Map)
+
+3. Zincirleme (Chain) Şablonları
+   Önceden tanımlanmış "A -> B -> C" şeklindeki spesifik iş kurallarını (Öneri motoru) çalıştırır.
 
 Arkadaşların Beğendiği Gönderiler
 
@@ -30,9 +58,9 @@ Method: GET
 
 Path: /chain/{userId}/friends-likes
 
-Örnek İstek: http://localhost:8080/chain/1/friends-likes
+Çıktı: { nodes, edges } objesi (Map)
 
-Açıklama: Önce belirtilen kullanıcının arkadaşlarını bulur, ardından o arkadaşların beğendiği gönderileri (Post) getirir. Bu yolculuktaki tüm düğümleri ve aralarındaki bağlantıları (Edge) döndürür.
+Açıklama: Kullanıcının arkadaşlarını bulur, o arkadaşların beğendiği gönderileri getirir.
 
 Arkadaşların Katıldığı Etkinlikler
 
@@ -40,33 +68,40 @@ Method: GET
 
 Path: /chain/{userId}/friends-events
 
-Örnek İstek: http://localhost:8080/chain/1/friends-events
+Çıktı: { nodes, edges } objesi (Map)
 
-Açıklama: Önce belirtilen kullanıcının arkadaşlarını bulur, ardından o arkadaşların katıldığı etkinlikleri (Event) getirir. Bu yolculuktaki tüm düğümleri ve aralarındaki bağlantıları (Edge) döndürür.
+Açıklama: Kullanıcının arkadaşlarını bulur, o arkadaşların katıldığı etkinlikleri getirir.
 
-3. İki düğüm arasındaki en kısa yol 
+4. Analiz ve Hesaplama
+   İki Düğüm Arasındaki En Kısa Yol (Shortest Path)
 
 Method: GET
 
-Path: /traversal/shortest-path?from={from}&to={to}
+Path: /traversal/shortest-path
 
-Örnek İstek: http://localhost:8080/traversal/shortest-path?from=1&to=5
+Parametreler: from (Başlangıç ID), to (Bitiş ID)
 
-Örnek çıktı: 
+Örnek İstek: /traversal/shortest-path?from=1&to=5
 
+Çıktı: ```json
 {
-"path": [
-1,
-2,
-3,
-4,
-5
-],
+"path": [1, 2, 3, 4, 5],
 "distance": 4
 }
 
-4. Düğüm (Node) İşlemleri
-   Bu endpointler, belirli bir düğümün detaylarını veya doğrudan bağlantılarını anlık olarak çekmek (Lazy Loading) için kullanılır.
+
+5. Düğüm (Node) ve Arayüz İşlemleri
+   Frontend (React/Cytoscape) tarafındaki tıklama, sayfa yükleme ve Lazy Loading (Tembel Yükleme) aksiyonlarını yönetir.
+
+Sistem Başlangıç Düğümü (Init)
+
+Method: GET
+
+Path: /api/nodes/init
+
+Çıktı: { nodes, edges } objesi (Map)
+
+Açıklama: Sayfa ilk yüklendiğinde beyaz ekran kalmaması için varsayılan merkez düğümünü (ID: 1) ve komşularını getirir.
 
 Komşuları Getir (Tıklama / Expand)
 
@@ -74,8 +109,6 @@ Method: GET
 
 Path: /api/nodes/{id}/neighbors
 
-Örnek İstek: http://localhost:8080/api/nodes/3/neighbors
+Çıktı: { nodes, edges } objesi (Map)
 
-Çıktı: nodes ve edges objesi (Map)
-
-Açıklama: Arayüzde (Cytoscape) bir düğüme tıklandığında, o düğümün sadece 1. derece (doğrudan bağlı) komşularını getirir. Grafın tamamını yüklemek yerine sadece tıklanan kişinin ağını açmak için kullanılır.
+Açıklama: Arayüzde bir düğüme tıklandığında sadece o düğümün 1. derece (doğrudan bağlı) komşularını döndürür.

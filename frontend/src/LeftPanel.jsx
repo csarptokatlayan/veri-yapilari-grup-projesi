@@ -89,16 +89,8 @@ export default function LeftPanel() {
 
         // 2. Sabit '1' yerine dinamik ${startNode} ekledik.
         // 3. depth ve edgeType değerlerini de URL sonuna ekliyoruz.
-        if (targetType === "POST") {
-            endpoint = `http://localhost:8080/chain/${startNode}/friends-likes?depth=${depth}&edgeType=${edgeType}`;
-        }
-        else if (targetType === "EVENT") {
-            endpoint = `http://localhost:8080/chain/${startNode}/friends-events?depth=${depth}&edgeType=${edgeType}`;
-        }
-        else {
-            alert("Bu arama henüz backend tarafından desteklenmiyor.");
-            return;
-        }
+        //Bfs ile yapılıyor şuan bu işlem
+        endpoint = `http://localhost:8080/traversal/dynamic-chain-bfs?startId=${startNode}&depth=${depth}&edgeType=${edgeType || ''}&targetType=${targetType || ''}`;
 
         // Gerçek isteği at (GET olarak)
         fetch(endpoint)
