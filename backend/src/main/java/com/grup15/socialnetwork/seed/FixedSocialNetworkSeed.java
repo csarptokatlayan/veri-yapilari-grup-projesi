@@ -102,13 +102,13 @@ public final class FixedSocialNetworkSeed {
         for (int offset = 0; offset < POST_COUNT; offset++) {
             int sourceId = userIdAtIndex(offset);
             int targetId = POST_FIRST_ID + offset;
-            visitor.visit(sourceId, targetId, EdgeType.POSTED, true);
+            visitor.visit(sourceId, targetId, EdgeType.POSTED, false);
         }
 
         for (int offset = 0; offset < PHOTO_COUNT; offset++) {
             int sourceId = userIdAtIndex(POST_COUNT + offset);
             int targetId = PHOTO_FIRST_ID + offset;
-            visitor.visit(sourceId, targetId, EdgeType.POSTED, true);
+            visitor.visit(sourceId, targetId, EdgeType.POSTED, false);
         }
 
         for (int userOffset = 0; userOffset < USER_COUNT; userOffset++) {
