@@ -372,6 +372,36 @@ html, body, #root {
 .query-input::placeholder { color: var(--text-muted); }
 .query-input:focus { border-color: var(--border-focus); }
 
+.chain-mode-toggle {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+}
+
+.chain-mode-btn {
+  height: 26px;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+
+.chain-mode-btn:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.chain-mode-btn.active {
+  background: var(--accent-dim);
+  border-color: var(--accent);
+  color: var(--text-accent);
+}
+
 .error-message {
   margin: 2px 12px 6px;
   color: #ff6b6b;

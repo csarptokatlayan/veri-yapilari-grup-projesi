@@ -7,6 +7,8 @@ const ZOOM_STEP = 1.2;
 const FIT_PADDING = 40;
 const EXPAND_SPAWN_DURATION = 700;
 const COLLAPSE_DURATION = 360;
+const ALGORITHM_STEP_DELAY = 400;
+const ALGORITHM_OVERLAY_PREFIX = 'algo-overlay';
 const EXPAND_SPAWN_RADIUS = 120;
 const EXPAND_SPAWN_RING_GAP = 76;
 const EXPAND_SPAWN_RING_COUNT = 7;
@@ -146,6 +148,13 @@ const GRAPH_STYLE = [
       'background-color': '#3d8b5a',
     },
   },
+  {
+    selector: 'node[nodeType = "UNKNOWN"]',
+    style: {
+      shape: 'ellipse',
+      'background-color': '#596070',
+    },
+  },
   
   
   
@@ -183,6 +192,19 @@ const GRAPH_STYLE = [
       width: 3.5,
       'line-color': '#00ffcc',
       'target-arrow-color': '#00ffcc',
+      opacity: 1,
+    },
+  },
+  {
+    selector: 'edge.algo-overlay',
+    style: {
+      width: 4,
+      'line-color': '#ffce45',
+      'target-arrow-color': '#ffce45',
+      'target-arrow-shape': 'triangle',
+      'curve-style': 'bezier',
+      'control-point-step-size': 36,
+      'z-index': 999,
       opacity: 1,
     },
   },
@@ -1060,27 +1082,6 @@ function renderFreshGraph(cy, graph) {
 }
 
 /**
- * Algoritma endpointinden gelen graph parcasini sahneye ekler ve yerlesimi yeniler.
- * @author Semih Tuncel
- */
-function mergeAlgorithmGraph(cy, graph) {
-  const normalizedGraph = normalizeGraphResponse(graph);
-  const { elements, didHitLimit } = collectGraphElementsForAdd(cy, normalizedGraph);
-
-  if (didHitLimit) {
-    console.log(`Maksimum ${MAX_VISIBLE_NODES} node limitine ulasildi`);
-  }
-
-  if (elements.length > 0) {
-    cy.add(elements);
-  }
-
-  if (normalizedGraph.nodes.length > 0 || normalizedGraph.edges.length > 0) {
-    cy.layout(COSE_LAYOUT).run();
-  }
-}
-
-/**
  * Komsu graph parcasini mevcut sahneye duplicate olmadan ekler.
  * @author Semih Tuncel
  */
@@ -1195,95 +1196,591 @@ function reportGraphLoadError(error, label) {
 }
 
 /**
- * Sonuc path ve dugumlerini highlight siniflariyla gorsellestirir.
- * @author Murat Kutku
+ * Abort durumunu normal Error nesnesiyle temsil eder; runner temiz cikis yapar.
+ * @author Semih Tuncel
  */
-function highlightPathEdges(cy, path) {
-  if (!Array.isArray(path)) {
-    return;
-  }
+function createAlgorithmAbortError() {
+  const error = new Error('Algoritma animasyonu iptal edildi.');
 
-  for (let index = 0; index < path.length - 1; index++) {
-    const current = String(path[index]);
-    const next = String(path[index + 1]);
+  error.name = 'AbortError';
+  return error;
+}
 
-    cy.elements(`edge[source="${current}"][target="${next}"], edge[source="${next}"][target="${current}"]`)
-        .addClass('highlighted');
+/**
+ * Iptal sinyalini ortak noktada kontrol eder; async animasyon akisi sade kalir.
+ * @author Semih Tuncel
+ */
+function throwIfAlgorithmAborted(signal) {
+  if (signal?.aborted) {
+    throw createAlgorithmAbortError();
   }
 }
 
 /**
- * Sol panelden gelen mock algoritma sonuclarini canvas uzerinde gorsellestirir.
- * F3-US4: Sonuc path highlight, baslangic/bitis dugumu renklendirmeleri.
- * @author Murat Kutku
+ * Adim arasi beklemeyi iptal edilebilir timer ile yapar; UI thread bloklanmaz.
+ * @author Semih Tuncel
  */
-function handleVisualAlgorithmResult(cy, result) {
+function waitForAlgorithmStep(signal) {
+  throwIfAlgorithmAborted(signal);
+
+  return new Promise((resolve, reject) => {
+    const timerId = window.setTimeout(resolve, ALGORITHM_STEP_DELAY);
+
+    signal?.addEventListener('abort', () => {
+      window.clearTimeout(timerId);
+      reject(createAlgorithmAbortError());
+    }, { once: true });
+  });
+}
+
+/**
+ * Algoritma tipinden frontend traversal modunu secer; zincirleme tipleri korunur.
+ * @author Semih Tuncel
+ */
+function getAlgorithmTraversalMode(type) {
+  if (type === 'bfs' || type === 'dynamic-chain-bfs') {
+    return 'bfs';
+  }
+
+  if (type === 'dfs' || type === 'dynamic-chain-dfs') {
+    return 'dfs';
+  }
+
+  return null;
+}
+
+/**
+ * Node id siralamasini sayisal deger varsa sayisal, yoksa string yapar.
+ * @author Semih Tuncel
+ */
+function compareNodeIds(firstNodeId, secondNodeId) {
+  const firstNumber = Number(firstNodeId);
+  const secondNumber = Number(secondNodeId);
+
+  if (Number.isFinite(firstNumber) && Number.isFinite(secondNumber)) {
+    return firstNumber - secondNumber;
+  }
+
+  return String(firstNodeId).localeCompare(String(secondNodeId));
+}
+
+/**
+ * Traversal komsularini deterministik siraya sokar; BFS/DFS farki stabil gorunur.
+ * @author Semih Tuncel
+ */
+function sortTraversalEntries(entries) {
+  return entries.sort((firstEntry, secondEntry) => {
+    const nodeCompare = compareNodeIds(firstEntry.nodeId, secondEntry.nodeId);
+
+    if (nodeCompare !== 0) {
+      return nodeCompare;
+    }
+
+    return firstEntry.edge.id.localeCompare(secondEntry.edge.id);
+  });
+}
+
+/**
+ * Node dizisini Map indeksine cevirir; id ile node aramasi sabit zamanda kalir.
+ * @author Semih Tuncel
+ */
+function createNodeMap(nodes) {
+  // Insert: O(1)  Search: O(1)  Delete: O(1)
+  const nodesById = new Map();
+
+  nodes.forEach((node) => {
+    nodesById.set(node.id, node);
+  });
+
+  return nodesById;
+}
+
+/**
+ * Komsuluk Map kaydina tek edge gecisi ekler; traversal grafinda queue/stack beslenir.
+ * @author Semih Tuncel
+ */
+function appendTraversalAdjacency(adjacencyByNodeId, sourceId, targetId, edge) {
+  const entries = adjacencyByNodeId.get(sourceId) ?? [];
+
+  entries.push({
+    nodeId: targetId,
+    edge,
+  });
+  adjacencyByNodeId.set(sourceId, entries);
+}
+
+/**
+ * Backend alt grafini adjacency map yapar; BFS/DFS ayni indeks uzerinden calisir.
+ * @author Semih Tuncel
+ */
+function createTraversalAdjacency(graph, nodesById) {
+  // Insert: O(1)  Search: O(1)  Delete: O(1)
+  const adjacencyByNodeId = new Map();
+
+  graph.nodes.forEach((node) => {
+    adjacencyByNodeId.set(node.id, []);
+  });
+
+  graph.edges.forEach((edge) => {
+    if (!nodesById.has(edge.source) || !nodesById.has(edge.target)) {
+      return;
+    }
+
+    appendTraversalAdjacency(adjacencyByNodeId, edge.source, edge.target, edge);
+
+    if (edge.source !== edge.target) {
+      appendTraversalAdjacency(adjacencyByNodeId, edge.target, edge.source, edge);
+    }
+  });
+
+  adjacencyByNodeId.forEach((entries) => {
+    sortTraversalEntries(entries);
+  });
+
+  return adjacencyByNodeId;
+}
+
+/**
+ * Backend node verisi yoksa gorsel akisi koparmayan sade node verisi uretir.
+ * @author Semih Tuncel
+ */
+function createFallbackAlgorithmNode(nodeId) {
+  return {
+    id: String(nodeId),
+    title: String(nodeId),
+    nodeType: 'UNKNOWN',
+    properties: {},
+  };
+}
+
+/**
+ * BFS adimlarini queue ile uretir; genislik oncelikli sira gorunur kalir.
+ * @author Semih Tuncel
+ */
+function createBfsTraversalSteps(startNodeId, adjacencyByNodeId) {
+  // Insert: O(1)  Search: O(1)  Delete: O(1)
+  const visitedNodeIds = new Set([startNodeId]);
+  const queue = [{
+    nodeId: startNodeId,
+    parentNodeId: null,
+    edge: null,
+  }];
+  const steps = [];
+  let queueCursor = 0;
+
+  while (queueCursor < queue.length) {
+    const currentStep = queue[queueCursor];
+
+    queueCursor += 1;
+    steps.push(currentStep);
+
+    const entries = adjacencyByNodeId.get(currentStep.nodeId) ?? [];
+
+    entries.forEach((entry) => {
+      if (visitedNodeIds.has(entry.nodeId)) {
+        return;
+      }
+
+      visitedNodeIds.add(entry.nodeId);
+      queue.push({
+        nodeId: entry.nodeId,
+        parentNodeId: currentStep.nodeId,
+        edge: entry.edge,
+      });
+    });
+  }
+
+  return steps;
+}
+
+/**
+ * DFS adimlarini stack ile uretir; derinlik oncelikli ilerleme ekranda ayrisir.
+ * @author Semih Tuncel
+ */
+function createDfsTraversalSteps(startNodeId, adjacencyByNodeId) {
+  // Insert: O(1)  Search: O(1)  Delete: O(1)
+  const visitedNodeIds = new Set();
+  const stack = [{
+    nodeId: startNodeId,
+    parentNodeId: null,
+    edge: null,
+  }];
+  const steps = [];
+
+  while (stack.length > 0) {
+    const currentStep = stack.pop();
+
+    if (visitedNodeIds.has(currentStep.nodeId)) {
+      continue;
+    }
+
+    visitedNodeIds.add(currentStep.nodeId);
+    steps.push(currentStep);
+
+    const entries = adjacencyByNodeId.get(currentStep.nodeId) ?? [];
+
+    for (let index = entries.length - 1; index >= 0; index--) {
+      const entry = entries[index];
+
+      if (visitedNodeIds.has(entry.nodeId)) {
+        continue;
+      }
+
+      stack.push({
+        nodeId: entry.nodeId,
+        parentNodeId: currentStep.nodeId,
+        edge: entry.edge,
+      });
+    }
+  }
+
+  return steps;
+}
+
+/**
+ * Secili moda gore traversal adimlarini hazirlar; graph normalizasyonu burada biter.
+ * @author Semih Tuncel
+ */
+function createTraversalSteps(graph, mode, startNodeId) {
+  const nodesById = createNodeMap(graph.nodes);
+
+  if (!nodesById.has(startNodeId)) {
+    nodesById.set(startNodeId, createFallbackAlgorithmNode(startNodeId));
+  }
+
+  const adjacencyByNodeId = createTraversalAdjacency(graph, nodesById);
+
+  if (!adjacencyByNodeId.has(startNodeId)) {
+    adjacencyByNodeId.set(startNodeId, []);
+  }
+
+  const steps = mode === 'dfs'
+      ? createDfsTraversalSteps(startNodeId, adjacencyByNodeId)
+      : createBfsTraversalSteps(startNodeId, adjacencyByNodeId);
+
+  return {
+    nodesById,
+    steps,
+  };
+}
+
+/**
+ * Mevcut viewport merkezini model koordinatina cevirir; eksik start node burada dogar.
+ * @author Semih Tuncel
+ */
+function createViewportCenterPosition(cy) {
+  const extent = cy.extent();
+
+  return {
+    x: (extent.x1 + extent.x2) / 2,
+    y: (extent.y1 + extent.y2) / 2,
+  };
+}
+
+/**
+ * Algoritma node'unu sahnede garanti eder; eksikse parent uzerinden spawn eder.
+ * @author Semih Tuncel
+ */
+async function ensureAlgorithmNodeVisible(cy, node, parentNodeId, signal) {
+  throwIfAlgorithmAborted(signal);
+
+  const existingNode = cy.getElementById(node.id);
+
+  if (!existingNode.empty()) {
+    existingNode.data(node);
+    return existingNode;
+  }
+
+  if (cy.nodes().length >= MAX_VISIBLE_NODES) {
+    console.log(`Maksimum ${MAX_VISIBLE_NODES} node limitine ulasildi`);
+    return null;
+  }
+
+  const parentNode = parentNodeId ? cy.getElementById(parentNodeId) : null;
+  const hasVisibleParent = parentNode && !parentNode.empty();
+  const spawnPosition = hasVisibleParent ? parentNode.position() : createViewportCenterPosition(cy);
+  const viewportSnapshot = createViewportSnapshot(cy);
+
+  if (!hasVisibleParent) {
+    cy.add(createNodeElement(node, spawnPosition));
+    restoreViewport(cy, viewportSnapshot);
+    return cy.getElementById(node.id);
+  }
+
+  const existingNodes = cy.nodes();
+  const restoreNodeLocks = lockNodesForAnimation(existingNodes);
+  const targetPositions = createSpawnTargetPositions(spawnPosition, existingNodes, [node.id]);
+
+  cy.add(createNodeElement(node, spawnPosition));
+  restoreViewport(cy, viewportSnapshot);
+
+  await animateSpawnedNodes(cy, [node.id], targetPositions);
+
+  if (!cy.destroyed()) {
+    restoreNodeLocks();
+    restoreViewport(cy, viewportSnapshot);
+  }
+
+  throwIfAlgorithmAborted(signal);
+  return cy.getElementById(node.id);
+}
+
+/**
+ * Verilen iki node arasindaki gorunur edge'i bulur; ters kayitli edge de kabul edilir.
+ * @author Semih Tuncel
+ */
+function findVisibleConnectingEdge(cy, fromNodeId, toNodeId) {
+  const visibleEdges = cy.edges();
+
+  for (let index = 0; index < visibleEdges.length; index++) {
+    const edge = visibleEdges[index];
+
+    if (edge.hasClass('algo-overlay')) {
+      continue;
+    }
+
+    const source = String(edge.data('source'));
+    const target = String(edge.data('target'));
+    const isForward = source === fromNodeId && target === toNodeId;
+    const isReverse = source === toNodeId && target === fromNodeId;
+
+    if (isForward || isReverse) {
+      return edge;
+    }
+  }
+
+  return null;
+}
+
+/**
+ * Algoritma edge'ini sahneye ekler; yoksa gorunur ters edge'i kullanir.
+ * @author Semih Tuncel
+ */
+function ensureAlgorithmEdgeVisible(cy, edge) {
+  if (!edge) {
+    return null;
+  }
+
+  const existingEdge = cy.getElementById(edge.id);
+
+  if (!existingEdge.empty()) {
+    existingEdge.data(edge);
+    return existingEdge;
+  }
+
+  const visibleEdge = findVisibleConnectingEdge(cy, edge.source, edge.target);
+
+  if (visibleEdge) {
+    return visibleEdge;
+  }
+
+  const sourceNode = cy.getElementById(edge.source);
+  const targetNode = cy.getElementById(edge.target);
+
+  if (sourceNode.empty() || targetNode.empty()) {
+    return null;
+  }
+
+  cy.add(createEdgeElement(edge));
+
+  return cy.getElementById(edge.id);
+}
+
+/**
+ * Eski algoritma vurgularini temizler; kalici graph node'lari sahnede kalir.
+ * @author Semih Tuncel
+ */
+function clearAlgorithmVisualState(cy) {
+  cy.elements().removeClass('highlighted algo-start algo-end');
+  cy.elements('edge.algo-overlay').remove();
+}
+
+/**
+ * Traversal adimini uygular; node spawn ve edge highlight tek yerde islenir.
+ * @author Semih Tuncel
+ */
+async function applyTraversalStep(cy, step, nodesById, startNodeId, signal) {
+  const node = nodesById.get(step.nodeId) ?? createFallbackAlgorithmNode(step.nodeId);
+  const cyNode = await ensureAlgorithmNodeVisible(cy, node, step.parentNodeId, signal);
+
+  if (!cyNode || cyNode.empty()) {
+    return;
+  }
+
+  cyNode.addClass('highlighted');
+
+  if (step.nodeId === startNodeId) {
+    cyNode.addClass('algo-start');
+  }
+
+  const cyEdge = ensureAlgorithmEdgeVisible(cy, step.edge);
+
+  if (cyEdge && !cyEdge.empty()) {
+    cyEdge.addClass('highlighted');
+  }
+}
+
+/**
+ * BFS/DFS graph sonucunu 400ms araliklarla sahneye uygular.
+ * @author Semih Tuncel
+ */
+async function runTraversalAnimation(cy, result, mode, signal) {
+  const graph = normalizeGraphResponse(result.data);
+  const startNodeId = String(result.startNode);
+  const { nodesById, steps } = createTraversalSteps(graph, mode, startNodeId);
+
+  for (const step of steps) {
+    throwIfAlgorithmAborted(signal);
+    await applyTraversalStep(cy, step, nodesById, startNodeId, signal);
+    await waitForAlgorithmStep(signal);
+  }
+}
+
+/**
+ * Path icindeki iki node'u baglayan edge kaydini alt graftan secer.
+ * @author Semih Tuncel
+ */
+function findConnectingEdge(edges, fromNodeId, toNodeId) {
+  return edges.find((edge) => {
+    const source = String(edge.source);
+    const target = String(edge.target);
+    const isForward = source === fromNodeId && target === toNodeId;
+    const isReverse = source === toNodeId && target === fromNodeId;
+
+    return isForward || isReverse;
+  }) ?? null;
+}
+
+/**
+ * Shortest path segmenti icin yalniz gerekli komsu graph parcasini getirir.
+ * @author Semih Tuncel
+ */
+async function fetchPathSegmentGraph(fromNodeId, signal) {
+  try {
+    const graph = await fetchNodeNeighbors(fromNodeId, signal);
+
+    return normalizeGraphResponse(graph);
+  } catch (error) {
+    if (error.name === 'AbortError') {
+      throw error;
+    }
+
+    reportGraphLoadError(error, 'Shortest path segment graph');
+
+    return {
+      nodes: [],
+      edges: [],
+    };
+  }
+}
+
+/**
+ * Path node'u eksikse parent komsularindan sadece gerekli node ve edge'i ekler.
+ * @author Semih Tuncel
+ */
+async function ensureShortestPathNodeVisible(cy, fromNodeId, toNodeId, signal) {
+  const existingNode = cy.getElementById(toNodeId);
+
+  if (!existingNode.empty()) {
+    return existingNode;
+  }
+
+  const segmentGraph = await fetchPathSegmentGraph(fromNodeId, signal);
+  const nodesById = createNodeMap(segmentGraph.nodes);
+  const nextNode = nodesById.get(toNodeId) ?? createFallbackAlgorithmNode(toNodeId);
+  const connectingEdge = findConnectingEdge(segmentGraph.edges, fromNodeId, toNodeId);
+  const cyNode = await ensureAlgorithmNodeVisible(cy, nextNode, fromNodeId, signal);
+
+  if (connectingEdge) {
+    ensureAlgorithmEdgeVisible(cy, connectingEdge)?.addClass('highlighted');
+  }
+
+  return cyNode;
+}
+
+/**
+ * Shortest path icin path yonunde gecici ok edge'i ekler.
+ * @author Semih Tuncel
+ */
+function addShortestPathOverlayEdge(cy, fromNodeId, toNodeId, index) {
+  const overlayEdgeId = `${ALGORITHM_OVERLAY_PREFIX}-${index}-${fromNodeId}-${toNodeId}`;
+  const existingOverlay = cy.getElementById(overlayEdgeId);
+
+  if (!existingOverlay.empty()) {
+    return existingOverlay;
+  }
+
+  cy.add({
+    data: {
+      id: overlayEdgeId,
+      source: fromNodeId,
+      target: toNodeId,
+      type: '',
+    },
+    classes: 'algo-overlay highlighted',
+  });
+
+  return cy.getElementById(overlayEdgeId);
+}
+
+/**
+ * Shortest path sonucunu segment segment spawn eder ve path yonunu overlay okla gosterir.
+ * @author Semih Tuncel
+ */
+async function runShortestPathAnimation(cy, result, signal) {
+  const path = Array.isArray(result.data?.path) ? result.data.path.map((id) => String(id)) : [];
+
+  if (path.length === 0) {
+    return;
+  }
+
+  const startNodeId = path[0];
+  const startNode = cy.getElementById(startNodeId).empty()
+      ? createFallbackAlgorithmNode(startNodeId)
+      : normalizeNode(cy.getElementById(startNodeId).data());
+  const cyStartNode = await ensureAlgorithmNodeVisible(cy, startNode, null, signal);
+
+  cyStartNode?.addClass('highlighted algo-start');
+  await waitForAlgorithmStep(signal);
+
+  for (let index = 1; index < path.length; index++) {
+    throwIfAlgorithmAborted(signal);
+
+    const fromNodeId = path[index - 1];
+    const toNodeId = path[index];
+    const cyNode = await ensureShortestPathNodeVisible(cy, fromNodeId, toNodeId, signal);
+
+    cyNode?.addClass('highlighted');
+
+    if (toNodeId === String(result.endNode)) {
+      cyNode?.addClass('algo-end');
+    }
+
+    addShortestPathOverlayEdge(cy, fromNodeId, toNodeId, index);
+    await waitForAlgorithmStep(signal);
+  }
+}
+
+/**
+ * Sol panel algoritma sonucunu iptal edilebilir tek animasyon runner ile isler.
+ * @author Semih Tuncel
+ */
+async function runAlgorithmAnimation(cy, result, signal) {
   if (!cy || !result) {
     return;
   }
 
-  cy.elements().removeClass('highlighted algo-start algo-end');
+  clearAlgorithmVisualState(cy);
 
-  const { type, data = {}, startNode, endNode } = result;
+  const traversalMode = getAlgorithmTraversalMode(result.type);
 
-  if (startNode) {
-    cy.getElementById(String(startNode)).addClass('algo-start');
-  }
-
-  if (endNode) {
-    cy.getElementById(String(endNode)).addClass('algo-end');
-  }
-
-  if (result.resultKind === 'graph') {
-    const graph = normalizeGraphResponse(data);
-
-    graph.nodes.forEach((node) => {
-      cy.getElementById(node.id).addClass('highlighted');
-    });
-
-    graph.edges.forEach((edge) => {
-      cy.getElementById(edge.id).addClass('highlighted');
-    });
-
+  if (traversalMode) {
+    await runTraversalAnimation(cy, result, traversalMode, signal);
     return;
   }
 
-  if (type === 'bfs' || type === 'dfs') {
-    if (Array.isArray(data.visitedNodes)) {
-      data.visitedNodes.forEach((id) => {
-        cy.getElementById(String(id)).addClass('highlighted');
-      });
-    }
-
-    highlightPathEdges(cy, data.path);
-    return;
-  }
-
-  if (type === 'shortest') {
-    if (Array.isArray(data.path)) {
-      data.path.forEach((id) => {
-        cy.getElementById(String(id)).addClass('highlighted');
-      });
-    }
-
-    highlightPathEdges(cy, data.path);
-    return;
-  }
-
-  if (type === 'degrees' && data.targetNode) {
-    const targetNodeId = String(data.targetNode);
-
-    cy.getElementById(targetNodeId).addClass('highlighted');
-
-    if (Array.isArray(data.neighbors)) {
-      data.neighbors.forEach((id) => {
-        const neighborId = String(id);
-
-        cy.getElementById(neighborId).addClass('highlighted');
-        cy.elements(`edge[source="${targetNodeId}"][target="${neighborId}"], edge[source="${neighborId}"][target="${targetNodeId}"]`)
-            .addClass('highlighted');
-      });
-    }
+  if (result.type === 'shortest') {
+    await runShortestPathAnimation(cy, result, signal);
   }
 }
 
@@ -1306,19 +1803,45 @@ export default function CenterCanvas({ algorithmResult, searchSelection, onNodeS
   const latestSearchRequestIdRef = useRef(null);
   const canvasGenerationRef = useRef(0);
   const expansionRecordsRef = useRef(new Map());
+  const algorithmAbortRef = useRef(null);
+  const isAlgorithmAnimatingRef = useRef(false);
 
   useEffect(() => {
     onNodeSelectRef.current = onNodeSelect;
   }, [onNodeSelect]);
 
   useEffect(() => {
-    if (cyRef.current && algorithmResult) {
-      if (algorithmResult.resultKind === 'graph') {
-        mergeAlgorithmGraph(cyRef.current, algorithmResult.data);
-      }
+    const cy = cyRef.current;
 
-      handleVisualAlgorithmResult(cyRef.current, algorithmResult);
+    if (!cy || !algorithmResult) {
+      return undefined;
     }
+
+    algorithmAbortRef.current?.abort();
+
+    const abortController = new AbortController();
+
+    algorithmAbortRef.current = abortController;
+    isAlgorithmAnimatingRef.current = true;
+
+    runAlgorithmAnimation(cy, algorithmResult, abortController.signal)
+        .catch((error) => {
+          reportGraphLoadError(error, 'Algoritma animasyonu');
+        })
+        .finally(() => {
+          if (algorithmAbortRef.current === abortController) {
+            algorithmAbortRef.current = null;
+            isAlgorithmAnimatingRef.current = false;
+          }
+
+          if (!cy.destroyed()) {
+            setCameraState(createCameraSnapshot(cy));
+          }
+        });
+
+    return () => {
+      abortController.abort();
+    };
   }, [algorithmResult]);
 
   useEffect(() => {
@@ -1332,6 +1855,7 @@ export default function CenterCanvas({ algorithmResult, searchSelection, onNodeS
     const selectedNode = normalizeNode(searchSelection.node);
     const requestId = searchSelection.requestId;
 
+    algorithmAbortRef.current?.abort();
     latestSearchRequestIdRef.current = requestId;
     canvasGenerationRef.current += 1;
     expansionRecordsRef.current.clear();
@@ -1425,7 +1949,7 @@ export default function CenterCanvas({ algorithmResult, searchSelection, onNodeS
 
       onNodeSelectRef.current?.(createSelectedNodePayload(event.target));
 
-      if (isExpandingRef.current) {
+      if (isExpandingRef.current || isAlgorithmAnimatingRef.current) {
         return;
       }
 
@@ -1541,6 +2065,7 @@ export default function CenterCanvas({ algorithmResult, searchSelection, onNodeS
     return () => {
       isMounted = false;
       abortController.abort();
+      algorithmAbortRef.current?.abort();
       cy.destroy();
       cyRef.current = null;
       seedGraphCacheRef.current = {
