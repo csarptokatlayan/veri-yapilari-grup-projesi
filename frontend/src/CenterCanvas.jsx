@@ -1141,6 +1141,17 @@ function createCameraSnapshot(cy) {
 }
 
 /**
+ * Kanvastaki gorunur dugum ve gercek edge sayisini panel state'ine hazirlar.
+ * @author Semih Tuncel
+ */
+function createGraphStats(cy) {
+  return {
+    DUGUM: cy.nodes().length,
+    EDGE: cy.edges().filter((edge) => !edge.hasClass('algo-overlay')).length,
+  };
+}
+
+/**
  * Toolbar zoom komutunu uygular; zoom merkezi kanvasin ortasi secilir.
  * @author Semih Tuncel
  */
@@ -1789,7 +1800,7 @@ async function runAlgorithmAnimation(cy, result, signal) {
  * @author Semih Tuncel
  * @author Murat Kutku (AlgorithmResult Prop Altyapisi ve Harita Uzerinde Renklendirme Entegrasyonu)
  */
-export default function CenterCanvas({ algorithmResult, searchSelection, onNodeSelect }) {
+export default function CenterCanvas({ algorithmResult, searchSelection, onNodeSelect, onGraphStatsChange }) {
   const [activeTool, setActiveTool] = useState('select');
   const [cameraState, setCameraState] = useState(INITIAL_CAMERA);
   const canvasRef = useRef(null);
@@ -1800,6 +1811,7 @@ export default function CenterCanvas({ algorithmResult, searchSelection, onNodeS
   });
   const isExpandingRef = useRef(false);
   const onNodeSelectRef = useRef(onNodeSelect);
+  const onGraphStatsChangeRef = useRef(onGraphStatsChange);
   const latestSearchRequestIdRef = useRef(null);
   const canvasGenerationRef = useRef(0);
   const expansionRecordsRef = useRef(new Map());
@@ -1809,6 +1821,10 @@ export default function CenterCanvas({ algorithmResult, searchSelection, onNodeS
   useEffect(() => {
     onNodeSelectRef.current = onNodeSelect;
   }, [onNodeSelect]);
+
+  useEffect(() => {
+    onGraphStatsChangeRef.current = onGraphStatsChange;
+  }, [onGraphStatsChange]);
 
   useEffect(() => {
     const cy = cyRef.current;
@@ -1938,6 +1954,14 @@ export default function CenterCanvas({ algorithmResult, searchSelection, onNodeS
     }
 
     /**
+     * Graph elemanlari degistikce sol paneldeki anlik sayaclari yeniler.
+     * @author Semih Tuncel
+     */
+    function handleGraphStatsChanged() {
+      onGraphStatsChangeRef.current?.(createGraphStats(cy));
+    }
+
+    /**
      * Node tiklamasinda secimi yukari yollar ve komsulari getirir.
      * @author Semih Tuncel
      */
@@ -2029,7 +2053,9 @@ export default function CenterCanvas({ algorithmResult, searchSelection, onNodeS
     }
 
     cy.on('pan zoom', handleCameraChanged);
+    cy.on('add remove', handleGraphStatsChanged);
     cy.on('tap', 'node', handleNodeTap);
+    handleGraphStatsChanged();
 
     fetchInitialGraph(abortController.signal)
         .then(handleInitialGraphLoaded)

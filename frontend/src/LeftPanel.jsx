@@ -47,10 +47,8 @@ const ALGORITHMS = [
 ];
 
 const STATS = [
-    { key: 'DUGUM' },
-    { key: 'KENAR' },
-    { key: 'BILESEN' },
-    { key: 'DERINLIK' },
+    { key: 'DUGUM', label: 'DUGUM SAYISI' },
+    { key: 'EDGE', label: 'EDGE SAYISI' },
 ];
 
 /**
@@ -360,9 +358,9 @@ export default function LeftPanel({ onAlgorithmResult, graphStats }) {
                 {STATS.map((stat) => (
                     <div key={stat.key} className="stat-block">
                         <span className="stat-val">
-                            {graphStats?.[stat.key] ?? '-'}
+                            {graphStats?.[stat.key] ?? 0}
                         </span>
-                        <span className="stat-key">{stat.key}</span>
+                        <span className="stat-key">{stat.label}</span>
                     </div>
                 ))}
             </div>

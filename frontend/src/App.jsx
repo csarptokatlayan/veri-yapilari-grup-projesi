@@ -15,6 +15,10 @@ export default function App() {
   const [algoResult, setAlgoResult] = useState(null);
   const [selectedNode, setSelectedNode] = useState(null);
   const [searchSelection, setSearchSelection] = useState(null);
+  const [graphStats, setGraphStats] = useState({
+    DUGUM: 0,
+    EDGE: 0,
+  });
   const searchRequestIdRef = useRef(0);
 
   /**
@@ -35,12 +39,13 @@ export default function App() {
     <div className="app-shell">
       <Topbar onSearchResultSelect={handleSearchResultSelect} />
 
-      <LeftPanel onAlgorithmResult={setAlgoResult} />
+      <LeftPanel onAlgorithmResult={setAlgoResult} graphStats={graphStats} />
 
       <CenterCanvas
         algorithmResult={algoResult}
         searchSelection={searchSelection}
         onNodeSelect={setSelectedNode}
+        onGraphStatsChange={setGraphStats}
       />
 
       <RightInspector selectedNode={selectedNode} />
