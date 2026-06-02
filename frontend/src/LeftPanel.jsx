@@ -58,17 +58,17 @@ const ALGORITHMS = [
 ];
 
 const STATS = [
-    { key: 'DÜĞÜM' },
+    { key: 'DUGUM' },
     { key: 'KENAR' },
-    { key: 'BİLEŞEN' },
-    { key: 'DERİNLİK' },
+    { key: 'BILESEN' },
+    { key: 'DERINLIK' },
 ];
 
 /**
  * Sol menu iskeleti, algoritma ve zincirleme sorgu panellerini ayri state'lerle yonetir.
  * @author Semih Tuncel
  * @author Murat Kutku
- * @author Arda Aşan
+ * @author Arda Asan
  */
 export default function LeftPanel({ onAlgorithmResult, graphStats }) {
     const [activeAlgo, setActiveAlgo] = useState('bfs');
@@ -81,67 +81,86 @@ export default function LeftPanel({ onAlgorithmResult, graphStats }) {
     const [edgeType, setEdgeType] = useState('');
     const [targetType, setTargetType] = useState('');
     const [depth, setDepth] = useState(1);
+    const [chainLoading, setChainLoading] = useState(false);
+    const [chainError, setChainError] = useState(null);
 
-    const handleRunAlgorithm = () => {
+    const fetchJson = async (path) => {
+        const response = await fetch(path);
+
+        if (!response.ok) {
+            throw new Error(`Backend istegi basarisiz: ${response.status}`);
+        }
+
+        return response.json();
+    };
+
+    const emitGraphResult = (type, data, startNode, endNode = null) => {
+        onAlgorithmResult?.({
+            type,
+            resultKind: 'graph',
+            data,
+            startNode,
+            endNode,
+        });
+    };
+
+    const emitPathResult = (data, startNode, endNode) => {
+        onAlgorithmResult?.({
+            type: 'shortest',
+            resultKind: 'path',
+            data,
+            startNode,
+            endNode,
+        });
+    };
+
+    const handleRunAlgorithm = async () => {
         const trimmedStartNode = algoStartNode.trim();
         const trimmedEndNode = algoEndNode.trim();
 
         setAlgorithmError(null);
 
         if (!trimmedStartNode) {
-            setAlgorithmError('Lütfen bir Başlangıç Düğümü girin!');
+            setAlgorithmError('Lutfen bir Baslangic Dugumu girin.');
             return;
         }
 
         if (activeAlgo === 'shortest' && !trimmedEndNode) {
-            setAlgorithmError('Shortest Path algoritması için Bitiş Düğümü zorunludur!');
+            setAlgorithmError('Shortest Path icin Bitis Dugumu zorunludur.');
+            return;
+        }
+
+        if (activeAlgo === 'degrees') {
+            setAlgorithmError('Degrees icin backend endpointi tanimli degil.');
             return;
         }
 
         setAlgorithmLoading(true);
 
-        setTimeout(() => {
-            let mockData = {};
+        try {
+            if (activeAlgo === 'shortest') {
+                const params = new URLSearchParams({
+                    from: trimmedStartNode,
+                    to: trimmedEndNode,
+                });
+                const data = await fetchJson(`/traversal/shortest-path?${params.toString()}`);
 
-            if (activeAlgo === 'bfs' || activeAlgo === 'dfs') {
-                mockData = {
-                    visitedNodes: [trimmedStartNode, '2', '3', '4'],
-                    path: [trimmedStartNode, '2', '3'],
-                };
-            } else if (activeAlgo === 'shortest') {
-                mockData = {
-                    source: trimmedStartNode,
-                    target: trimmedEndNode,
-                    path: [trimmedStartNode, '3', trimmedEndNode],
-                    distance: 2,
-                };
-            } else if (activeAlgo === 'degrees') {
-                mockData = {
-                    targetNode: trimmedStartNode,
-                    degreeCentrality: 4,
-                    neighbors: ['2', '5', '7', '9'],
-                };
+                emitPathResult(data, trimmedStartNode, trimmedEndNode);
+                return;
             }
 
-            onAlgorithmResult?.({
-                type: activeAlgo,
-                data: mockData,
-                startNode: trimmedStartNode,
-                endNode: activeAlgo === 'shortest' ? trimmedEndNode : null,
-            });
+            const encodedStartNode = encodeURIComponent(trimmedStartNode);
+            const data = await fetchJson(`/traversal/${activeAlgo}/${encodedStartNode}`);
 
+            emitGraphResult(activeAlgo, data, trimmedStartNode);
+        } catch (error) {
+            setAlgorithmError(error.message);
+        } finally {
             setAlgorithmLoading(false);
-        }, 800);
+        }
     };
 
-    const handleRunChainQuery = () => {
-        const trimmedChainStartNode = chainStartNode.trim();
-
-        if (!trimmedChainStartNode) {
-            alert('Lütfen bir Başlangıç Düğümü (ID) girin!');
-            return;
-        }
-
+    const createDynamicChainPath = (mode, trimmedChainStartNode) => {
         const params = new URLSearchParams({
             startId: trimmedChainStartNode,
             depth: String(depth),
@@ -155,16 +174,42 @@ export default function LeftPanel({ onAlgorithmResult, graphStats }) {
             params.set('targetType', targetType);
         }
 
-        fetch(`http://localhost:8080/traversal/dynamic-chain-bfs?${params.toString()}`)
-            .then((response) => response.json())
-            .then((data) => {
-                console.log('Gelen Veri:', data);
-                alert('Sorgu başarılı! Sonuçlar konsola yazdırıldı.');
-            })
-            .catch((error) => {
-                console.error('Bağlantı hatası:', error);
-                alert("Backend'e ulaşılamadı. Spring Boot açık mı?");
-            });
+        return `/traversal/dynamic-chain-${mode}?${params.toString()}`;
+    };
+
+    const handleRunChainQuery = async (chainType) => {
+        const trimmedChainStartNode = chainStartNode.trim();
+
+        setChainError(null);
+
+        if (!trimmedChainStartNode) {
+            setChainError('Lutfen bir Baslangic Dugumu ID degeri girin.');
+            return;
+        }
+
+        setChainLoading(true);
+
+        try {
+            let path = '';
+
+            if (chainType === 'dynamic-bfs') {
+                path = createDynamicChainPath('bfs', trimmedChainStartNode);
+            } else if (chainType === 'dynamic-dfs') {
+                path = createDynamicChainPath('dfs', trimmedChainStartNode);
+            } else if (chainType === 'friends-likes') {
+                path = `/chain/${encodeURIComponent(trimmedChainStartNode)}/friends-likes`;
+            } else if (chainType === 'friends-events') {
+                path = `/chain/${encodeURIComponent(trimmedChainStartNode)}/friends-events`;
+            }
+
+            const data = await fetchJson(path);
+
+            emitGraphResult(chainType, data, trimmedChainStartNode);
+        } catch (error) {
+            setChainError(error.message);
+        } finally {
+            setChainLoading(false);
+        }
     };
 
     return (
@@ -204,11 +249,11 @@ export default function LeftPanel({ onAlgorithmResult, graphStats }) {
                 </div>
 
                 <div className="query-row">
-                    <span className="query-label">Başlangıç Düğümü</span>
+                    <span className="query-label">Baslangic Dugumu</span>
                     <input
                         className="query-input"
                         type="text"
-                        placeholder="Örn: 1"
+                        placeholder="Orn: 1"
                         spellCheck={false}
                         value={algoStartNode}
                         onChange={(event) => setAlgoStartNode(event.target.value)}
@@ -217,11 +262,11 @@ export default function LeftPanel({ onAlgorithmResult, graphStats }) {
 
                 {activeAlgo === 'shortest' && (
                     <div className="query-row">
-                        <span className="query-label">Bitiş Düğümü</span>
+                        <span className="query-label">Bitis Dugumu</span>
                         <input
                             className="query-input"
                             type="text"
-                            placeholder="Örn: 5"
+                            placeholder="Orn: 5"
                             spellCheck={false}
                             value={algoEndNode}
                             onChange={(event) => setAlgoEndNode(event.target.value)}
@@ -241,7 +286,7 @@ export default function LeftPanel({ onAlgorithmResult, graphStats }) {
                     disabled={algorithmLoading}
                     style={{ opacity: algorithmLoading ? 0.7 : 1, cursor: algorithmLoading ? 'not-allowed' : 'pointer' }}
                 >
-                    {algorithmLoading ? 'Hesaplanıyor...' : 'Çalıştır'}
+                    {algorithmLoading ? 'Hesaplaniyor...' : 'Calistir'}
                 </button>
             </div>
 
@@ -254,11 +299,11 @@ export default function LeftPanel({ onAlgorithmResult, graphStats }) {
                 </div>
 
                 <div className="query-row">
-                    <span className="query-label">Başlangıç (Kök)</span>
+                    <span className="query-label">Baslangic (Kok)</span>
                     <input
                         className="query-input"
                         type="text"
-                        placeholder="Örn: Kullanıcı A"
+                        placeholder="Orn: 1"
                         value={chainStartNode}
                         onChange={(event) => setChainStartNode(event.target.value)}
                         spellCheck={false}
@@ -266,16 +311,16 @@ export default function LeftPanel({ onAlgorithmResult, graphStats }) {
                 </div>
 
                 <div className="query-row">
-                    <span className="query-label">İlişki (Edge) Tipi</span>
+                    <span className="query-label">Iliski (Edge) Tipi</span>
                     <select
                         className="query-select"
                         value={edgeType}
                         onChange={(event) => setEdgeType(event.target.value)}
                     >
-                        <option value="">Tüm bağlantılar</option>
-                        <option value="FOLLOWS">Takip Ediyor</option>
-                        <option value="LIKES">Beğendi</option>
-                        <option value="KNOWS">Tanıyor</option>
+                        <option value="">Tum baglantilar</option>
+                        <option value="FRIEND">Arkadas</option>
+                        <option value="LIKES">Begendi</option>
+                        <option value="ATTENDS">Katiliyor</option>
                     </select>
                 </div>
 
@@ -286,10 +331,10 @@ export default function LeftPanel({ onAlgorithmResult, graphStats }) {
                         value={targetType}
                         onChange={(event) => setTargetType(event.target.value)}
                     >
-                        <option value="">Tüm hedefler</option>
-                        <option value="USER">Kullanıcı Düğümü</option>
-                        <option value="POST">Gönderi Düğümü</option>
-                        <option value="EVENT">Etkinlik Düğümü</option>
+                        <option value="">Tum hedefler</option>
+                        <option value="USER">Kullanici Dugumu</option>
+                        <option value="POST">Gonderi Dugumu</option>
+                        <option value="EVENT">Etkinlik Dugumu</option>
                     </select>
                 </div>
 
@@ -305,8 +350,23 @@ export default function LeftPanel({ onAlgorithmResult, graphStats }) {
                     />
                 </div>
 
-                <button className="run-btn" onClick={handleRunChainQuery}>
-                    Zinciri Çalıştır
+                {chainError && (
+                    <div className="error-message">
+                        {chainError}
+                    </div>
+                )}
+
+                <button className="run-btn" onClick={() => handleRunChainQuery('dynamic-bfs')} disabled={chainLoading}>
+                    Dynamic BFS
+                </button>
+                <button className="run-btn" onClick={() => handleRunChainQuery('dynamic-dfs')} disabled={chainLoading}>
+                    Dynamic DFS
+                </button>
+                <button className="run-btn" onClick={() => handleRunChainQuery('friends-likes')} disabled={chainLoading}>
+                    Friends Likes
+                </button>
+                <button className="run-btn" onClick={() => handleRunChainQuery('friends-events')} disabled={chainLoading}>
+                    Friends Events
                 </button>
             </div>
 
@@ -314,7 +374,7 @@ export default function LeftPanel({ onAlgorithmResult, graphStats }) {
                 {STATS.map((stat) => (
                     <div key={stat.key} className="stat-block">
                         <span className="stat-val">
-                            {graphStats?.[stat.key] ?? '—'}
+                            {graphStats?.[stat.key] ?? '-'}
                         </span>
                         <span className="stat-key">{stat.key}</span>
                     </div>

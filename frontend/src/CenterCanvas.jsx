@@ -242,7 +242,7 @@ async function fetchSeedGraph(signal) {
  * @author Semih Tuncel
  */
 function fetchInitialGraph(signal) {
-  return fetchGraphEndpoint('/api/nodes/init', signal);
+  return fetchGraphEndpoint(`/nodes/${ROOT_NODE_ID}/neighbors`, signal);
 }
 
 /**
@@ -252,7 +252,7 @@ function fetchInitialGraph(signal) {
 function fetchNodeNeighbors(nodeId, signal) {
   const encodedNodeId = encodeURIComponent(nodeId);
 
-  return fetchGraphEndpoint(`/api/nodes/${encodedNodeId}/neighbors`, signal);
+  return fetchGraphEndpoint(`/nodes/${encodedNodeId}/neighbors`, signal);
 }
 
 /**
@@ -882,6 +882,27 @@ function renderInitialGraph(cy, graph) {
 }
 
 /**
+ * Algoritma endpointinden gelen graph parcasini sahneye ekler ve yerlesimi yeniler.
+ * @author Semih Tuncel
+ */
+function mergeAlgorithmGraph(cy, graph) {
+  const normalizedGraph = normalizeGraphResponse(graph);
+  const { elements, didHitLimit } = collectGraphElementsForAdd(cy, normalizedGraph);
+
+  if (didHitLimit) {
+    console.log(`Maksimum ${MAX_VISIBLE_NODES} node limitine ulasildi`);
+  }
+
+  if (elements.length > 0) {
+    cy.add(elements);
+  }
+
+  if (normalizedGraph.nodes.length > 0 || normalizedGraph.edges.length > 0) {
+    cy.layout(COSE_LAYOUT).run();
+  }
+}
+
+/**
  * Komsu graph parcasini mevcut sahneye duplicate olmadan ekler.
  * @author Semih Tuncel
  */
@@ -992,7 +1013,7 @@ function reportGraphLoadError(error, label) {
 
 /**
  * Sonuc path ve dugumlerini highlight siniflariyla gorsellestirir.
- * @author Semih Tuncel
+ * @author Murat Kutku
  */
 function highlightPathEdges(cy, path) {
   if (!Array.isArray(path)) {
@@ -1028,6 +1049,20 @@ function handleVisualAlgorithmResult(cy, result) {
 
   if (endNode) {
     cy.getElementById(String(endNode)).addClass('algo-end');
+  }
+
+  if (result.resultKind === 'graph') {
+    const graph = normalizeGraphResponse(data);
+
+    graph.nodes.forEach((node) => {
+      cy.getElementById(node.id).addClass('highlighted');
+    });
+
+    graph.edges.forEach((edge) => {
+      cy.getElementById(edge.id).addClass('highlighted');
+    });
+
+    return;
   }
 
   if (type === 'bfs' || type === 'dfs') {
@@ -1092,6 +1127,10 @@ export default function CenterCanvas({ algorithmResult, onNodeSelect }) {
 
   useEffect(() => {
     if (cyRef.current && algorithmResult) {
+      if (algorithmResult.resultKind === 'graph') {
+        mergeAlgorithmGraph(cyRef.current, algorithmResult.data);
+      }
+
       handleVisualAlgorithmResult(cyRef.current, algorithmResult);
     }
   }, [algorithmResult]);
