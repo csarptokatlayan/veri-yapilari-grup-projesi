@@ -98,3 +98,34 @@ Arayüzden gelen parametrelere göre kısıtlanmış (Derinlik, İlişki Tipi, H
 * **Örnek İstek:** `http://localhost:8080/nodes/search?q=Ah`
 * **Çıktı:** `[{ "id": 2, "title": "Ahmet Efe", "type": "USER" }]` (Liste)
 * **Açıklama:** Trie veri yapısı ile harf bazlı (prefix) hızlı arama yapar, eşleşen düğümlerin özet bilgilerini döndürür.
+
+
+
+## 7. Veri Filtreleme (Filters)
+
+Grafik üzerindeki verileri tipine, özelliklerine veya ilişkilerine göre süzerek getiren API uçlarıdır. Aranan kriter bulunamazsa hata fırlatmaz, boş liste döner.
+
+* **Düğüm Tipine Göre Filtreleme**
+    * **Method:** `GET`
+    * **Path:** `/filter/node/type/{nodeType}`
+    * **Örnek İstek:** `http://localhost:8080/filter/node/type/USER`
+    * **Çıktı:** `{ "nodes": [...] }` objesi
+    * **Açıklama:** Graf içindeki belirtilen tipteki (USER, POST, EVENT vb.) tüm düğümleri listeler.
+    * **Zaman Karmaşıklığı:** $O(V)$ - Tüm düğümler (Vertices) taranır.
+
+* **Özelliğe (Property) Göre Filtreleme**
+    * **Method:** `GET`
+    * **Path:** `/filter/node/property`
+    * **Parametreler:** `key` (Özellik adı), `value` (Değer)
+    * **Örnek İstek:** `http://localhost:8080/filter/node/property?key=age&value=21`
+    * **Çıktı:** `{ "nodes": [...] }` objesi
+    * **Açıklama:** Düğümlerin Hash Table yapısında tutulan `properties` verilerine göre filtreleme yapar.
+    * **Zaman Karmaşıklığı:** $O(V)$ - Düğüm sayısı kadar gezinip Hash Table üzerinde sabit $O(1)$ sürede arama yapılır.
+
+* **İlişki (Edge) Tipine Göre Filtreleme**
+    * **Method:** `GET`
+    * **Path:** `/filter/edge/type/{edgeType}`
+    * **Örnek İstek:** `http://localhost:8080/filter/edge/type/FRIEND`
+    * **Çıktı:** `{ "edges": [...] }` objesi
+    * **Açıklama:** Graf üzerindeki tüm bağlantıları tarar ve sadece istenilen türdeki ilişkileri döndürür.
+    * **Zaman Karmaşıklığı:** $O(V+E)$ - Tüm düğümlerin kenar (Edge) listeleri taranır.
