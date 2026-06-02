@@ -6,6 +6,7 @@ const MAX_VISIBLE_NODES = 500;
 const ZOOM_STEP = 1.2;
 const FIT_PADDING = 40;
 const EXPAND_SPAWN_DURATION = 700;
+const COLLAPSE_DURATION = 360;
 const EXPAND_SPAWN_RADIUS = 120;
 const EXPAND_SPAWN_RING_GAP = 76;
 const EXPAND_SPAWN_RING_COUNT = 7;
@@ -646,21 +647,25 @@ function isNodeUsedByOtherExpansion(cy, expansionRecords, expandedNodeId, nodeId
 }
 
 /**
- * Daha once acilmis bir dugumun getirdigi edge ve node'lari geri kaldirir.
+ * Daha once acilmis bir dugumun getirdigi edge ve node'lari animasyonla geri kaldirir.
  * @author Semih Tuncel
  */
 function collapseExpandedNode(cy, expansionRecords, expandedNodeId) {
   const record = expansionRecords.get(expandedNodeId);
 
   if (!record) {
-    return;
+    return Promise.resolve();
   }
+
+  const parentNode = cy.getElementById(expandedNodeId);
+  const collapsePosition = parentNode.empty() ? null : parentNode.position();
+  const removableEdges = [];
+  const removableNodes = [];
 
   record.edgeIds.forEach((edgeId) => {
     const edge = cy.getElementById(edgeId);
-
     if (!edge.empty()) {
-      edge.remove();
+      removableEdges.push(edge);
     }
   });
 
@@ -671,10 +676,50 @@ function collapseExpandedNode(cy, expansionRecords, expandedNodeId) {
       return;
     }
 
-    node.remove();
+    removableNodes.push(node);
   });
 
   expansionRecords.delete(expandedNodeId);
+
+  const fadeAnimations = removableEdges.map((edge) => (
+      edge.animation({
+        style: { opacity: 0 },
+        duration: COLLAPSE_DURATION,
+        easing: 'ease-out-cubic',
+      }).play().promise()
+  ));
+
+  const nodeAnimations = removableNodes.map((node) => {
+    const animationConfig = {
+      style: { opacity: 0 },
+      duration: COLLAPSE_DURATION,
+      easing: 'ease-in-cubic',
+    };
+
+    if (collapsePosition) {
+      animationConfig.position = collapsePosition;
+    }
+
+    return node.animation(animationConfig).play().promise();
+  });
+
+  return Promise.all([...fadeAnimations, ...nodeAnimations]).then(() => {
+    if (cy.destroyed()) {
+      return;
+    }
+
+    removableEdges.forEach((edge) => {
+      if (!edge.empty()) {
+        edge.remove();
+      }
+    });
+
+    removableNodes.forEach((node) => {
+      if (!node.empty()) {
+        node.remove();
+      }
+    });
+  });
 }
 
 /**
@@ -1337,8 +1382,15 @@ export default function CenterCanvas({ algorithmResult, searchSelection, onNodeS
       }
 
       if (expansionRecords.has(nodeId)) {
-        collapseExpandedNode(cy, expansionRecords, nodeId);
-        setCameraState(createCameraSnapshot(cy));
+        isExpandingRef.current = true;
+        collapseExpandedNode(cy, expansionRecords, nodeId)
+            .finally(() => {
+              isExpandingRef.current = false;
+
+              if (!cy.destroyed()) {
+                setCameraState(createCameraSnapshot(cy));
+              }
+            });
         return;
       }
 
