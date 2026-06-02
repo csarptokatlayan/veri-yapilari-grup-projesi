@@ -12,20 +12,25 @@ import RightInspector from './RightInspector';
  * @author Murat Kutku (AlgorithmResult Ebeveyn State Altyapisi ve Bileşenler Arası Veri Köprüsü)
  */
 export default function App() {
-    // Sol panelden cikan mock sonucu tutup orta kanvasa (CenterCanvas) aktaracak olan ortak state
-    const [algoResult, setAlgoResult] = useState(null);
+ 
+  const [algoResult, setAlgoResult] = useState(null);
+  const [selectedNode, setSelectedNode] = useState(null);
 
-    return (
-        <div className="app-shell">
-            <Topbar />
-
-            {/* onAlgorithmResult prop'una state degistirme fonksiyonumuzu bagliyoruz */}
-            <LeftPanel onAlgorithmResult={setAlgoResult} />
-
-            {/* algorithmResult prop'una guncel state verisini pasliyoruz */}
-            <CenterCanvas algorithmResult={algoResult} />
-
-            <RightInspector />
-        </div>
-    );
+  return (
+    <div className="app-shell">
+      <Topbar />
+      
+      {/* Sol panel, algoritma sonucunu App'e bildirir */}
+      <LeftPanel onAlgorithmResult={setAlgoResult} />
+      
+      {/* Orta kanvas hem algoritma sonucunu alır, hem de tıklanan node'u App'e bildirir */}
+      <CenterCanvas 
+        algorithmResult={algoResult} 
+        onNodeSelect={setSelectedNode} 
+      />
+      
+      {/* Sağ panel, App'teki seçili node bilgisini alır ve ekrana basar */}
+      <RightInspector selectedNode={selectedNode} />
+    </div>
+  );
 }
