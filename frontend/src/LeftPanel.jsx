@@ -67,6 +67,7 @@ export default function LeftPanel({ onAlgorithmResult, graphStats }) {
     const [algorithmError, setAlgorithmError] = useState(null);
 
     const [chainMode, setChainMode] = useState('bfs');
+    const [chainStartNode, setChainStartNode] = useState('');
     const [edgeType, setEdgeType] = useState('');
     const [targetType, setTargetType] = useState('');
     const [depth, setDepth] = useState(1);
@@ -162,7 +163,7 @@ export default function LeftPanel({ onAlgorithmResult, graphStats }) {
     };
 
     const handleRunChainQuery = async () => {
-        const trimmedChainStartNode = startNode.trim();
+        const trimmedChainStartNode = chainStartNode.trim();
 
         setChainError(null);
 
@@ -270,6 +271,18 @@ export default function LeftPanel({ onAlgorithmResult, graphStats }) {
                         <path d="M2 2.5h2.5v2H7M7 4.5v2H4.5M4.5 6.5v2H9" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
                     Zincirleme Sorgular
+                </div>
+
+                <div className="query-row">
+                    <span className="query-label">Baslangic Dugumu</span>
+                    <input
+                        className="query-input"
+                        type="text"
+                        placeholder="Orn: 1"
+                        spellCheck={false}
+                        value={chainStartNode}
+                        onChange={(event) => setChainStartNode(event.target.value)}
+                    />
                 </div>
 
                 <div className="query-row">
