@@ -139,6 +139,9 @@ const GRAPH_STYLE = [
       opacity: 0.72,
     },
   },
+  
+  
+  // F3-US4: Algoritma Sonucu Vurgulama Stilleri (Murat Kutku Entegrasyonu)
   {
     selector: 'node.highlighted',
     style: {
@@ -1006,8 +1009,9 @@ function highlightPathEdges(cy, path) {
 }
 
 /**
- * Sol panelden gelen algoritma sonucunu canvas uzerinde gorsellestirir.
- * @author Semih Tuncel
+ * Sol panelden gelen mock algoritma sonuclarini canvas uzerinde gorsellestirir.
+ * F3-US4: Sonuc path highlight, baslangic/bitis dugumu renklendirmeleri.
+ * @author Murat Kutku
  */
 function handleVisualAlgorithmResult(cy, result) {
   if (!cy || !result) {
@@ -1068,6 +1072,7 @@ function handleVisualAlgorithmResult(cy, result) {
 /**
  * Orta kanvas alaninin UI iskeleti, backend graph ve algoritma highlight akisini yonetir.
  * @author Semih Tuncel
+ * @author Murat Kutku (AlgorithmResult Prop Altyapisi ve Harita Uzerinde Renklendirme Entegrasyonu)
  */
 export default function CenterCanvas({ algorithmResult, onNodeSelect }) {
   const [activeTool, setActiveTool] = useState('select');
@@ -1210,6 +1215,11 @@ export default function CenterCanvas({ algorithmResult, onNodeSelect }) {
     };
   }, []);
 
+  /**
+ * F3-US4: LeftPanel'den yeni bir algoritma sonucu tetiklendiginde haritayi guncelle
+ * @author Murat Kutku 
+ */
+  
   useEffect(() => {
     applyCanvasMode(cyRef.current, activeTool);
   }, [activeTool]);

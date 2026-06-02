@@ -170,7 +170,8 @@ html, body, #root {
   flex-direction: column;
   background: var(--bg-panel);
   border-right: 1px solid var(--border);
-  overflow: hidden;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .panel-section {
@@ -296,6 +297,14 @@ html, body, #root {
 
 .query-input::placeholder { color: var(--text-muted); }
 .query-input:focus { border-color: var(--border-focus); }
+
+.error-message {
+  margin: 2px 12px 6px;
+  color: #ff6b6b;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  line-height: 1.4;
+}
 
 .run-btn {
   margin: 4px 12px 10px;
