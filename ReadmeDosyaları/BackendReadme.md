@@ -79,21 +79,7 @@ Arayüzden gelen parametrelere göre kısıtlanmış (Derinlik, İlişki Tipi, H
 
 ```
 
-
-
-
-
 ## 5. Düğüm (Node) ve Arayüz İşlemleri
-
-Frontend (React/Cytoscape) tarafındaki tıklama, sayfa yükleme ve Lazy Loading (Tembel Yükleme) aksiyonlarını yönetir.
-
-* **Sistem Başlangıç Düğümü (Init)**
-* **Method:** `GET`
-* **Path:** `/nodes/init/{id}`
-* **Örnek İstek:** `http://localhost:8080/nodes/init/2`
-* **Çıktı:** `{ nodes, edges }` objesi (Map)
-* **Açıklama:** Istenilen düğümü ve komşularını getirir.*
-
 
 * **Komşuları Getir (Tıklama / Expand)**
 * **Method:** `GET`
