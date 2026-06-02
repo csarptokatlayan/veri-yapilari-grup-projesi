@@ -1,6 +1,5 @@
 package com.grup15.socialnetwork.controller;
 
-import com.grup15.socialnetwork.datastructures.list.CustomLinkedList;
 import com.grup15.socialnetwork.dto.ShortestPathResponse;
 import com.grup15.socialnetwork.model.Node;
 import com.grup15.socialnetwork.service.TraversalService;
