@@ -577,6 +577,7 @@ function collectGraphElementsForAdd(cy, graph, spawnPosition) {
   const visibleNodeIds = createVisibleNodeIdSet(cy);
   const elements = [];
   const newNodeIds = [];
+  const newEdgeIds = [];
   let didHitLimit = false;
 
   graph.nodes.forEach((node) => {
@@ -604,14 +605,76 @@ function collectGraphElementsForAdd(cy, graph, spawnPosition) {
         && visibleNodeIds.has(edge.target)
     ) {
       elements.push(createEdgeElement(edge));
+      newEdgeIds.push(edge.id);
     }
   });
 
   return {
     elements,
     newNodeIds,
+    newEdgeIds,
     didHitLimit,
   };
+}
+
+/**
+ * Acik kalan diger expand kayitlari verilen node'a hala ihtiyac duyuyor mu kontrol eder.
+ * @author Semih Tuncel
+ */
+function isNodeUsedByOtherExpansion(cy, expansionRecords, expandedNodeId, nodeId) {
+  for (const [recordNodeId, record] of expansionRecords.entries()) {
+    if (recordNodeId === expandedNodeId) {
+      continue;
+    }
+
+    if (record.nodeIds.includes(nodeId)) {
+      return true;
+    }
+
+    const hasLinkedEdge = record.edgeIds.some((edgeId) => {
+      const edge = cy.getElementById(edgeId);
+
+      return !edge.empty() && (edge.data('source') === nodeId || edge.data('target') === nodeId);
+    });
+
+    if (hasLinkedEdge) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+/**
+ * Daha once acilmis bir dugumun getirdigi edge ve node'lari geri kaldirir.
+ * @author Semih Tuncel
+ */
+function collapseExpandedNode(cy, expansionRecords, expandedNodeId) {
+  const record = expansionRecords.get(expandedNodeId);
+
+  if (!record) {
+    return;
+  }
+
+  record.edgeIds.forEach((edgeId) => {
+    const edge = cy.getElementById(edgeId);
+
+    if (!edge.empty()) {
+      edge.remove();
+    }
+  });
+
+  record.nodeIds.forEach((nodeId) => {
+    const node = cy.getElementById(nodeId);
+
+    if (node.empty() || isNodeUsedByOtherExpansion(cy, expansionRecords, expandedNodeId, nodeId)) {
+      return;
+    }
+
+    node.remove();
+  });
+
+  expansionRecords.delete(expandedNodeId);
 }
 
 /**
@@ -933,14 +996,18 @@ function mergeAlgorithmGraph(cy, graph) {
  * @author Semih Tuncel
  */
 function mergeExpandedGraph(cy, graph, spawnPosition) {
-  const { elements, newNodeIds, didHitLimit } = collectGraphElementsForAdd(cy, graph, spawnPosition);
+  const { elements, newNodeIds, newEdgeIds, didHitLimit } = collectGraphElementsForAdd(cy, graph, spawnPosition);
+  const expansionRecord = {
+    nodeIds: newNodeIds,
+    edgeIds: newEdgeIds,
+  };
 
   if (didHitLimit) {
     console.log(`Maksimum ${MAX_VISIBLE_NODES} node limitine ulasildi`);
   }
 
   if (elements.length === 0) {
-    return Promise.resolve();
+    return Promise.resolve(expansionRecord);
   }
 
   const viewportSnapshot = createViewportSnapshot(cy);
@@ -948,7 +1015,7 @@ function mergeExpandedGraph(cy, graph, spawnPosition) {
   if (newNodeIds.length === 0) {
     cy.add(elements);
     restoreViewport(cy, viewportSnapshot);
-    return Promise.resolve();
+    return Promise.resolve(expansionRecord);
   }
 
   const existingNodes = cy.nodes();
@@ -960,11 +1027,12 @@ function mergeExpandedGraph(cy, graph, spawnPosition) {
 
   return animateSpawnedNodes(cy, newNodeIds, spawnTargetPositions).then(() => {
     if (cy.destroyed()) {
-      return;
+      return expansionRecord;
     }
 
     restoreNodeLocks();
     restoreViewport(cy, viewportSnapshot);
+    return expansionRecord;
   });
 }
 
@@ -1148,6 +1216,7 @@ export default function CenterCanvas({ algorithmResult, searchSelection, onNodeS
   const onNodeSelectRef = useRef(onNodeSelect);
   const latestSearchRequestIdRef = useRef(null);
   const canvasGenerationRef = useRef(0);
+  const expansionRecordsRef = useRef(new Map());
 
   useEffect(() => {
     onNodeSelectRef.current = onNodeSelect;
@@ -1176,6 +1245,7 @@ export default function CenterCanvas({ algorithmResult, searchSelection, onNodeS
 
     latestSearchRequestIdRef.current = requestId;
     canvasGenerationRef.current += 1;
+    expansionRecordsRef.current.clear();
 
     const searchGeneration = canvasGenerationRef.current;
 
@@ -1258,10 +1328,17 @@ export default function CenterCanvas({ algorithmResult, searchSelection, onNodeS
       const nodeId = event.target.id();
       const spawnPosition = event.target.position();
       const expandGeneration = canvasGenerationRef.current;
+      const expansionRecords = expansionRecordsRef.current;
 
       onNodeSelectRef.current?.(createSelectedNodePayload(event.target));
 
       if (isExpandingRef.current) {
+        return;
+      }
+
+      if (expansionRecords.has(nodeId)) {
+        collapseExpandedNode(cy, expansionRecords, nodeId);
+        setCameraState(createCameraSnapshot(cy));
         return;
       }
 
@@ -1292,6 +1369,19 @@ export default function CenterCanvas({ algorithmResult, searchSelection, onNodeS
                 .catch((seedError) => {
                   reportGraphLoadError(seedError, 'Seed fallback graph');
                 });
+          })
+          .then((expansionRecord) => {
+            if (
+                !isMounted
+                || cy.destroyed()
+                || canvasGenerationRef.current !== expandGeneration
+                || !expansionRecord
+                || (expansionRecord.nodeIds.length === 0 && expansionRecord.edgeIds.length === 0)
+            ) {
+              return;
+            }
+
+            expansionRecords.set(nodeId, expansionRecord);
           })
           .finally(() => {
             isExpandingRef.current = false;
