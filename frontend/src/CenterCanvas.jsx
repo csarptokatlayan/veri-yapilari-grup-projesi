@@ -78,6 +78,29 @@ const FitIcon = () => (
 // Insert: O(1)  Search: O(1)  Delete: O(1)
 const GRAPH_STYLE = [
   {
+    selector: 'edge',
+    style: {
+      label: 'data(type)',
+      width: 1.2,
+      color: '#6b7385',
+      'font-size': 7,
+      'font-family': 'Courier New, monospace',
+      'line-color': '#3f4558',
+      'curve-style': 'bezier',
+      'text-rotation': 'autorotate',
+      'text-margin-y': -8,
+      opacity: 0.72,
+      'target-arrow-shape': 'none', // Bütün oklari varsayılan olarak kaldırdık (Düz çizgi)
+    },
+  },
+  {
+    selector: 'edge[type = "LIKES"], edge[type = "POSTED"], edge[type = "ATTENDS"]',
+    style: {
+      'target-arrow-color': '#3f4558',
+      'target-arrow-shape': 'triangle', // Sadece bu aksiyonlara ok ekledik
+    }
+  },
+  {
     selector: 'node',
     style: {
       label: 'data(title)',
@@ -123,25 +146,9 @@ const GRAPH_STYLE = [
       'background-color': '#3d8b5a',
     },
   },
-  {
-    selector: 'edge',
-    style: {
-      label: 'data(type)',
-      width: 1.2,
-      color: '#6b7385',
-      'font-size': 7,
-      'font-family': 'Courier New, monospace',
-      'line-color': '#3f4558',
-      'target-arrow-color': '#3f4558',
-      'target-arrow-shape': 'triangle',
-      'curve-style': 'bezier',
-      'text-rotation': 'autorotate',
-      'text-margin-y': -8,
-      opacity: 0.72,
-    },
-  },
-  
-  
+
+
+
   // F3-US4: Algoritma Sonucu Vurgulama Stilleri (Murat Kutku Entegrasyonu)
   {
     selector: 'node.highlighted',
@@ -1544,10 +1551,10 @@ export default function CenterCanvas({ algorithmResult, searchSelection, onNodeS
   }, []);
 
   /**
- * F3-US4: LeftPanel'den yeni bir algoritma sonucu tetiklendiginde haritayi guncelle
- * @author Murat Kutku 
- */
-  
+   * F3-US4: LeftPanel'den yeni bir algoritma sonucu tetiklendiginde haritayi guncelle
+   * @author Murat Kutku
+   */
+
   useEffect(() => {
     applyCanvasMode(cyRef.current, activeTool);
   }, [activeTool]);
