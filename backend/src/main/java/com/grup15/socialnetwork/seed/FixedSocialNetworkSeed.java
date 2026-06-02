@@ -116,7 +116,7 @@ public final class FixedSocialNetworkSeed {
                 int sourceId = userIdAtIndex(userOffset);
                 int contentIndex = userOffset * 3 + likeOffset * 17;
                 int targetId = contentIdAtIndex(contentIndex);
-                visitor.visit(sourceId, targetId, EdgeType.LIKES, true);
+                visitor.visit(sourceId, targetId, EdgeType.LIKES, false);
             }
         }
 
@@ -125,7 +125,7 @@ public final class FixedSocialNetworkSeed {
                 int sourceId = userIdAtIndex(userOffset);
                 int eventIndex = userOffset * 2 + attendOffset * 7;
                 int targetId = eventIdAtIndex(eventIndex);
-                visitor.visit(sourceId, targetId, EdgeType.ATTENDS, true);
+                visitor.visit(sourceId, targetId, EdgeType.ATTENDS, false);
             }
         }
     }
