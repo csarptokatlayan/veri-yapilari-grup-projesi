@@ -24,54 +24,54 @@ const TOOLS = [
     id: 'select',
     title: 'Sec',
     icon: (
-      <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-        <path d="M2 2l3.5 9.5 2-4 4.5 4.5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
-      </svg>
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+          <path d="M2 2l3.5 9.5 2-4 4.5 4.5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
     ),
   },
   {
     id: 'pan',
     title: 'Kaydir',
     icon: (
-      <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-        <path d="M7 1v12M1 7h12M3.5 3.5l7 7M10.5 3.5l-7 7" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
-      </svg>
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+          <path d="M7 1v12M1 7h12M3.5 3.5l7 7M10.5 3.5l-7 7" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
+        </svg>
     ),
   },
   {
     id: 'zoomin',
     title: 'Yakinlastir',
     icon: (
-      <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-        <circle cx="6" cy="6" r="4" stroke="currentColor" strokeWidth="1.2" />
-        <line x1="4" y1="6" x2="8" y2="6" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
-        <line x1="6" y1="4" x2="6" y2="8" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
-        <line x1="9.3" y1="9.3" x2="12.3" y2="12.3" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
-      </svg>
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+          <circle cx="6" cy="6" r="4" stroke="currentColor" strokeWidth="1.2" />
+          <line x1="4" y1="6" x2="8" y2="6" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
+          <line x1="6" y1="4" x2="6" y2="8" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
+          <line x1="9.3" y1="9.3" x2="12.3" y2="12.3" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+        </svg>
     ),
   },
   {
     id: 'zoomout',
     title: 'Uzaklastir',
     icon: (
-      <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-        <circle cx="6" cy="6" r="4" stroke="currentColor" strokeWidth="1.2" />
-        <line x1="4" y1="6" x2="8" y2="6" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
-        <line x1="9.3" y1="9.3" x2="12.3" y2="12.3" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
-      </svg>
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+          <circle cx="6" cy="6" r="4" stroke="currentColor" strokeWidth="1.2" />
+          <line x1="4" y1="6" x2="8" y2="6" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
+          <line x1="9.3" y1="9.3" x2="12.3" y2="12.3" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+        </svg>
     ),
   },
 ];
 
 /**
- * Ekrana sigdir ikonunu cizer; toolbar icin statik SVG yeterlidir.
+ * Ekrana sigdir ikonunu cizer; toolbar icin statik SVG secildi.
  * @author Semih Tuncel
  */
 const FitIcon = () => (
-  <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-    <rect x="2" y="2" width="10" height="10" rx="1" stroke="currentColor" strokeWidth="1.2" />
-    <path d="M5 5h4v4" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round" strokeLinejoin="round" />
-  </svg>
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+      <rect x="2" y="2" width="10" height="10" rx="1" stroke="currentColor" strokeWidth="1.2" />
+      <path d="M5 5h4v4" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
 );
 
 // Insert: O(1)  Search: O(1)  Delete: O(1)
@@ -139,6 +139,42 @@ const GRAPH_STYLE = [
       opacity: 0.72,
     },
   },
+  {
+    selector: 'node.highlighted',
+    style: {
+      'border-width': 3,
+      'border-color': '#00ffcc',
+      width: 42,
+      height: 42,
+      'font-size': 11,
+      color: '#fff',
+    },
+  },
+  {
+    selector: 'node.algo-start',
+    style: {
+      'border-width': 4,
+      'border-color': '#3df253',
+      'background-color': '#1b5e20',
+    },
+  },
+  {
+    selector: 'node.algo-end',
+    style: {
+      'border-width': 4,
+      'border-color': '#f44336',
+      'background-color': '#b71c1c',
+    },
+  },
+  {
+    selector: 'edge.highlighted',
+    style: {
+      width: 3.5,
+      'line-color': '#00ffcc',
+      'target-arrow-color': '#00ffcc',
+      opacity: 1,
+    },
+  },
 ];
 
 // Insert: O(1)  Search: O(1)  Delete: O(1)
@@ -171,7 +207,7 @@ function createCytoscapeInstance(container) {
 }
 
 /**
- * Graph endpoint cevabini okur; ortak fetch akisi hata mesajini sade tutar.
+ * Graph endpoint cevabini okur; backend graph sozlesmesini tek yerde toplar.
  * @author Semih Tuncel
  */
 async function fetchGraphEndpoint(path, signal) {
@@ -453,16 +489,16 @@ function loadSeedGraphIndex(seedGraphCache, signal) {
 
   if (!seedGraphCache.promise) {
     seedGraphCache.promise = fetchSeedGraph(signal)
-      .then((graph) => {
-        const graphIndex = createGraphIndex(graph);
+        .then((graph) => {
+          const graphIndex = createGraphIndex(graph);
 
-        seedGraphCache.graphIndex = graphIndex;
-        return graphIndex;
-      })
-      .catch((error) => {
-        seedGraphCache.promise = null;
-        throw error;
-      });
+          seedGraphCache.graphIndex = graphIndex;
+          return graphIndex;
+        })
+        .catch((error) => {
+          seedGraphCache.promise = null;
+          throw error;
+        });
   }
 
   return seedGraphCache.promise;
@@ -531,7 +567,7 @@ function createVisibleNodeIdSet(cy) {
 }
 
 /**
- * Backend graph parcasindan yalnizca yeni elementleri secer.
+ * Graph parcasindan yalnizca yeni elementleri secer.
  * @author Semih Tuncel
  */
 function collectGraphElementsForAdd(cy, graph, spawnPosition) {
@@ -560,9 +596,9 @@ function collectGraphElementsForAdd(cy, graph, spawnPosition) {
 
   graph.edges.forEach((edge) => {
     if (
-      cy.getElementById(edge.id).empty()
-      && visibleNodeIds.has(edge.source)
-      && visibleNodeIds.has(edge.target)
+        cy.getElementById(edge.id).empty()
+        && visibleNodeIds.has(edge.source)
+        && visibleNodeIds.has(edge.target)
     ) {
       elements.push(createEdgeElement(edge));
     }
@@ -603,7 +639,7 @@ function restoreViewport(cy, viewportSnapshot) {
 }
 
 /**
- * Spatial memory icin eski node'lari animasyon boyunca sabitler ve onceki lock durumlarini saklar.
+ * Spatial memory icin eski node'lari animasyon boyunca sabitler.
  * @author Semih Tuncel
  */
 function lockNodesForAnimation(nodes) {
@@ -630,7 +666,7 @@ function lockNodesForAnimation(nodes) {
 }
 
 /**
- * Iki pozisyon arasindaki uzakligin karesini hesaplar; kok alma maliyetine gerek yoktur.
+ * Iki pozisyon arasindaki uzakligin karesini hesaplar; kok alma maliyeti gerekmez.
  * @author Semih Tuncel
  */
 function getDistanceSquared(firstPosition, secondPosition) {
@@ -641,7 +677,7 @@ function getDistanceSquared(firstPosition, secondPosition) {
 }
 
 /**
- * Parent merkezinden verilen aci ve yaricapla yeni bir hedef pozisyon uretir.
+ * Parent merkezinden verilen aci ve yaricapla yeni hedef pozisyon uretir.
  * @author Semih Tuncel
  */
 function createRadialPosition(parentPosition, angle, radius) {
@@ -652,7 +688,7 @@ function createRadialPosition(parentPosition, angle, radius) {
 }
 
 /**
- * Bosluk ararken parent'in kendisini ve ayni noktadaki node'lari engel listesinden ayirir.
+ * Bosluk ararken parent noktasini engel listesinden ayirir.
  * @author Semih Tuncel
  */
 function collectBlockingNodePositions(nodes, parentPosition) {
@@ -684,8 +720,8 @@ function findOpenSpawnAngle(parentPosition, blockingPositions) {
   for (let angle = 0; angle < Math.PI * 2; angle += Math.PI / 12) {
     const probePosition = createRadialPosition(parentPosition, angle, EXPAND_SPAWN_PROBE_DISTANCE);
     const closestDistance = blockingPositions.reduce(
-      (closest, position) => Math.min(closest, getDistanceSquared(probePosition, position)),
-      Infinity,
+        (closest, position) => Math.min(closest, getDistanceSquared(probePosition, position)),
+        Infinity,
     );
 
     if (closestDistance > bestScore) {
@@ -736,18 +772,18 @@ function createSpawnSlotCandidates(parentPosition, baseAngle) {
 }
 
 /**
- * Aday noktanin mevcut ve bu expand icinde secilen hedeflere ne kadar yakin oldugunu olcer.
+ * Aday noktanin mevcut hedeflere en yakin mesafesini olcer.
  * @author Semih Tuncel
  */
 function getClosestDistanceSquared(candidatePosition, occupiedPositions) {
   return occupiedPositions.reduce(
-    (closest, position) => Math.min(closest, getDistanceSquared(candidatePosition, position)),
-    Infinity,
+      (closest, position) => Math.min(closest, getDistanceSquared(candidatePosition, position)),
+      Infinity,
   );
 }
 
 /**
- * Adaylar arasindan carpisma yapmayan en yakin slotu, yoksa en genis boslugu secer.
+ * Adaylar arasindan carpisma yapmayan en yakin slotu secer.
  * @author Semih Tuncel
  */
 function findAvailableSpawnSlot(candidates, occupiedPositions) {
@@ -772,7 +808,7 @@ function findAvailableSpawnSlot(candidates, occupiedPositions) {
 }
 
 /**
- * Yeni node id'leri icin parent cevresindeki gercek bos slotlari secer.
+ * Yeni node id'leri icin parent cevresindeki bos slotlari secer.
  * @author Semih Tuncel
  */
 function createSpawnTargetPositions(parentPosition, existingNodes, newNodeIds) {
@@ -797,7 +833,7 @@ function createSpawnTargetPositions(parentPosition, existingNodes, newNodeIds) {
 }
 
 /**
- * Yeni node'lari parent'tan fan hedeflerine dogru kisa ve gorunur bir acilimla tasir.
+ * Yeni node'lari parent'tan fan hedeflerine dogru tasir.
  * @author Semih Tuncel
  */
 function animateSpawnedNodes(cy, newNodeIds, targetPositions) {
@@ -812,11 +848,11 @@ function animateSpawnedNodes(cy, newNodeIds, targetPositions) {
     }
 
     animations.push(
-      node.animation({
-        position,
-        duration: EXPAND_SPAWN_DURATION,
-        easing: 'ease-out-cubic',
-      }).play().promise(),
+        node.animation({
+          position,
+          duration: EXPAND_SPAWN_DURATION,
+          easing: 'ease-out-cubic',
+        }).play().promise(),
     );
   });
 
@@ -824,7 +860,7 @@ function animateSpawnedNodes(cy, newNodeIds, targetPositions) {
 }
 
 /**
- * Ilk backend graph parcasini sahneye koyar ve layout calistirir.
+ * Ilk graph parcasini sahneye koyar ve layout calistirir.
  * @author Semih Tuncel
  */
 function renderInitialGraph(cy, graph) {
@@ -843,7 +879,7 @@ function renderInitialGraph(cy, graph) {
 }
 
 /**
- * Backend komsu graph parcasini mevcut sahneye duplicate olmadan ekler.
+ * Komsu graph parcasini mevcut sahneye duplicate olmadan ekler.
  * @author Semih Tuncel
  */
 function mergeExpandedGraph(cy, graph, spawnPosition) {
@@ -883,7 +919,7 @@ function mergeExpandedGraph(cy, graph, spawnPosition) {
 }
 
 /**
- * Cytoscape kamerasi icin guncel pan ve zoom degerlerini sade state formatina cevirir.
+ * Cytoscape kamerasi icin pan ve zoom degerlerini sade state formatina cevirir.
  * @author Semih Tuncel
  */
 function createCameraSnapshot(cy) {
@@ -915,7 +951,7 @@ function zoomCanvas(cy, factor) {
 }
 
 /**
- * Tum gorunur elementleri ekrana sigdirir; padding sabit tutularak UI dengesi korunur.
+ * Tum gorunur elementleri ekrana sigdirir.
  * @author Semih Tuncel
  */
 function fitCanvas(cy) {
@@ -927,7 +963,7 @@ function fitCanvas(cy) {
 }
 
 /**
- * Select ve pan modlarini Cytoscape motoruna uygular; zoom araclari anlik komuttur.
+ * Select ve pan modlarini Cytoscape motoruna uygular.
  * @author Semih Tuncel
  */
 function applyCanvasMode(cy, activeTool) {
@@ -942,7 +978,7 @@ function applyCanvasMode(cy, activeTool) {
 }
 
 /**
- * Abort disindaki backend graph hatalarini bildirir; mevcut sahne korunur.
+ * Abort disindaki graph hatalarini bildirir; mevcut sahne korunur.
  * @author Semih Tuncel
  */
 function reportGraphLoadError(error, label) {
@@ -952,10 +988,88 @@ function reportGraphLoadError(error, label) {
 }
 
 /**
- * Orta kanvas alaninin UI iskeleti ve backend graph yonetimi.
+ * Sonuc path ve dugumlerini highlight siniflariyla gorsellestirir.
  * @author Semih Tuncel
  */
-export default function CenterCanvas({ onNodeSelect }) {
+function highlightPathEdges(cy, path) {
+  if (!Array.isArray(path)) {
+    return;
+  }
+
+  for (let index = 0; index < path.length - 1; index++) {
+    const current = String(path[index]);
+    const next = String(path[index + 1]);
+
+    cy.elements(`edge[source="${current}"][target="${next}"], edge[source="${next}"][target="${current}"]`)
+        .addClass('highlighted');
+  }
+}
+
+/**
+ * Sol panelden gelen algoritma sonucunu canvas uzerinde gorsellestirir.
+ * @author Semih Tuncel
+ */
+function handleVisualAlgorithmResult(cy, result) {
+  if (!cy || !result) {
+    return;
+  }
+
+  cy.elements().removeClass('highlighted algo-start algo-end');
+
+  const { type, data = {}, startNode, endNode } = result;
+
+  if (startNode) {
+    cy.getElementById(String(startNode)).addClass('algo-start');
+  }
+
+  if (endNode) {
+    cy.getElementById(String(endNode)).addClass('algo-end');
+  }
+
+  if (type === 'bfs' || type === 'dfs') {
+    if (Array.isArray(data.visitedNodes)) {
+      data.visitedNodes.forEach((id) => {
+        cy.getElementById(String(id)).addClass('highlighted');
+      });
+    }
+
+    highlightPathEdges(cy, data.path);
+    return;
+  }
+
+  if (type === 'shortest') {
+    if (Array.isArray(data.path)) {
+      data.path.forEach((id) => {
+        cy.getElementById(String(id)).addClass('highlighted');
+      });
+    }
+
+    highlightPathEdges(cy, data.path);
+    return;
+  }
+
+  if (type === 'degrees' && data.targetNode) {
+    const targetNodeId = String(data.targetNode);
+
+    cy.getElementById(targetNodeId).addClass('highlighted');
+
+    if (Array.isArray(data.neighbors)) {
+      data.neighbors.forEach((id) => {
+        const neighborId = String(id);
+
+        cy.getElementById(neighborId).addClass('highlighted');
+        cy.elements(`edge[source="${targetNodeId}"][target="${neighborId}"], edge[source="${neighborId}"][target="${targetNodeId}"]`)
+            .addClass('highlighted');
+      });
+    }
+  }
+}
+
+/**
+ * Orta kanvas alaninin UI iskeleti, backend graph ve algoritma highlight akisini yonetir.
+ * @author Semih Tuncel
+ */
+export default function CenterCanvas({ algorithmResult, onNodeSelect }) {
   const [activeTool, setActiveTool] = useState('select');
   const [cameraState, setCameraState] = useState(INITIAL_CAMERA);
   const canvasRef = useRef(null);
@@ -970,6 +1084,12 @@ export default function CenterCanvas({ onNodeSelect }) {
   useEffect(() => {
     onNodeSelectRef.current = onNodeSelect;
   }, [onNodeSelect]);
+
+  useEffect(() => {
+    if (cyRef.current && algorithmResult) {
+      handleVisualAlgorithmResult(cyRef.current, algorithmResult);
+    }
+  }, [algorithmResult]);
 
   useEffect(() => {
     const container = canvasRef.current;
@@ -993,7 +1113,7 @@ export default function CenterCanvas({ onNodeSelect }) {
     }
 
     /**
-     * Node tiklamasinda secimi yukari yollar ve backend komsularini ister.
+     * Node tiklamasinda secimi yukari yollar ve komsulari getirir.
      * @author Semih Tuncel
      */
     function handleNodeTap(event) {
@@ -1008,35 +1128,35 @@ export default function CenterCanvas({ onNodeSelect }) {
 
       isExpandingRef.current = true;
       fetchNodeNeighbors(nodeId, abortController.signal)
-        .then((graph) => {
-          if (!isMounted || cy.destroyed()) {
-            return Promise.resolve();
-          }
+          .then((graph) => {
+            if (!isMounted || cy.destroyed()) {
+              return Promise.resolve();
+            }
 
-          return mergeExpandedGraph(cy, normalizeGraphResponse(graph), spawnPosition);
-        })
-        .catch((error) => {
-          reportGraphLoadError(error, 'Komsu graph');
+            return mergeExpandedGraph(cy, normalizeGraphResponse(graph), spawnPosition);
+          })
+          .catch((error) => {
+            reportGraphLoadError(error, 'Komsu graph');
 
-          if (error.name === 'AbortError') {
-            return Promise.resolve();
-          }
+            if (error.name === 'AbortError') {
+              return Promise.resolve();
+            }
 
-          return loadSeedGraphIndex(seedGraphCacheRef.current, abortController.signal)
-            .then((graphIndex) => {
-              if (!isMounted || cy.destroyed()) {
-                return Promise.resolve();
-              }
+            return loadSeedGraphIndex(seedGraphCacheRef.current, abortController.signal)
+                .then((graphIndex) => {
+                  if (!isMounted || cy.destroyed()) {
+                    return Promise.resolve();
+                  }
 
-              return mergeExpandedGraph(cy, createLocalNeighborGraph(graphIndex, nodeId), spawnPosition);
-            })
-            .catch((seedError) => {
-              reportGraphLoadError(seedError, 'Seed fallback graph');
-            });
-        })
-        .finally(() => {
-          isExpandingRef.current = false;
-        });
+                  return mergeExpandedGraph(cy, createLocalNeighborGraph(graphIndex, nodeId), spawnPosition);
+                })
+                .catch((seedError) => {
+                  reportGraphLoadError(seedError, 'Seed fallback graph');
+                });
+          })
+          .finally(() => {
+            isExpandingRef.current = false;
+          });
     }
 
     /**
@@ -1056,27 +1176,27 @@ export default function CenterCanvas({ onNodeSelect }) {
     cy.on('tap', 'node', handleNodeTap);
 
     fetchInitialGraph(abortController.signal)
-      .then(handleInitialGraphLoaded)
-      .catch((error) => {
-        reportGraphLoadError(error, 'Init graph');
+        .then(handleInitialGraphLoaded)
+        .catch((error) => {
+          reportGraphLoadError(error, 'Init graph');
 
-        if (error.name === 'AbortError') {
-          return Promise.resolve();
-        }
+          if (error.name === 'AbortError') {
+            return Promise.resolve();
+          }
 
-        return loadSeedGraphIndex(seedGraphCacheRef.current, abortController.signal)
-          .then((graphIndex) => {
-            if (!isMounted || cy.destroyed()) {
-              return;
-            }
+          return loadSeedGraphIndex(seedGraphCacheRef.current, abortController.signal)
+              .then((graphIndex) => {
+                if (!isMounted || cy.destroyed()) {
+                  return;
+                }
 
-            renderInitialGraph(cy, createLocalInitialGraph(graphIndex));
-            handleCameraChanged();
-          })
-          .catch((seedError) => {
-            reportGraphLoadError(seedError, 'Seed fallback graph');
-          });
-      });
+                renderInitialGraph(cy, createLocalInitialGraph(graphIndex));
+                handleCameraChanged();
+              })
+              .catch((seedError) => {
+                reportGraphLoadError(seedError, 'Seed fallback graph');
+              });
+        });
 
     return () => {
       isMounted = false;
@@ -1123,44 +1243,41 @@ export default function CenterCanvas({ onNodeSelect }) {
   const zoomPercent = `${Math.round(cameraState.zoom * 100)}%`;
 
   return (
-    <main className="center-canvas">
+      <main className="center-canvas">
+        <div className="canvas-toolbar">
+          {TOOLS.map((tool, index) => (
+              <Fragment key={tool.id}>
+                <button
+                    className={`canvas-tool-btn${activeTool === tool.id ? ' active' : ''}`}
+                    title={tool.title}
+                    onClick={() => handleToolClick(tool.id)}
+                >
+                  {tool.icon}
+                </button>
+                {index === 1 && <div key="sep1" className="canvas-tool-sep" />}
+              </Fragment>
+          ))}
 
-      {/* Toolbar */}
-      <div className="canvas-toolbar">
-        {TOOLS.map((tool, i) => (
-          <Fragment key={tool.id}>
-            <button
-              className={`canvas-tool-btn${activeTool === tool.id ? ' active' : ''}`}
-              title={tool.title}
-              onClick={() => handleToolClick(tool.id)}
-            >
-              {tool.icon}
-            </button>
-            {i === 1 && <div key="sep1" className="canvas-tool-sep" />}
-          </Fragment>
-        ))}
+          <div className="canvas-tool-sep" />
 
-        <div className="canvas-tool-sep" />
+          <button
+              className="canvas-tool-btn"
+              title="Ekrana sigdir"
+              onClick={() => handleToolClick('fit')}
+          >
+            <FitIcon />
+          </button>
 
-        <button
-          className="canvas-tool-btn"
-          title="Ekrana sigdir"
-          onClick={() => handleToolClick('fit')}
-        >
-          <FitIcon />
-        </button>
+          <span className="canvas-tool-label">GRAPH CANVAS</span>
 
-        <span className="canvas-tool-label">GRAPH CANVAS</span>
-
-        <div className="canvas-zoom">
-          <span className="zoom-val">{zoomPercent}</span>
+          <div className="canvas-zoom">
+            <span className="zoom-val">{zoomPercent}</span>
+          </div>
         </div>
-      </div>
 
-      {/* Cytoscape mount point */}
-      <div id="cy-canvas" ref={canvasRef}>
-        <div className="canvas-hud">{hudText}</div>
-      </div>
-    </main>
+        <div id="cy-canvas" ref={canvasRef}>
+          <div className="canvas-hud">{hudText}</div>
+        </div>
+      </main>
   );
 }
