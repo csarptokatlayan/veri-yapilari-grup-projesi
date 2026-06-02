@@ -6,6 +6,7 @@ const MAX_VISIBLE_NODES = 500;
 const ZOOM_STEP = 1.2;
 const FIT_PADDING = 40;
 const EXPAND_SPAWN_DURATION = 700;
+const COLLAPSE_DURATION = 360;
 const EXPAND_SPAWN_RADIUS = 120;
 const EXPAND_SPAWN_RING_GAP = 76;
 const EXPAND_SPAWN_RING_COUNT = 7;
@@ -577,6 +578,7 @@ function collectGraphElementsForAdd(cy, graph, spawnPosition) {
   const visibleNodeIds = createVisibleNodeIdSet(cy);
   const elements = [];
   const newNodeIds = [];
+  const newEdgeIds = [];
   let didHitLimit = false;
 
   graph.nodes.forEach((node) => {
@@ -604,14 +606,157 @@ function collectGraphElementsForAdd(cy, graph, spawnPosition) {
         && visibleNodeIds.has(edge.target)
     ) {
       elements.push(createEdgeElement(edge));
+      newEdgeIds.push(edge.id);
     }
   });
 
   return {
     elements,
     newNodeIds,
+    newEdgeIds,
     didHitLimit,
   };
+}
+
+/**
+ * Bastan render edilen graph parcasini acik dugum kaydina cevirir.
+ * @author Semih Tuncel
+ */
+function createExpansionRecordFromGraph(graph, expandedNodeId) {
+  return {
+    nodeIds: graph.nodes
+        .map((node) => node.id)
+        .filter((nodeId) => nodeId !== expandedNodeId),
+    edgeIds: graph.edges.map((edge) => edge.id),
+  };
+}
+
+/**
+ * Bos expand kayitlarini map'e yazmadan ayirir.
+ * @author Semih Tuncel
+ */
+function hasExpansionRecordContent(expansionRecord) {
+  return expansionRecord.nodeIds.length > 0 || expansionRecord.edgeIds.length > 0;
+}
+
+/**
+ * Render edilen graph icin kaydi yalnizca ilgili merkez dugum sahnedeyse ekler.
+ * @author Semih Tuncel
+ */
+function registerRenderedExpansion(cy, expansionRecords, expandedNodeId, graph) {
+  if (cy.getElementById(expandedNodeId).empty()) {
+    return;
+  }
+
+  const expansionRecord = createExpansionRecordFromGraph(graph, expandedNodeId);
+
+  if (hasExpansionRecordContent(expansionRecord)) {
+    expansionRecords.set(expandedNodeId, expansionRecord);
+  }
+}
+
+/**
+ * Acik kalan diger expand kayitlari verilen node'a hala ihtiyac duyuyor mu kontrol eder.
+ * @author Semih Tuncel
+ */
+function isNodeUsedByOtherExpansion(cy, expansionRecords, expandedNodeId, nodeId) {
+  for (const [recordNodeId, record] of expansionRecords.entries()) {
+    if (recordNodeId === expandedNodeId) {
+      continue;
+    }
+
+    if (record.nodeIds.includes(nodeId)) {
+      return true;
+    }
+
+    const hasLinkedEdge = record.edgeIds.some((edgeId) => {
+      const edge = cy.getElementById(edgeId);
+
+      return !edge.empty() && (edge.data('source') === nodeId || edge.data('target') === nodeId);
+    });
+
+    if (hasLinkedEdge) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+/**
+ * Daha once acilmis bir dugumun getirdigi edge ve node'lari animasyonla geri kaldirir.
+ * @author Semih Tuncel
+ */
+function collapseExpandedNode(cy, expansionRecords, expandedNodeId) {
+  const record = expansionRecords.get(expandedNodeId);
+
+  if (!record) {
+    return Promise.resolve();
+  }
+
+  const parentNode = cy.getElementById(expandedNodeId);
+  const collapsePosition = parentNode.empty() ? null : parentNode.position();
+  const removableEdges = [];
+  const removableNodes = [];
+
+  record.edgeIds.forEach((edgeId) => {
+    const edge = cy.getElementById(edgeId);
+    if (!edge.empty()) {
+      removableEdges.push(edge);
+    }
+  });
+
+  record.nodeIds.forEach((nodeId) => {
+    const node = cy.getElementById(nodeId);
+
+    if (node.empty() || isNodeUsedByOtherExpansion(cy, expansionRecords, expandedNodeId, nodeId)) {
+      return;
+    }
+
+    removableNodes.push(node);
+  });
+
+  expansionRecords.delete(expandedNodeId);
+
+  const fadeAnimations = removableEdges.map((edge) => (
+      edge.animation({
+        style: { opacity: 0 },
+        duration: COLLAPSE_DURATION,
+        easing: 'ease-out-cubic',
+      }).play().promise()
+  ));
+
+  const nodeAnimations = removableNodes.map((node) => {
+    const animationConfig = {
+      style: { opacity: 0 },
+      duration: COLLAPSE_DURATION,
+      easing: 'ease-in-cubic',
+    };
+
+    if (collapsePosition) {
+      animationConfig.position = collapsePosition;
+    }
+
+    return node.animation(animationConfig).play().promise();
+  });
+
+  return Promise.all([...fadeAnimations, ...nodeAnimations]).then(() => {
+    if (cy.destroyed()) {
+      return;
+    }
+
+    removableEdges.forEach((edge) => {
+      if (!edge.empty()) {
+        edge.remove();
+      }
+    });
+
+    removableNodes.forEach((node) => {
+      if (!node.empty()) {
+        node.remove();
+      }
+    });
+  });
 }
 
 /**
@@ -933,14 +1078,18 @@ function mergeAlgorithmGraph(cy, graph) {
  * @author Semih Tuncel
  */
 function mergeExpandedGraph(cy, graph, spawnPosition) {
-  const { elements, newNodeIds, didHitLimit } = collectGraphElementsForAdd(cy, graph, spawnPosition);
+  const { elements, newNodeIds, newEdgeIds, didHitLimit } = collectGraphElementsForAdd(cy, graph, spawnPosition);
+  const expansionRecord = {
+    nodeIds: newNodeIds,
+    edgeIds: newEdgeIds,
+  };
 
   if (didHitLimit) {
     console.log(`Maksimum ${MAX_VISIBLE_NODES} node limitine ulasildi`);
   }
 
   if (elements.length === 0) {
-    return Promise.resolve();
+    return Promise.resolve(expansionRecord);
   }
 
   const viewportSnapshot = createViewportSnapshot(cy);
@@ -948,7 +1097,7 @@ function mergeExpandedGraph(cy, graph, spawnPosition) {
   if (newNodeIds.length === 0) {
     cy.add(elements);
     restoreViewport(cy, viewportSnapshot);
-    return Promise.resolve();
+    return Promise.resolve(expansionRecord);
   }
 
   const existingNodes = cy.nodes();
@@ -960,11 +1109,12 @@ function mergeExpandedGraph(cy, graph, spawnPosition) {
 
   return animateSpawnedNodes(cy, newNodeIds, spawnTargetPositions).then(() => {
     if (cy.destroyed()) {
-      return;
+      return expansionRecord;
     }
 
     restoreNodeLocks();
     restoreViewport(cy, viewportSnapshot);
+    return expansionRecord;
   });
 }
 
@@ -1148,6 +1298,7 @@ export default function CenterCanvas({ algorithmResult, searchSelection, onNodeS
   const onNodeSelectRef = useRef(onNodeSelect);
   const latestSearchRequestIdRef = useRef(null);
   const canvasGenerationRef = useRef(0);
+  const expansionRecordsRef = useRef(new Map());
 
   useEffect(() => {
     onNodeSelectRef.current = onNodeSelect;
@@ -1176,6 +1327,7 @@ export default function CenterCanvas({ algorithmResult, searchSelection, onNodeS
 
     latestSearchRequestIdRef.current = requestId;
     canvasGenerationRef.current += 1;
+    expansionRecordsRef.current.clear();
 
     const searchGeneration = canvasGenerationRef.current;
 
@@ -1200,6 +1352,7 @@ export default function CenterCanvas({ algorithmResult, searchSelection, onNodeS
           const graphWithSelection = ensureSelectedNodeInGraph(normalizedGraph, selectedNode);
 
           renderFreshGraph(cy, graphWithSelection);
+          registerRenderedExpansion(cy, expansionRecordsRef.current, selectedNode.id, graphWithSelection);
           setCameraState(createCameraSnapshot(cy));
         })
         .catch((error) => {
@@ -1217,10 +1370,13 @@ export default function CenterCanvas({ algorithmResult, searchSelection, onNodeS
             return;
           }
 
-          renderFreshGraph(cy, {
+          const fallbackGraph = {
             nodes: [selectedNode],
             edges: [],
-          });
+          };
+
+          renderFreshGraph(cy, fallbackGraph);
+          registerRenderedExpansion(cy, expansionRecordsRef.current, selectedNode.id, fallbackGraph);
           setCameraState(createCameraSnapshot(cy));
         });
 
@@ -1258,10 +1414,24 @@ export default function CenterCanvas({ algorithmResult, searchSelection, onNodeS
       const nodeId = event.target.id();
       const spawnPosition = event.target.position();
       const expandGeneration = canvasGenerationRef.current;
+      const expansionRecords = expansionRecordsRef.current;
 
       onNodeSelectRef.current?.(createSelectedNodePayload(event.target));
 
       if (isExpandingRef.current) {
+        return;
+      }
+
+      if (expansionRecords.has(nodeId)) {
+        isExpandingRef.current = true;
+        collapseExpandedNode(cy, expansionRecords, nodeId)
+            .finally(() => {
+              isExpandingRef.current = false;
+
+              if (!cy.destroyed()) {
+                setCameraState(createCameraSnapshot(cy));
+              }
+            });
         return;
       }
 
@@ -1293,6 +1463,19 @@ export default function CenterCanvas({ algorithmResult, searchSelection, onNodeS
                   reportGraphLoadError(seedError, 'Seed fallback graph');
                 });
           })
+          .then((expansionRecord) => {
+            if (
+                !isMounted
+                || cy.destroyed()
+                || canvasGenerationRef.current !== expandGeneration
+                || !expansionRecord
+                || !hasExpansionRecordContent(expansionRecord)
+            ) {
+              return;
+            }
+
+            expansionRecords.set(nodeId, expansionRecord);
+          })
           .finally(() => {
             isExpandingRef.current = false;
           });
@@ -1307,7 +1490,10 @@ export default function CenterCanvas({ algorithmResult, searchSelection, onNodeS
         return;
       }
 
-      renderInitialGraph(cy, normalizeGraphResponse(graph));
+      const normalizedGraph = normalizeGraphResponse(graph);
+
+      renderInitialGraph(cy, normalizedGraph);
+      registerRenderedExpansion(cy, expansionRecordsRef.current, ROOT_NODE_ID, normalizedGraph);
       handleCameraChanged();
     }
 
@@ -1329,7 +1515,15 @@ export default function CenterCanvas({ algorithmResult, searchSelection, onNodeS
                   return;
                 }
 
-                renderInitialGraph(cy, createLocalInitialGraph(graphIndex));
+                const rootNodeId = getSeedRootNodeId(graphIndex);
+                const initialGraph = createLocalInitialGraph(graphIndex);
+
+                renderInitialGraph(cy, initialGraph);
+
+                if (rootNodeId) {
+                  registerRenderedExpansion(cy, expansionRecordsRef.current, rootNodeId, initialGraph);
+                }
+
                 handleCameraChanged();
               })
               .catch((seedError) => {
