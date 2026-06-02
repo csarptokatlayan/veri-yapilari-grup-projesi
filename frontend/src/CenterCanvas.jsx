@@ -882,6 +882,32 @@ function renderInitialGraph(cy, graph) {
 }
 
 /**
+ * Arama seciminden gelen graph icinde secili node yoksa onu basa ekler.
+ * @author Semih Tuncel
+ */
+function ensureSelectedNodeInGraph(graph, selectedNode) {
+  const hasSelectedNode = graph.nodes.some((node) => node.id === selectedNode.id);
+
+  if (hasSelectedNode) {
+    return graph;
+  }
+
+  return {
+    nodes: [selectedNode, ...graph.nodes],
+    edges: graph.edges,
+  };
+}
+
+/**
+ * Kanvasi tamamen temizler ve verilen graph parcasini bastan render eder.
+ * @author Semih Tuncel
+ */
+function renderFreshGraph(cy, graph) {
+  cy.elements().remove();
+  renderInitialGraph(cy, graph);
+}
+
+/**
  * Algoritma endpointinden gelen graph parcasini sahneye ekler ve yerlesimi yeniler.
  * @author Semih Tuncel
  */
@@ -1109,7 +1135,7 @@ function handleVisualAlgorithmResult(cy, result) {
  * @author Semih Tuncel
  * @author Murat Kutku (AlgorithmResult Prop Altyapisi ve Harita Uzerinde Renklendirme Entegrasyonu)
  */
-export default function CenterCanvas({ algorithmResult, onNodeSelect }) {
+export default function CenterCanvas({ algorithmResult, searchSelection, onNodeSelect }) {
   const [activeTool, setActiveTool] = useState('select');
   const [cameraState, setCameraState] = useState(INITIAL_CAMERA);
   const canvasRef = useRef(null);
@@ -1120,6 +1146,8 @@ export default function CenterCanvas({ algorithmResult, onNodeSelect }) {
   });
   const isExpandingRef = useRef(false);
   const onNodeSelectRef = useRef(onNodeSelect);
+  const latestSearchRequestIdRef = useRef(null);
+  const canvasGenerationRef = useRef(0);
 
   useEffect(() => {
     onNodeSelectRef.current = onNodeSelect;
@@ -1134,6 +1162,72 @@ export default function CenterCanvas({ algorithmResult, onNodeSelect }) {
       handleVisualAlgorithmResult(cyRef.current, algorithmResult);
     }
   }, [algorithmResult]);
+
+  useEffect(() => {
+    const cy = cyRef.current;
+
+    if (!cy || !searchSelection?.node) {
+      return undefined;
+    }
+
+    const abortController = new AbortController();
+    const selectedNode = normalizeNode(searchSelection.node);
+    const requestId = searchSelection.requestId;
+
+    latestSearchRequestIdRef.current = requestId;
+    canvasGenerationRef.current += 1;
+
+    const searchGeneration = canvasGenerationRef.current;
+
+    if (searchSelection.clearCanvas) {
+      cy.elements().remove();
+    }
+
+    onNodeSelectRef.current?.(selectedNode);
+
+    fetchNodeNeighbors(selectedNode.id, abortController.signal)
+        .then((graph) => {
+          if (
+              abortController.signal.aborted
+              || cy.destroyed()
+              || latestSearchRequestIdRef.current !== requestId
+              || canvasGenerationRef.current !== searchGeneration
+          ) {
+            return;
+          }
+
+          const normalizedGraph = normalizeGraphResponse(graph);
+          const graphWithSelection = ensureSelectedNodeInGraph(normalizedGraph, selectedNode);
+
+          renderFreshGraph(cy, graphWithSelection);
+          setCameraState(createCameraSnapshot(cy));
+        })
+        .catch((error) => {
+          if (error.name === 'AbortError') {
+            return;
+          }
+
+          reportGraphLoadError(error, 'Arama secimi komsu graph');
+
+          if (
+              cy.destroyed()
+              || latestSearchRequestIdRef.current !== requestId
+              || canvasGenerationRef.current !== searchGeneration
+          ) {
+            return;
+          }
+
+          renderFreshGraph(cy, {
+            nodes: [selectedNode],
+            edges: [],
+          });
+          setCameraState(createCameraSnapshot(cy));
+        });
+
+    return () => {
+      abortController.abort();
+    };
+  }, [searchSelection]);
 
   useEffect(() => {
     const container = canvasRef.current;
@@ -1163,6 +1257,7 @@ export default function CenterCanvas({ algorithmResult, onNodeSelect }) {
     function handleNodeTap(event) {
       const nodeId = event.target.id();
       const spawnPosition = event.target.position();
+      const expandGeneration = canvasGenerationRef.current;
 
       onNodeSelectRef.current?.(createSelectedNodePayload(event.target));
 
@@ -1173,7 +1268,7 @@ export default function CenterCanvas({ algorithmResult, onNodeSelect }) {
       isExpandingRef.current = true;
       fetchNodeNeighbors(nodeId, abortController.signal)
           .then((graph) => {
-            if (!isMounted || cy.destroyed()) {
+            if (!isMounted || cy.destroyed() || canvasGenerationRef.current !== expandGeneration) {
               return Promise.resolve();
             }
 
@@ -1188,7 +1283,7 @@ export default function CenterCanvas({ algorithmResult, onNodeSelect }) {
 
             return loadSeedGraphIndex(seedGraphCacheRef.current, abortController.signal)
                 .then((graphIndex) => {
-                  if (!isMounted || cy.destroyed()) {
+                  if (!isMounted || cy.destroyed() || canvasGenerationRef.current !== expandGeneration) {
                     return Promise.resolve();
                   }
 
@@ -1208,7 +1303,7 @@ export default function CenterCanvas({ algorithmResult, onNodeSelect }) {
      * @author Semih Tuncel
      */
     function handleInitialGraphLoaded(graph) {
-      if (!isMounted || cy.destroyed()) {
+      if (!isMounted || cy.destroyed() || canvasGenerationRef.current !== 0) {
         return;
       }
 
@@ -1230,7 +1325,7 @@ export default function CenterCanvas({ algorithmResult, onNodeSelect }) {
 
           return loadSeedGraphIndex(seedGraphCacheRef.current, abortController.signal)
               .then((graphIndex) => {
-                if (!isMounted || cy.destroyed()) {
+                if (!isMounted || cy.destroyed() || canvasGenerationRef.current !== 0) {
                   return;
                 }
 
