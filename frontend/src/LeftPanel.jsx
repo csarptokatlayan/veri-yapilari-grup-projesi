@@ -65,82 +65,110 @@ const STATS = [
 ];
 
 /**
- * Sol menu iskeleti, dinamik algoritmalar ve hatasız sorgu paneli yönetimi.
- * F3-US4: UI'dan algoritmaları kesin parametre sınırlarına göre mock veriyle tetikleme.
+ * Sol menu iskeleti, algoritma ve zincirleme sorgu panellerini ayri state'lerle yonetir.
  * @author Semih Tuncel
- * @author Murat Kutku (Sorgu Yapısının Temizlenmesi, Bağımsız Mock Veri Entegrasyonu ve Parametre Dinamikliği)
+ * @author Murat Kutku
+ * @author Arda Aşan
  */
 export default function LeftPanel({ onAlgorithmResult, graphStats }) {
     const [activeAlgo, setActiveAlgo] = useState('bfs');
-    const [startNode, setStartNode] = useState('');
-    const [endNode, setEndNode] = useState('');
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState(null);
+    const [algoStartNode, setAlgoStartNode] = useState('');
+    const [algoEndNode, setAlgoEndNode] = useState('');
+    const [algorithmLoading, setAlgorithmLoading] = useState(false);
+    const [algorithmError, setAlgorithmError] = useState(null);
 
-    // Algoritma çalıştırma fonksiyonu (Backend hazır olmadığı için geçici olarak Mock çalışıyor)
+    const [chainStartNode, setChainStartNode] = useState('');
+    const [edgeType, setEdgeType] = useState('');
+    const [targetType, setTargetType] = useState('');
+    const [depth, setDepth] = useState(1);
+
     const handleRunAlgorithm = () => {
-        setError(null);
+        const trimmedStartNode = algoStartNode.trim();
+        const trimmedEndNode = algoEndNode.trim();
 
-        // 1. Girdi Kontrolleri
-        if (!startNode.trim()) {
-            setError('Lütfen bir Başlangıç Düğümü girin!');
+        setAlgorithmError(null);
+
+        if (!trimmedStartNode) {
+            setAlgorithmError('Lütfen bir Başlangıç Düğümü girin!');
             return;
         }
 
-        if (activeAlgo === 'shortest' && !endNode.trim()) {
-            setError('Shortest Path algoritmaları için Bitiş Düğümü zorunludur!');
+        if (activeAlgo === 'shortest' && !trimmedEndNode) {
+            setAlgorithmError('Shortest Path algoritması için Bitiş Düğümü zorunludur!');
             return;
         }
 
-        setLoading(true);
+        setAlgorithmLoading(true);
 
-        // UI'daki loading (hesaplanıyor) durumunu test edebilmek için 800ms gecikme simüle ediyoruz
         setTimeout(() => {
-            try {
-                let mockData = {};
+            let mockData = {};
 
-                // Seçilen algoritmaya göre Cytoscape canvas'ının renklendirebileceği mock çıktılar üretiyoruz
-                if (activeAlgo === 'bfs' || activeAlgo === 'dfs') {
-                    mockData = {
-                        visitedNodes: [startNode.trim(), "2", "3", "4"], // Gezilen örnek düğümler
-                        path: [startNode.trim(), "2", "3"]
-                    };
-                } else if (activeAlgo === 'shortest') {
-                    mockData = {
-                        source: startNode.trim(),
-                        target: endNode.trim(),
-                        path: [startNode.trim(), "3", endNode.trim()], // Aradaki en kısa yol rotası
-                        distance: 2
-                    };
-                } else if (activeAlgo === 'degrees') {
-                    mockData = {
-                        targetNode: startNode.trim(),
-                        degreeCentrality: 4,
-                        neighbors: ["2", "5", "7", "9"]
-                    };
-                }
-
-                // Sonucu üst bileşene (App.jsx / CenterCanvas) aktar
-                if (onAlgorithmResult) {
-                    onAlgorithmResult({
-                        type: activeAlgo,
-                        data: mockData,
-                        startNode: startNode.trim(),
-                        endNode: activeAlgo === 'shortest' ? endNode.trim() : null
-                    });
-                }
-
-                setLoading(false);
-            } catch (err) {
-                setError('Mock veri işlenirken bir hata oluştu!');
-                setLoading(false);
+            if (activeAlgo === 'bfs' || activeAlgo === 'dfs') {
+                mockData = {
+                    visitedNodes: [trimmedStartNode, '2', '3', '4'],
+                    path: [trimmedStartNode, '2', '3'],
+                };
+            } else if (activeAlgo === 'shortest') {
+                mockData = {
+                    source: trimmedStartNode,
+                    target: trimmedEndNode,
+                    path: [trimmedStartNode, '3', trimmedEndNode],
+                    distance: 2,
+                };
+            } else if (activeAlgo === 'degrees') {
+                mockData = {
+                    targetNode: trimmedStartNode,
+                    degreeCentrality: 4,
+                    neighbors: ['2', '5', '7', '9'],
+                };
             }
+
+            onAlgorithmResult?.({
+                type: activeAlgo,
+                data: mockData,
+                startNode: trimmedStartNode,
+                endNode: activeAlgo === 'shortest' ? trimmedEndNode : null,
+            });
+
+            setAlgorithmLoading(false);
         }, 800);
+    };
+
+    const handleRunChainQuery = () => {
+        const trimmedChainStartNode = chainStartNode.trim();
+
+        if (!trimmedChainStartNode) {
+            alert('Lütfen bir Başlangıç Düğümü (ID) girin!');
+            return;
+        }
+
+        const params = new URLSearchParams({
+            startId: trimmedChainStartNode,
+            depth: String(depth),
+        });
+
+        if (edgeType) {
+            params.set('edgeType', edgeType);
+        }
+
+        if (targetType) {
+            params.set('targetType', targetType);
+        }
+
+        fetch(`http://localhost:8080/traversal/dynamic-chain-bfs?${params.toString()}`)
+            .then((response) => response.json())
+            .then((data) => {
+                console.log('Gelen Veri:', data);
+                alert('Sorgu başarılı! Sonuçlar konsola yazdırıldı.');
+            })
+            .catch((error) => {
+                console.error('Bağlantı hatası:', error);
+                alert("Backend'e ulaşılamadı. Spring Boot açık mı?");
+            });
     };
 
     return (
         <nav className="left-panel">
-            {/* Algorithms Section */}
             <div className="panel-section">
                 <div className="panel-section-header">
                     <svg width="11" height="11" viewBox="0 0 11 11" fill="none">
@@ -157,7 +185,7 @@ export default function LeftPanel({ onAlgorithmResult, graphStats }) {
                         className={`algo-btn${activeAlgo === algo.id ? ' active' : ''}`}
                         onClick={() => {
                             setActiveAlgo(algo.id);
-                            setError(null);
+                            setAlgorithmError(null);
                         }}
                     >
                         {algo.icon}
@@ -167,7 +195,6 @@ export default function LeftPanel({ onAlgorithmResult, graphStats }) {
                 ))}
             </div>
 
-            {/* Parameters & Queries Section */}
             <div className="panel-section">
                 <div className="panel-section-header">
                     <svg width="11" height="11" viewBox="0 0 11 11" fill="none">
@@ -183,8 +210,8 @@ export default function LeftPanel({ onAlgorithmResult, graphStats }) {
                         type="text"
                         placeholder="Örn: 1"
                         spellCheck={false}
-                        value={startNode}
-                        onChange={(e) => setStartNode(e.target.value)}
+                        value={algoStartNode}
+                        onChange={(event) => setAlgoStartNode(event.target.value)}
                     />
                 </div>
 
@@ -196,36 +223,100 @@ export default function LeftPanel({ onAlgorithmResult, graphStats }) {
                             type="text"
                             placeholder="Örn: 5"
                             spellCheck={false}
-                            value={endNode}
-                            onChange={(e) => setEndNode(e.target.value)}
+                            value={algoEndNode}
+                            onChange={(event) => setAlgoEndNode(event.target.value)}
                         />
                     </div>
                 )}
 
-                {error && (
-                    <div className="error-message" style={{ color: '#ff6b6b', fontSize: '11px', marginTop: '8px', padding: '0 4px' }}>
-                        ⚠️ {error}
+                {algorithmError && (
+                    <div className="error-message">
+                        {algorithmError}
                     </div>
                 )}
 
                 <button
                     className="run-btn"
                     onClick={handleRunAlgorithm}
-                    disabled={loading}
-                    style={{ opacity: loading ? 0.7 : 1, cursor: loading ? 'not-allowed' : 'pointer' }}
+                    disabled={algorithmLoading}
+                    style={{ opacity: algorithmLoading ? 0.7 : 1, cursor: algorithmLoading ? 'not-allowed' : 'pointer' }}
                 >
-                    {loading ? '⏳ Hesaplanıyor...' : '▶ Çalıştır'}
+                    {algorithmLoading ? 'Hesaplanıyor...' : 'Çalıştır'}
                 </button>
             </div>
 
-            {/* Stats Footer Section */}
+            <div className="panel-section">
+                <div className="panel-section-header">
+                    <svg width="11" height="11" viewBox="0 0 11 11" fill="none">
+                        <path d="M2 2.5h2.5v2H7M7 4.5v2H4.5M4.5 6.5v2H9" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                    Zincirleme Sorgular
+                </div>
+
+                <div className="query-row">
+                    <span className="query-label">Başlangıç (Kök)</span>
+                    <input
+                        className="query-input"
+                        type="text"
+                        placeholder="Örn: Kullanıcı A"
+                        value={chainStartNode}
+                        onChange={(event) => setChainStartNode(event.target.value)}
+                        spellCheck={false}
+                    />
+                </div>
+
+                <div className="query-row">
+                    <span className="query-label">İlişki (Edge) Tipi</span>
+                    <select
+                        className="query-select"
+                        value={edgeType}
+                        onChange={(event) => setEdgeType(event.target.value)}
+                    >
+                        <option value="">Tüm bağlantılar</option>
+                        <option value="FOLLOWS">Takip Ediyor</option>
+                        <option value="LIKES">Beğendi</option>
+                        <option value="KNOWS">Tanıyor</option>
+                    </select>
+                </div>
+
+                <div className="query-row">
+                    <span className="query-label">Hedef Filtresi</span>
+                    <select
+                        className="query-select"
+                        value={targetType}
+                        onChange={(event) => setTargetType(event.target.value)}
+                    >
+                        <option value="">Tüm hedefler</option>
+                        <option value="USER">Kullanıcı Düğümü</option>
+                        <option value="POST">Gönderi Düğümü</option>
+                        <option value="EVENT">Etkinlik Düğümü</option>
+                    </select>
+                </div>
+
+                <div className="query-row">
+                    <span className="query-label">Derinlik (Step)</span>
+                    <input
+                        className="query-input"
+                        type="number"
+                        min="1"
+                        max="5"
+                        value={depth}
+                        onChange={(event) => setDepth(event.target.value)}
+                    />
+                </div>
+
+                <button className="run-btn" onClick={handleRunChainQuery}>
+                    Zinciri Çalıştır
+                </button>
+            </div>
+
             <div className="panel-footer">
-                {STATS.map((s) => (
-                    <div key={s.key} className="stat-block">
+                {STATS.map((stat) => (
+                    <div key={stat.key} className="stat-block">
                         <span className="stat-val">
-                            {graphStats && graphStats[s.key] ? graphStats[s.key] : '—'}
+                            {graphStats?.[stat.key] ?? '—'}
                         </span>
-                        <span className="stat-key">{s.key}</span>
+                        <span className="stat-key">{stat.key}</span>
                     </div>
                 ))}
             </div>
