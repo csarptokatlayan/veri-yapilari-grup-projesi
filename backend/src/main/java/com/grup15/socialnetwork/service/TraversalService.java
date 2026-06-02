@@ -2,8 +2,6 @@ package com.grup15.socialnetwork.service;
 
 import com.grup15.socialnetwork.datastructures.graph.BFS;
 import com.grup15.socialnetwork.datastructures.graph.DFS;
-import com.grup15.socialnetwork.datastructures.graph.Graph;
-import com.grup15.socialnetwork.datastructures.list.CustomLinkedList;
 import com.grup15.socialnetwork.dto.ShortestPathResponse;
 import com.grup15.socialnetwork.model.Edge;
 import com.grup15.socialnetwork.model.Node;
@@ -115,6 +113,69 @@ public class TraversalService {
         }
 
         return formatForFrontend(nodes, edges);
+    }
+
+    public Map<String, Object> getDynamicChainBfs(Integer startNodeId, String edgeType, String targetType, int maxDepth) {
+        Node startNode = seedContext.getGraph().ahmetEfe_findNodeById(startNodeId);
+        if (startNode == null) {
+            return emptyResult();
+        }
+
+        List<Node> visitedNodesList = bfs.dynamicBfs(startNode, edgeType, targetType, maxDepth);
+
+        Set<Node> visitedNodes = new HashSet<>(visitedNodesList);
+        Set<Edge> traversedEdges = new HashSet<>();
+
+        // 2. Dönen düğümlerin arasındaki "sadece istenilen" bağları (Edge) topla
+        for (Node currentNode : visitedNodes) {
+            List<Node> neighbors = seedContext.getGraph().fatih_getNeighbors(currentNode);
+            for (Node neighbor : neighbors) {
+                if (visitedNodes.contains(neighbor)) {
+                    List<Edge> edgesBetween = seedContext.getGraph().fatih_getEdgesBetween(currentNode, neighbor);
+
+                    for (Edge edge : edgesBetween) {
+                        // Seçilen Edge tipine uymayanları Cytoscape'e çizdirmemek için eliyoruz
+                        if (edgeType == null || edgeType.isEmpty() || edge.getType().name().equalsIgnoreCase(edgeType)) {
+                            traversedEdges.add(edge);
+                        }
+                    }
+                }
+            }
+        }
+
+        // 3. Klasik JSON formata çevir
+        return formatForFrontend(visitedNodes, traversedEdges);
+    }
+
+    // Dinamik Zincir / Derinlik Sorgusu - DFS Versiyonu
+    public Map<String, Object> getDynamicChainDfs(Integer startNodeId, String edgeType, String targetType, int maxDepth) {
+        Node startNode = seedContext.getGraph().ahmetEfe_findNodeById(startNodeId);
+        if (startNode == null) {
+            return emptyResult();
+        }
+
+        DFS dfs = new DFS(seedContext.getGraph());
+        List<Node> visitedNodesList = dfs.dynamicDfs(startNode, edgeType, targetType, maxDepth);
+
+        Set<Node> visitedNodes = new HashSet<>(visitedNodesList);
+        Set<Edge> traversedEdges = new HashSet<>();
+
+        for (Node currentNode : visitedNodes) {
+            List<Node> neighbors = seedContext.getGraph().fatih_getNeighbors(currentNode);
+            for (Node neighbor : neighbors) {
+                if (visitedNodes.contains(neighbor)) {
+                    List<Edge> edgesBetween = seedContext.getGraph().fatih_getEdgesBetween(currentNode, neighbor);
+
+                    for (Edge edge : edgesBetween) {
+                        if (edgeType == null || edgeType.isEmpty() || edge.getType().name().equalsIgnoreCase(edgeType)) {
+                            traversedEdges.add(edge);
+                        }
+                    }
+                }
+            }
+        }
+
+        return formatForFrontend(visitedNodes, traversedEdges);
     }
 
     private Map<String, Object> formatForFrontend(Set<Node> nodes, Set<Edge> edges) {

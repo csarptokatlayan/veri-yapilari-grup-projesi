@@ -1,6 +1,7 @@
 package com.grup15.socialnetwork.datastructures.graph;
 
 import com.grup15.socialnetwork.datastructures.stack.GenericStack;
+import com.grup15.socialnetwork.model.Edge;
 import com.grup15.socialnetwork.model.Node;
 
 import java.util.ArrayList;
@@ -86,5 +87,69 @@ public class DFS {
             }
         }
         return result;
+    }
+
+    //  @author Ahmet Efe Gencel
+    /*
+     * Arayüzden gelen filtrelere (Edge tipi, Node tipi ve Derinlik sınırı) göre
+     * dinamik olarak çalışan sınırlandırılmış DFS (Depth-Limited Search) algoritması.
+     */
+    public List<Node> dynamicDfs(Node start, String edgeType, String targetType, int maxDepth) {
+        List<Node> resultNodes = new ArrayList<>();
+
+        if (start == null) {
+            return resultNodes;
+        }
+
+        Set<Node> visited = new HashSet<>();
+
+        // Başlangıç düğümünü her halükarda listeye ekliyoruz (BFS ile aynı davranış)
+        resultNodes.add(start);
+
+        // Rekürsif (kendi kendini çağıran) yardımcı metodu başlat
+        dfsRecursiveHelper(start, edgeType, targetType, 0, maxDepth, visited, resultNodes);
+
+        return resultNodes;
+    }
+
+    private void dfsRecursiveHelper(Node current, String edgeType, String targetType, int currentDepth, int maxDepth, Set<Node> visited, List<Node> resultNodes) {
+        // Ziyaret edildi olarak işaretle
+        visited.add(current);
+
+        // Derinlik sınırına ulaştıysak daha dibe inme, geri dön (Backtrack)
+        if (currentDepth >= maxDepth) {
+            return;
+        }
+
+        List<Node> neighbors = this.graph.fatih_getNeighbors(current);
+
+        for (Node neighbor : neighbors) {
+            if (!visited.contains(neighbor)) {
+
+                // 1. İlişki (Edge) tipini kontrol et
+                List<Edge> edges = this.graph.fatih_getEdgesBetween(current, neighbor);
+                boolean edgeMatches = false;
+
+                for (Edge edge : edges) {
+                    if (edgeType == null || edgeType.isEmpty() || edge.getType().name().equalsIgnoreCase(edgeType)) {
+                        edgeMatches = true;
+                        break;
+                    }
+                }
+
+                // Eğer ilişki uyuyorsa yola devam et
+                if (edgeMatches) {
+
+                    // 2. Hedef (Node) tipini kontrol et ve sonuca ekle
+                    boolean nodeMatches = (targetType == null || targetType.isEmpty() || neighbor.getNodeType().name().equalsIgnoreCase(targetType));
+                    if (nodeMatches && !resultNodes.contains(neighbor)) {
+                        resultNodes.add(neighbor);
+                    }
+
+                    // Bir alt derinliğe (currentDepth + 1) inerek algoritmayı tekrar çağır
+                    dfsRecursiveHelper(neighbor, edgeType, targetType, currentDepth + 1, maxDepth, visited, resultNodes);
+                }
+            }
+        }
     }
 }
