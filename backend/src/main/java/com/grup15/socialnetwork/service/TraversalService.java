@@ -178,6 +178,12 @@ public class TraversalService {
         return formatForFrontend(visitedNodes, traversedEdges);
     }
 
+    public Map<String, Object> getInitialGraph(Integer startId) {
+        // Sistem ilk açıldığında beyaz ekran olmaması için varsayılan merkez düğümü (Örn: ID 1) baz alıyoruz.
+        // Zaten yazılı olan getNeighbors metodunu doğrudan çağırarak kod tekrarını önlüyoruz.
+        return getNeighbors(startId);
+    }
+
     private Map<String, Object> formatForFrontend(Set<Node> nodes, Set<Edge> edges) {
         Map<String, Object> response = new HashMap<>();
 
