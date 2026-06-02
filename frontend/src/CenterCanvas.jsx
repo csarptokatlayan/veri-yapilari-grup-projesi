@@ -619,6 +619,43 @@ function collectGraphElementsForAdd(cy, graph, spawnPosition) {
 }
 
 /**
+ * Bastan render edilen graph parcasini acik dugum kaydina cevirir.
+ * @author Semih Tuncel
+ */
+function createExpansionRecordFromGraph(graph, expandedNodeId) {
+  return {
+    nodeIds: graph.nodes
+        .map((node) => node.id)
+        .filter((nodeId) => nodeId !== expandedNodeId),
+    edgeIds: graph.edges.map((edge) => edge.id),
+  };
+}
+
+/**
+ * Bos expand kayitlarini map'e yazmadan ayirir.
+ * @author Semih Tuncel
+ */
+function hasExpansionRecordContent(expansionRecord) {
+  return expansionRecord.nodeIds.length > 0 || expansionRecord.edgeIds.length > 0;
+}
+
+/**
+ * Render edilen graph icin kaydi yalnizca ilgili merkez dugum sahnedeyse ekler.
+ * @author Semih Tuncel
+ */
+function registerRenderedExpansion(cy, expansionRecords, expandedNodeId, graph) {
+  if (cy.getElementById(expandedNodeId).empty()) {
+    return;
+  }
+
+  const expansionRecord = createExpansionRecordFromGraph(graph, expandedNodeId);
+
+  if (hasExpansionRecordContent(expansionRecord)) {
+    expansionRecords.set(expandedNodeId, expansionRecord);
+  }
+}
+
+/**
  * Acik kalan diger expand kayitlari verilen node'a hala ihtiyac duyuyor mu kontrol eder.
  * @author Semih Tuncel
  */
@@ -1315,6 +1352,7 @@ export default function CenterCanvas({ algorithmResult, searchSelection, onNodeS
           const graphWithSelection = ensureSelectedNodeInGraph(normalizedGraph, selectedNode);
 
           renderFreshGraph(cy, graphWithSelection);
+          registerRenderedExpansion(cy, expansionRecordsRef.current, selectedNode.id, graphWithSelection);
           setCameraState(createCameraSnapshot(cy));
         })
         .catch((error) => {
@@ -1332,10 +1370,13 @@ export default function CenterCanvas({ algorithmResult, searchSelection, onNodeS
             return;
           }
 
-          renderFreshGraph(cy, {
+          const fallbackGraph = {
             nodes: [selectedNode],
             edges: [],
-          });
+          };
+
+          renderFreshGraph(cy, fallbackGraph);
+          registerRenderedExpansion(cy, expansionRecordsRef.current, selectedNode.id, fallbackGraph);
           setCameraState(createCameraSnapshot(cy));
         });
 
@@ -1428,7 +1469,7 @@ export default function CenterCanvas({ algorithmResult, searchSelection, onNodeS
                 || cy.destroyed()
                 || canvasGenerationRef.current !== expandGeneration
                 || !expansionRecord
-                || (expansionRecord.nodeIds.length === 0 && expansionRecord.edgeIds.length === 0)
+                || !hasExpansionRecordContent(expansionRecord)
             ) {
               return;
             }
@@ -1449,7 +1490,10 @@ export default function CenterCanvas({ algorithmResult, searchSelection, onNodeS
         return;
       }
 
-      renderInitialGraph(cy, normalizeGraphResponse(graph));
+      const normalizedGraph = normalizeGraphResponse(graph);
+
+      renderInitialGraph(cy, normalizedGraph);
+      registerRenderedExpansion(cy, expansionRecordsRef.current, ROOT_NODE_ID, normalizedGraph);
       handleCameraChanged();
     }
 
@@ -1471,7 +1515,15 @@ export default function CenterCanvas({ algorithmResult, searchSelection, onNodeS
                   return;
                 }
 
-                renderInitialGraph(cy, createLocalInitialGraph(graphIndex));
+                const rootNodeId = getSeedRootNodeId(graphIndex);
+                const initialGraph = createLocalInitialGraph(graphIndex);
+
+                renderInitialGraph(cy, initialGraph);
+
+                if (rootNodeId) {
+                  registerRenderedExpansion(cy, expansionRecordsRef.current, rootNodeId, initialGraph);
+                }
+
                 handleCameraChanged();
               })
               .catch((seedError) => {
