@@ -1,6 +1,7 @@
 import cytoscape from 'cytoscape';
 import { Fragment, useEffect, useRef, useState } from 'react';
 
+const ROOT_NODE_ID = '1';
 const MAX_VISIBLE_NODES = 500;
 const ZOOM_STEP = 1.2;
 const FIT_PADDING = 40;
@@ -184,6 +185,20 @@ async function fetchGraphEndpoint(path, signal) {
 }
 
 /**
+ * Backend kapaliyken local seed graph dosyasini indirir.
+ * @author Semih Tuncel
+ */
+async function fetchSeedGraph(signal) {
+  const response = await fetch('/seed_data.json', { signal });
+
+  if (!response.ok) {
+    throw new Error(`Seed graph yuklenemedi: ${response.status}`);
+  }
+
+  return response.json();
+}
+
+/**
  * Ilk graph parcasini backend init endpointinden getirir.
  * @author Semih Tuncel
  */
@@ -308,6 +323,149 @@ function normalizeGraphResponse(graph) {
     nodes: rawNodes.map(normalizeNode),
     edges: rawEdges.map(normalizeEdge),
   };
+}
+
+/**
+ * Edge kaydini node indeksine ekler; Map uzerinden komsu edge aramasi hizli kalir.
+ * @author Semih Tuncel
+ */
+function appendEdgeToNodeIndex(edgesByNodeId, nodeId, edge) {
+  const edges = edgesByNodeId.get(nodeId) ?? [];
+
+  edges.push(edge);
+  edgesByNodeId.set(nodeId, edges);
+}
+
+/**
+ * Seed graph icin node ve komsu edge indekslerini kurar; lazy fallback icin Map secilir.
+ * @author Semih Tuncel
+ */
+function createGraphIndex(graph) {
+  const normalizedGraph = normalizeGraphResponse(graph);
+  // Insert: O(1)  Search: O(1)  Delete: O(1)
+  const nodesById = new Map();
+  // Insert: O(1)  Search: O(1)  Delete: O(1)
+  const edgesByNodeId = new Map();
+
+  normalizedGraph.nodes.forEach((node) => {
+    nodesById.set(node.id, node);
+  });
+
+  normalizedGraph.edges.forEach((edge) => {
+    appendEdgeToNodeIndex(edgesByNodeId, edge.source, edge);
+
+    if (edge.source !== edge.target) {
+      appendEdgeToNodeIndex(edgesByNodeId, edge.target, edge);
+    }
+  });
+
+  return {
+    nodesById,
+    edgesByNodeId,
+  };
+}
+
+/**
+ * Edge'in verilen node disindaki ucunu bulur; local expand komsuyu buradan alir.
+ * @author Semih Tuncel
+ */
+function getOppositeNodeId(edge, nodeId) {
+  return edge.source === nodeId ? edge.target : edge.source;
+}
+
+/**
+ * Seed indexinden baslangic icin kullanilacak root node id degerini secer.
+ * @author Semih Tuncel
+ */
+function getSeedRootNodeId(graphIndex) {
+  if (graphIndex.nodesById.has(ROOT_NODE_ID)) {
+    return ROOT_NODE_ID;
+  }
+
+  return graphIndex.nodesById.keys().next().value;
+}
+
+/**
+ * Seed indexinden secili node ve birinci derece komsulari icin graph parcasi uretir.
+ * @author Semih Tuncel
+ */
+function createLocalNeighborGraph(graphIndex, nodeId) {
+  const centerNode = graphIndex.nodesById.get(nodeId);
+  const neighborEdges = graphIndex.edgesByNodeId.get(nodeId) ?? [];
+  // Insert: O(1)  Search: O(1)  Delete: O(1)
+  const nodeIds = new Set();
+  // Insert: O(1)  Search: O(1)  Delete: O(1)
+  const edgeIds = new Set();
+  const nodes = [];
+  const edges = [];
+
+  if (centerNode) {
+    nodeIds.add(centerNode.id);
+    nodes.push(centerNode);
+  }
+
+  neighborEdges.forEach((edge) => {
+    const oppositeNodeId = getOppositeNodeId(edge, nodeId);
+    const oppositeNode = graphIndex.nodesById.get(oppositeNodeId);
+
+    if (oppositeNode && !nodeIds.has(oppositeNode.id)) {
+      nodeIds.add(oppositeNode.id);
+      nodes.push(oppositeNode);
+    }
+
+    if (!edgeIds.has(edge.id)) {
+      edgeIds.add(edge.id);
+      edges.push(edge);
+    }
+  });
+
+  return {
+    nodes,
+    edges,
+  };
+}
+
+/**
+ * Seed indexinden ilk gorunum icin root ve komsularini uretir.
+ * @author Semih Tuncel
+ */
+function createLocalInitialGraph(graphIndex) {
+  const rootNodeId = getSeedRootNodeId(graphIndex);
+
+  if (!rootNodeId) {
+    return {
+      nodes: [],
+      edges: [],
+    };
+  }
+
+  return createLocalNeighborGraph(graphIndex, rootNodeId);
+}
+
+/**
+ * Seed graph indexini cache ile yukler; tekrar eden fallback fetchlerini onler.
+ * @author Semih Tuncel
+ */
+function loadSeedGraphIndex(seedGraphCache, signal) {
+  if (seedGraphCache.graphIndex) {
+    return Promise.resolve(seedGraphCache.graphIndex);
+  }
+
+  if (!seedGraphCache.promise) {
+    seedGraphCache.promise = fetchSeedGraph(signal)
+      .then((graph) => {
+        const graphIndex = createGraphIndex(graph);
+
+        seedGraphCache.graphIndex = graphIndex;
+        return graphIndex;
+      })
+      .catch((error) => {
+        seedGraphCache.promise = null;
+        throw error;
+      });
+  }
+
+  return seedGraphCache.promise;
 }
 
 /**
@@ -802,6 +960,10 @@ export default function CenterCanvas({ onNodeSelect }) {
   const [cameraState, setCameraState] = useState(INITIAL_CAMERA);
   const canvasRef = useRef(null);
   const cyRef = useRef(null);
+  const seedGraphCacheRef = useRef({
+    graphIndex: null,
+    promise: null,
+  });
   const isExpandingRef = useRef(false);
   const onNodeSelectRef = useRef(onNodeSelect);
 
@@ -855,6 +1017,22 @@ export default function CenterCanvas({ onNodeSelect }) {
         })
         .catch((error) => {
           reportGraphLoadError(error, 'Komsu graph');
+
+          if (error.name === 'AbortError') {
+            return Promise.resolve();
+          }
+
+          return loadSeedGraphIndex(seedGraphCacheRef.current, abortController.signal)
+            .then((graphIndex) => {
+              if (!isMounted || cy.destroyed()) {
+                return Promise.resolve();
+              }
+
+              return mergeExpandedGraph(cy, createLocalNeighborGraph(graphIndex, nodeId), spawnPosition);
+            })
+            .catch((seedError) => {
+              reportGraphLoadError(seedError, 'Seed fallback graph');
+            });
         })
         .finally(() => {
           isExpandingRef.current = false;
@@ -881,6 +1059,23 @@ export default function CenterCanvas({ onNodeSelect }) {
       .then(handleInitialGraphLoaded)
       .catch((error) => {
         reportGraphLoadError(error, 'Init graph');
+
+        if (error.name === 'AbortError') {
+          return Promise.resolve();
+        }
+
+        return loadSeedGraphIndex(seedGraphCacheRef.current, abortController.signal)
+          .then((graphIndex) => {
+            if (!isMounted || cy.destroyed()) {
+              return;
+            }
+
+            renderInitialGraph(cy, createLocalInitialGraph(graphIndex));
+            handleCameraChanged();
+          })
+          .catch((seedError) => {
+            reportGraphLoadError(seedError, 'Seed fallback graph');
+          });
       });
 
     return () => {
@@ -888,6 +1083,10 @@ export default function CenterCanvas({ onNodeSelect }) {
       abortController.abort();
       cy.destroy();
       cyRef.current = null;
+      seedGraphCacheRef.current = {
+        graphIndex: null,
+        promise: null,
+      };
     };
   }, []);
 
