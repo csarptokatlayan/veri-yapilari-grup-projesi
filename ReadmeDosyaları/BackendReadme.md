@@ -8,14 +8,14 @@ Verilen bir düğümden başlayarak graf üzerindeki bağlantıları hiçbir fil
 
 * **BFS (Genişlik Öncelikli Arama)**
 * **Method:** `GET`
-* **Path:** `/traversal/bfs/{id}`
+* **Path:** `/traversal/bfs/{startId}`
 * **Çıktı:** `{ nodes, edges }` objesi (Map)
 * **Açıklama:** Belirtilen ID'den başlayarak ağı dalga dalga (seviye seviye) tarar.
 
 
 * **DFS (Derinlik Öncelikli Arama)**
 * **Method:** `GET`
-* **Path:** `/traversal/dfs/{id}`
+* **Path:** `/traversal/dfs/{startId}`
 * **Çıktı:** `{ nodes, edges }` objesi (Map)
 * **Açıklama:** Belirtilen ID'den başlayarak ağı derinlemesine tarar.
 
@@ -29,7 +29,7 @@ Arayüzden gelen parametrelere göre kısıtlanmış (Derinlik, İlişki Tipi, H
 * **Method:** `GET`
 * **Path:** `/traversal/dynamic-chain-bfs`
 * **Parametreler:** `startId` (Zorunlu), `edgeType` (Ops), `targetType` (Ops), `depth` (Ops, Default: 1)
-* **Örnek:** `/traversal/dynamic-chain-bfs?startId=1&depth=2&edgeType=FRIEND`
+* **Örnek İstek:** `http://localhost:8080/traversal/dynamic-chain-bfs?startId=1&depth=2&edgeType=FRIEND`
 * **Çıktı:** `{ nodes, edges }` objesi (Map)
 
 
@@ -37,6 +37,7 @@ Arayüzden gelen parametrelere göre kısıtlanmış (Derinlik, İlişki Tipi, H
 * **Method:** `GET`
 * **Path:** `/traversal/dynamic-chain-dfs`
 * **Parametreler:** Yukarıdaki ile birebir aynı parametreleri alır.
+* **Örnek İstek:** `http://localhost:8080/traversal/dynamic-chain-dfs?startId=1&depth=2&edgeType=FRIEND`
 * **Çıktı:** `{ nodes, edges }` objesi (Map)
 
 
@@ -48,6 +49,7 @@ Arayüzden gelen parametrelere göre kısıtlanmış (Derinlik, İlişki Tipi, H
 * **Arkadaşların Beğendiği Gönderiler**
 * **Method:** `GET`
 * **Path:** `/chain/{userId}/friends-likes`
+* **Örnek İstek:** `http://localhost:8080/chain/1/friends-likes`
 * **Çıktı:** `{ nodes, edges }` objesi (Map)
 * **Açıklama:** Kullanıcının arkadaşlarını bulur, o arkadaşların beğendiği gönderileri getirir.
 
@@ -55,6 +57,7 @@ Arayüzden gelen parametrelere göre kısıtlanmış (Derinlik, İlişki Tipi, H
 * **Arkadaşların Katıldığı Etkinlikler**
 * **Method:** `GET`
 * **Path:** `/chain/{userId}/friends-events`
+* **Örnek İstek:** `http://localhost:8080/chain/1/friends-events`
 * **Çıktı:** `{ nodes, edges }` objesi (Map)
 * **Açıklama:** Kullanıcının arkadaşlarını bulur, o arkadaşların katıldığı etkinlikleri getirir.
 
@@ -66,7 +69,7 @@ Arayüzden gelen parametrelere göre kısıtlanmış (Derinlik, İlişki Tipi, H
 * **Method:** `GET`
 * **Path:** `/traversal/shortest-path`
 * **Parametreler:** `from` (Başlangıç ID), `to` (Bitiş ID)
-* **Örnek İstek:** `/traversal/shortest-path?from=1&to=5`
+* **Örnek İstek:** `http://localhost:8080/traversal/shortest-path?from=1&to=5`
 * **Çıktı:**
 ```json
 {
@@ -86,14 +89,16 @@ Frontend (React/Cytoscape) tarafındaki tıklama, sayfa yükleme ve Lazy Loading
 
 * **Sistem Başlangıç Düğümü (Init)**
 * **Method:** `GET`
-* **Path:** `/api/nodes/init`
+* **Path:** `/nodes/init/{id}`
+* **Örnek İstek:** `http://localhost:8080/nodes/init/2`
 * **Çıktı:** `{ nodes, edges }` objesi (Map)
-* **Açıklama:** Sayfa ilk yüklendiğinde beyaz ekran kalmaması için varsayılan merkez düğümünü (ID: 1) ve komşularını getirir.
+* **Açıklama:** Istenilen düğümü ve komşularını getirir.*
 
 
 * **Komşuları Getir (Tıklama / Expand)**
 * **Method:** `GET`
-* **Path:** `/api/nodes/{id}/neighbors`
+* **Path:** `/nodes/{id}/neighbors`
+* **Örnek İstek:** `http://localhost:8080/nodes/3/neighbors`
 * **Çıktı:** `{ nodes, edges }` objesi (Map)
 * **Açıklama:** Arayüzde bir düğüme tıklandığında sadece o düğümün 1. derece (doğrudan bağlı) komşularını döndürür.
 
@@ -102,8 +107,8 @@ Frontend (React/Cytoscape) tarafındaki tıklama, sayfa yükleme ve Lazy Loading
 ## 6. Arama (Search - Trie)
 
 * **Method:** `GET`
-* **Path:** `/api/nodes/search`
+* **Path:** `/nodes/search`
 * **Parametre:** `q` (Aranan kelime)
-* **Örnek İstek:** `/api/nodes/search?q=Ah`
+* **Örnek İstek:** `http://localhost:8080/nodes/search?q=Ah`
 * **Çıktı:** `[{ "id": 2, "title": "Ahmet Efe", "type": "USER" }]` (Liste)
 * **Açıklama:** Trie veri yapısı ile harf bazlı (prefix) hızlı arama yapar, eşleşen düğümlerin özet bilgilerini döndürür.

@@ -28,4 +28,10 @@ public class NodeController {
         List<Map<String, Object>> results = searchService.searchNodes(query);
         return ResponseEntity.ok(results);
     }
+
+    @GetMapping("/init/{id}")
+    public ResponseEntity<Map<String, Object>> getInit(@PathVariable Integer id) {
+        Map<String, Object> result = traversalService.getInitialGraph(id);
+        return ResponseEntity.ok(result);
+    }
 }
