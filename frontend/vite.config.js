@@ -7,6 +7,7 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': 'http://localhost:8080',
+      '/nodes': 'http://localhost:8080',
       '/traversal': 'http://localhost:8080',
       '/chain': 'http://localhost:8080',
     },

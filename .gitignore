@@ -35,3 +35,5 @@ bin/
 
 ### Derlenmiş Maven Dosyaları
 target/
+backend/spring-codex.err.log
+backend/spring-codex.out.log
