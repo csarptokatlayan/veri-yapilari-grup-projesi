@@ -52,6 +52,11 @@ public class Graph {
         }
     }
 
+    public List<Node> ahmetEfe_getAllNodes()
+    {
+        return new ArrayList<>(nodeIdMap.values());
+    }
+
     public boolean ahmetEfe_nodeExist(int ID)
     {
         return nodeIdMap.containsKey(ID);
