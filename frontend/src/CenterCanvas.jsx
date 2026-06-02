@@ -2102,10 +2102,10 @@ export default function CenterCanvas({ algorithmResult, searchSelection, onNodeS
   }, []);
 
   /**
- * F3-US4: LeftPanel'den yeni bir algoritma sonucu tetiklendiginde haritayi guncelle
- * @author Murat Kutku 
- */
-  
+   * F3-US4: LeftPanel'den yeni bir algoritma sonucu tetiklendiginde haritayi guncelle
+   * @author Murat Kutku
+   */
+
   useEffect(() => {
     applyCanvasMode(cyRef.current, activeTool);
   }, [activeTool]);
