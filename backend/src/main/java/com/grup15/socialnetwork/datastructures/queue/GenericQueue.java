@@ -4,11 +4,13 @@ package com.grup15.socialnetwork.datastructures.queue;
  * Insert/enqueue: O(1)
  * Delete/dequeue: O(1)
  * Peek/isEmpty: O(1)
+ * Size: O(1)
  */
 public class GenericQueue<T> {
 
     private QueueNode<T> front;
     private QueueNode<T> rear;
+    private int size;
 
     /**
      * Bos bir queue olusturur boylece enqueue ve dequeue O(1) kalir.
@@ -17,6 +19,7 @@ public class GenericQueue<T> {
     public GenericQueue() {
         this.front = null;
         this.rear = null;
+        this.size = 0;
     }
 
     /**
@@ -30,11 +33,13 @@ public class GenericQueue<T> {
         if (rear == null) {
             front = newNode;
             rear = newNode;
+            size++; // Ekleme yapildiginda boyutu artir
             return;
         }
 
         rear.next = newNode;
         rear = newNode;
+        size++;
     }
 
     /**
@@ -53,6 +58,7 @@ public class GenericQueue<T> {
             rear = null;
         }
 
+        size--;
         return value;
     }
 
@@ -74,6 +80,13 @@ public class GenericQueue<T> {
     // @author Semih Tuncel
     public synchronized boolean isEmpty() {
         return front == null;
+    }
+
+    /**
+     * Queue'nun mevcut eleman sayisini dondurur. O(1) karmasikligindadir.
+     */
+    public synchronized int size() {
+        return this.size;
     }
 
     /**
