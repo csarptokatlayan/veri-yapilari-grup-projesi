@@ -1,6 +1,7 @@
 package com.grup15.socialnetwork.datastructures.graph;
 
 import com.grup15.socialnetwork.model.Edge;
+import com.grup15.socialnetwork.model.EdgeType;
 import com.grup15.socialnetwork.model.Node;
 import com.grup15.socialnetwork.model.NodeType;
 
@@ -116,7 +117,24 @@ public class Graph {
 // @fatihsoyer9008 o5 methods görevleri
 
     // --- FATİH'İN Ö5 METOTLARI (GRAPH QUERIES) ---
+    /**
+     * Belirli bir EdgeType (ilişki türü) filtresine uyan tüm kenarları döndürür.
+     * Big-O: O(V + E) - Tüm düğümleri ve onların kenarlarını tarar.
+     */
+    public List<Edge> fatih_getEdgesByType(EdgeType targetType) {
+        List<Edge> filteredEdges = new ArrayList<>();
 
+        // Graftaki tüm kenar listelerini geziyoruz
+        for (List<Edge> edges : nodeEdgeMap.values()) {
+            for (Edge edge : edges) {
+                // Eğer kenarın tipi aradığımız tipse listeye ekle
+                if (edge.getType() == targetType) {
+                    filteredEdges.add(edge);
+                }
+            }
+        }
+        return filteredEdges;
+    }
     /**
      * Bir düğümün komşularını döndürür.
      */
