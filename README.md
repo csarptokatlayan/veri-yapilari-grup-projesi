@@ -3,24 +3,23 @@
 Bu proje, temel veri yapıları ve algoritmalar kullanılarak sıfırdan geliştirilmiş kapsamlı bir sosyal ağ simülasyonudur. Sistem; kullanıcılar, gönderiler (post) ve etkinlikler (event) arasındaki karmaşık ilişkileri yönlü bir **Çizge (Graph)** yapısı üzerinde modelleyerek, yüksek performanslı ağ analizleri ve sorgular yapılabilmesini sağlar.
 
 ##  Projenin Amacı ve Kapsamı
-Modern sosyal medya platformlarının (Twitter, LinkedIn vb.) arka planında yatan arkadaşlık önermeleri, ilgi alanı analizleri ve içerik filtreleme gibi özellikleri "Property Graph" (Özellikli Çizge) mantığıyla simüle etmektir. Proje, veri tabanı bağımsız olarak sadece bellek içi (in-memory) veri yapıları kullanılarak inşa edilmiştir.
+
+Bu projede bir sosyal medya platformunun arka planının nasıl çalıştığını modelledik. Asıl amacımız; kullanıcıya görünmeyen kısımda kurduğumuz 'Property Graph' mantığını kullanarak arkadaşlık önerileri, ilgi alanı analizleri ve içerik filtreleme gibi özellikleri analitik bir altyapıya dökmek oldu. Proje, veri tabanından bağımsız olarak sadece bellek içi (in-memory) veri yapıları kullanılarak inşa edilmiştir.
 
 ---
 
 ##  Mimari ve Veri Yapısı Tercihleri
 
-Proje, optimum bellek yönetimi ve maksimum sorgu hızı sağlamak amacıyla belirli veri yapıları üzerine inşa edilmiştir. Değerlendirme kriterleri göz önüne alınarak yapılan mimari seçimler şunlardır:
-
-1. **Graph (Adjacency List):** Düğümler (Nodes) ve Kenarlar (Edges) arasındaki ilişkileri tutmak için matris yerine bitişiklik listesi (Adjacency List) tercih edilmiştir. Bu sayede bellek kullanımı optimize edilmiş ve seyrek (sparse) ağlarda performans artırılmıştır.
-2. **Trie (Prefix Tree):** Sistemdeki kullanıcıları ve içerikleri arama çubuğunda anlık (as-you-type) getirebilmek için Trie veri yapısı kullanılmıştır. Bu yapı, binlerce kayıt içinde bile anında sonuç verir.
+Sosyal ağ simülasyonumuzun hızlı ve sorunsuz çalışması için arka planda kullanacağımız veri yapılarını özenle seçtik. Projenin bizden istediklerini (değerlendirme kriterlerini) göz önünde bulundurarak aldığımız mimari kararlar kısaca şöyle:
+1. **Graph (Adjacency List):** Düğümler (Nodes) ve Kenarlar (Edges) arasındaki ilişkileri tutmak için matris yerine bitişiklik listesi (Adjacency List) tercih edilmiştir.Bu yapıyı seçmemizin en büyük artısı, belleği gereksiz yere şişirmemesi oldu. Kurduğumuz ağ yapısı gereği seyrek  olduğu için, bu sayede hem hafızadan ciddi tasarruf ettik hem de işlem performansımızı artırdık.
+2. **Trie (Prefix Tree):** Sistemdeki kullanıcıları ve içerikleri arama çubuğunda anlık getirebilmek için Trie veri yapısı kullanılmıştır. Böylece arama yaparken tüm düğümleri tek tek gezme zahmetinden kurtulduk. Sistemde ne kadar fazla kayıt olursa olsun, kelimeyi yazdığımız anda sonuçları anında getirebilen bir altyapı kurmuş olduk.
 3. **Hash Table:** Her bir düğüme ait spesifik özellikleri (isim, yaş, içerik tipi vb.) tutmak için kullanılmıştır. Bir düğümün detaylarına erişim süresi sabit hıza düşürülmüştür.
 
 ---
 
 ##  Kurulum ve Çalıştırma (Dockerization)
 
-Projeyi bilgisayarınıza kurmak için lokal bir Java veya Node.js ortamına ihtiyacınız yoktur. Proje mimarisi tamamen **Dockerize** edilerek her ortamda standart bir çalışma garantisi sağlanmıştır.
-
+Projenin kurulum aşamasında altyapı gereksinimleriyle vakit kaybetmemek için sistemi baştan aşağı Dockerize ettik. Bu sayede uygulamanın çalışması için lokalinizde herhangi bir ortama (Java, Node vb.) ihtiyacınız kalmıyor; her bilgisayarda aynı standartta ve sorunsuz çalışıyor.
 1. Bilgisayarınızda **Docker Desktop**'ın çalıştığından emin olun.
 2. Terminali projenin ana dizininde açın ve aşağıdaki komutu çalıştırın:
 
