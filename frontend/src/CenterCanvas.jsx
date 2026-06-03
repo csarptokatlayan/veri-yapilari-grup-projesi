@@ -9,11 +9,11 @@ const EXPAND_SPAWN_DURATION = 700;
 const COLLAPSE_DURATION = 360;
 const ALGORITHM_STEP_DELAY = 400;
 const ALGORITHM_OVERLAY_PREFIX = 'algo-overlay';
-const EXPAND_SPAWN_RADIUS = 150;
+const EXPAND_SPAWN_RADIUS = 140;
 const EXPAND_SPAWN_RING_GAP = 90;
-const EXPAND_SPAWN_RING_COUNT = 7;
-const EXPAND_SPAWN_ANGLE_COUNT = 16;
-const EXPAND_SPAWN_MIN_DISTANCE = 110;
+const EXPAND_SPAWN_RING_COUNT = 15;
+const EXPAND_SPAWN_ANGLE_COUNT = 36;
+const EXPAND_SPAWN_MIN_DISTANCE = 140;
 const EXPAND_SPAWN_PROBE_DISTANCE = 230;
 const EXPAND_SPAWN_FALLBACK_ANGLE = -Math.PI / 2;
 const INITIAL_CAMERA = {
@@ -235,7 +235,7 @@ function createCytoscapeInstance(container) {
     style: GRAPH_STYLE,
     minZoom: 0.12,
     maxZoom: 3,
-    wheelSensitivity: 0.18,
+    wheelSensitivity: 0.40,
   });
 }
 
@@ -804,16 +804,7 @@ function createViewportSnapshot(cy) {
   };
 }
 
-/**
- * Snapshot alinmis pan ve zoom'u Cytoscape viewport'una geri uygular.
- * @author Semih Tuncel
- */
-function restoreViewport(cy, viewportSnapshot) {
-  cy.viewport({
-    pan: viewportSnapshot.pan,
-    zoom: viewportSnapshot.zoom,
-  });
-}
+
 
 /**
  * Spatial memory icin eski node'lari animasyon boyunca sabitler.
@@ -1100,11 +1091,8 @@ function mergeExpandedGraph(cy, graph, spawnPosition) {
     return Promise.resolve(expansionRecord);
   }
 
-  const viewportSnapshot = createViewportSnapshot(cy);
-
   if (newNodeIds.length === 0) {
     cy.add(elements);
-    restoreViewport(cy, viewportSnapshot);
     return Promise.resolve(expansionRecord);
   }
 
@@ -1113,7 +1101,6 @@ function mergeExpandedGraph(cy, graph, spawnPosition) {
   const spawnTargetPositions = createSpawnTargetPositions(spawnPosition, existingNodes, newNodeIds);
 
   cy.add(elements);
-  restoreViewport(cy, viewportSnapshot);
 
   return animateSpawnedNodes(cy, newNodeIds, spawnTargetPositions).then(() => {
     if (cy.destroyed()) {
@@ -1121,7 +1108,6 @@ function mergeExpandedGraph(cy, graph, spawnPosition) {
     }
 
     restoreNodeLocks();
-    restoreViewport(cy, viewportSnapshot);
     return expansionRecord;
   });
 }
@@ -1510,11 +1496,9 @@ async function ensureAlgorithmNodeVisible(cy, node, parentNodeId, signal) {
   const parentNode = parentNodeId ? cy.getElementById(parentNodeId) : null;
   const hasVisibleParent = parentNode && !parentNode.empty();
   const spawnPosition = hasVisibleParent ? parentNode.position() : createViewportCenterPosition(cy);
-  const viewportSnapshot = createViewportSnapshot(cy);
 
   if (!hasVisibleParent) {
     cy.add(createNodeElement(node, spawnPosition));
-    restoreViewport(cy, viewportSnapshot);
     return cy.getElementById(node.id);
   }
 
@@ -1523,13 +1507,11 @@ async function ensureAlgorithmNodeVisible(cy, node, parentNodeId, signal) {
   const targetPositions = createSpawnTargetPositions(spawnPosition, existingNodes, [node.id]);
 
   cy.add(createNodeElement(node, spawnPosition));
-  restoreViewport(cy, viewportSnapshot);
 
   await animateSpawnedNodes(cy, [node.id], targetPositions);
 
   if (!cy.destroyed()) {
     restoreNodeLocks();
-    restoreViewport(cy, viewportSnapshot);
   }
 
   throwIfAlgorithmAborted(signal);
