@@ -32,31 +32,41 @@ import java.util.Locale;
 // @author Semih Tuncel
 public final class FixedSocialNetworkSeed {
 
-    // ── ID Aralıkları ──────────────────────────────────────────────────────────
+    // ── DÜĞÜM (NODE) SAYILARI VE ID ARALIKLARI ──
 
-    static final int USER_FIRST_ID  = 1;
-    static final int USER_COUNT     = 80;
-    static final int USER_LAST_ID   = USER_FIRST_ID + USER_COUNT - 1;    //  80
+    static final int USER_FIRST_ID = 1;
+    static final int USER_COUNT = 80;
+    static final int USER_LAST_ID = USER_FIRST_ID + USER_COUNT - 1; // 80
 
-    static final int POST_FIRST_ID  = USER_LAST_ID + 1;                  //  81
-    static final int POST_COUNT     = 70;
-    static final int POST_LAST_ID   = POST_FIRST_ID + POST_COUNT - 1;    // 150
+    static final int POST_FIRST_ID = USER_LAST_ID + 1; // 81
+    static final int POST_COUNT = 70;
+    static final int POST_LAST_ID = POST_FIRST_ID + POST_COUNT - 1; // 150
 
-    static final int PHOTO_FIRST_ID = POST_LAST_ID + 1;                  // 151
-    static final int PHOTO_COUNT    = 25;
-    static final int PHOTO_LAST_ID  = PHOTO_FIRST_ID + PHOTO_COUNT - 1;  // 175
+    static final int PHOTO_FIRST_ID = POST_LAST_ID + 1; // 151
+    static final int PHOTO_COUNT = 25;
+    static final int PHOTO_LAST_ID = PHOTO_FIRST_ID + PHOTO_COUNT - 1; // 175
 
-    static final int EVENT_FIRST_ID = PHOTO_LAST_ID + 1;                 // 176
-    static final int EVENT_COUNT    = 25;
-    static final int EVENT_LAST_ID  = EVENT_FIRST_ID + EVENT_COUNT - 1;  // 200
+    static final int EVENT_FIRST_ID = PHOTO_LAST_ID + 1; // 176
+    static final int EVENT_COUNT = 25;
+    static final int EVENT_LAST_ID = EVENT_FIRST_ID + EVENT_COUNT - 1; // 200
 
-    // İçerik düğüm sayısı (POST + PHOTO)
-    private static final int CONTENT_COUNT = POST_COUNT + PHOTO_COUNT;   //  95
 
-    // ── Özellik sabitleri ──────────────────────────────────────────────────────
+    // ── KENAR (EDGE) SAYILARI ──
 
-    static final String TEAM_MEMBER_PROPERTY       = "teamMember";
+    static final int FRIEND_EDGE_COUNT = 200;
+    static final int POSTED_EDGE_COUNT = 95;
+    static final int LIKES_EDGE_COUNT = 240;
+    static final int ATTENDS_EDGE_COUNT = 160;
+
+    static final int TOTAL_EDGE_COUNT = FRIEND_EDGE_COUNT + POSTED_EDGE_COUNT + LIKES_EDGE_COUNT + ATTENDS_EDGE_COUNT; // Toplam: 695
+
+
+    // ── ÖZELLİK SABİTLERİ VE YARDIMCILAR ──
+
+    static final String TEAM_MEMBER_PROPERTY = "teamMember";
     static final String TEAM_MEMBER_ASCII_PROPERTY = "teamMemberNameAscii";
+
+    private static final int CONTENT_COUNT = POST_COUNT + PHOTO_COUNT; // 95
 
     // ── Takım üyeleri (ilk 5 kullanıcı) ───────────────────────────────────────
 
@@ -288,6 +298,29 @@ public final class FixedSocialNetworkSeed {
             /* 24 */ "Spor Salonu Açılış Etkinliği",
     };
 
+    // ── Özellik (Property) Havuzları ──────────────────────────────────────────
+
+    private static final String[] LOCATIONS = {
+            "Bursa", "İstanbul", "Ankara", "İzmir", "Eskişehir", "Antalya", "Çanakkale"
+    };
+
+    private static final String[] OCCUPATIONS = {
+            "Bilgisayar Mühendisliği Öğrencisi", "Yazılım Geliştirici", "Grafik Tasarımcı",
+            "Veri Bilimcisi", "Akademisyen", "Serbest Çalışan (Freelancer)"
+    };
+
+    private static final String[] POST_CATEGORIES = {
+            "Teknoloji", "Günlük Yaşam", "Eğitim", "Eğlence", "Gezi", "Kültür & Sanat"
+    };
+
+    private static final String[] CAMERAS = {
+            "iPhone 14 Pro", "Canon EOS R5", "Sony A7 III", "Samsung S23 Ultra", "FujiFilm X-T4"
+    };
+
+    private static final String[] PHOTO_FILTERS = {
+            "Clarendon", "Juno", "Lark", "Gingham", "Filtresiz (No Filter)"
+    };
+
     /** Nesne oluşturmayı engeller; tüm metotlar statiktir. */
     // @author Semih Tuncel
     private FixedSocialNetworkSeed() {
@@ -390,7 +423,7 @@ public final class FixedSocialNetworkSeed {
     // ── Düğüm ekleme ──────────────────────────────────────────────────────────
 
     /**
-     * 80 kullanıcıyı gerçek isimlerle ekler; ilk 5'i takım üyesi olarak işaretler.
+     * 80 kullanıcıyı ekler ve USER türüne özel properties (yaş, konum, meslek) atar.
      */
     // @author Semih Tuncel
     private static void addUsers(Graph graph, NodeRegistry registry, Trie trie) {
@@ -399,7 +432,15 @@ public final class FixedSocialNetworkSeed {
             String title = (i < USER_NAMES.length)
                     ? USER_NAMES[i]
                     : String.format(Locale.ENGLISH, "User %03d", id);
+
             Node node = new Node(id, title, NodeType.USER);
+
+            // USER özelliklerini ekle
+            node.getProperties().put("age", 18 + (i % 15)); // 18 ile 32 arası deterministik yaş
+            node.getProperties().put("location", LOCATIONS[i % LOCATIONS.length]);
+            node.getProperties().put("occupation", OCCUPATIONS[i % OCCUPATIONS.length]);
+            node.getProperties().put("isActive", (i % 7 != 0)); // %85 ihtimalle aktif kullanıcı
+
             if (i < TEAM_MEMBER_NAMES.length) {
                 markTeamMember(node, title);
             }
@@ -408,7 +449,7 @@ public final class FixedSocialNetworkSeed {
     }
 
     /**
-     * 70 postu gerçekçi Türkçe başlıklarla ekler.
+     * 70 postu ekler ve POST türüne özel properties (kategori, görüntülenme, herkese açık mı) atar.
      */
     // @author Semih Tuncel
     private static void addPosts(Graph graph, NodeRegistry registry, Trie trie) {
@@ -417,12 +458,20 @@ public final class FixedSocialNetworkSeed {
             String title = (i < POST_TITLES.length)
                     ? POST_TITLES[i]
                     : String.format(Locale.ENGLISH, "Post %03d", i + 1);
-            registerNode(graph, registry, trie, new Node(id, title, NodeType.POST));
+
+            Node node = new Node(id, title, NodeType.POST);
+
+            // POST özelliklerini ekle
+            node.getProperties().put("category", POST_CATEGORIES[i % POST_CATEGORIES.length]);
+            node.getProperties().put("views", 100 + (i * 13 % 1000)); // 100-1100 arası görüntülenme
+            node.getProperties().put("isPublic", (i % 5 != 0)); // %80 ihtimalle herkese açık
+
+            registerNode(graph, registry, trie, node);
         }
     }
 
     /**
-     * 25 fotoğrafı gerçekçi Türkçe başlıklarla ekler.
+     * 25 fotoğrafı ekler ve PHOTO türüne özel properties (kamera, filtre, çözünürlük) atar.
      */
     // @author Semih Tuncel
     private static void addPhotos(Graph graph, NodeRegistry registry, Trie trie) {
@@ -431,12 +480,20 @@ public final class FixedSocialNetworkSeed {
             String title = (i < PHOTO_TITLES.length)
                     ? PHOTO_TITLES[i]
                     : String.format(Locale.ENGLISH, "Photo %03d", i + 1);
-            registerNode(graph, registry, trie, new Node(id, title, NodeType.PHOTO));
+
+            Node node = new Node(id, title, NodeType.PHOTO);
+
+            // PHOTO özelliklerini ekle
+            node.getProperties().put("camera", CAMERAS[i % CAMERAS.length]);
+            node.getProperties().put("filter", PHOTO_FILTERS[i % PHOTO_FILTERS.length]);
+            node.getProperties().put("resolution", (i % 2 == 0) ? "1080x1080" : "1920x1080");
+
+            registerNode(graph, registry, trie, node);
         }
     }
 
     /**
-     * 25 etkinliği gerçekçi Türkçe başlıklarla ekler.
+     * 25 etkinliği ekler ve EVENT türüne özel properties (tarih, kapasite, bilet fiyatı) atar.
      */
     // @author Semih Tuncel
     private static void addEvents(Graph graph, NodeRegistry registry, Trie trie) {
@@ -445,7 +502,20 @@ public final class FixedSocialNetworkSeed {
             String title = (i < EVENT_TITLES.length)
                     ? EVENT_TITLES[i]
                     : String.format(Locale.ENGLISH, "Event %03d", i + 1);
-            registerNode(graph, registry, trie, new Node(id, title, NodeType.EVENT));
+
+            Node node = new Node(id, title, NodeType.EVENT);
+
+            // EVENT özelliklerini ekle
+            // Tarih üretimi: Örn. "2026-06-12"
+            String date = "2026-0" + (6 + (i % 4)) + "-" + (10 + (i % 20));
+            node.getProperties().put("date", date);
+            node.getProperties().put("capacity", 50 + (i * 10 % 500)); // 50 ile 550 arası kapasite
+
+            // Fiyatı belirle: Her 3 etkinlikten biri ücretsiz (0.0) olsun
+            double price = (i % 3 == 0) ? 0.0 : (50.0 + (i * 15 % 300));
+            node.getProperties().put("ticketPrice", price);
+
+            registerNode(graph, registry, trie, node);
         }
     }
 

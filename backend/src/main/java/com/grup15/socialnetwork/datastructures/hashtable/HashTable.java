@@ -1,7 +1,11 @@
 package com.grup15.socialnetwork.datastructures.hashtable;
 
+import com.fasterxml.jackson.annotation.JsonValue;
+
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.Map;
 
 public class HashTable<K, V> {
 
@@ -226,4 +230,17 @@ public class HashTable<K, V> {
             this.value = value;
         }
     }
+
+    //Ornek veri olusturkren jacksonun dogru calisabilmesi icin
+    @JsonValue
+    public synchronized Map<K, V> toMap() {
+        Map<K, V> result = new HashMap<>();
+        for (LinkedList<Entry<K, V>> bucket : buckets) {
+            for (Entry<K, V> entry : bucket) {
+                result.put(entry.key, entry.value);
+            }
+        }
+        return result;
+    }
+
 }
