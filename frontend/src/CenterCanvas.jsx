@@ -1761,9 +1761,25 @@ async function runShortestPathAnimation(cy, result, record, signal) {
 
   const startNodeId = path[0];
   const isStartNew = cy.getElementById(startNodeId).empty();
-  const startNode = cy.getElementById(startNodeId).empty()
-      ? createFallbackAlgorithmNode(startNodeId)
-      : normalizeNode(cy.getElementById(startNodeId).data());
+
+  let startNode;
+
+  if (isStartNew) {
+    try {
+      // Başlangıç düğümü ekranda yoksa gerçek verisini backend'den çek
+      const startGraph = await fetchNodeNeighbors(startNodeId, signal);
+      const normalizedGraph = normalizeGraphResponse(startGraph);
+      const nodesById = createNodeMap(normalizedGraph.nodes);
+      startNode = nodesById.get(startNodeId) ?? createFallbackAlgorithmNode(startNodeId);
+    } catch (error) {
+
+      startNode = createFallbackAlgorithmNode(startNodeId);
+    }
+  } else {
+    
+    startNode = normalizeNode(cy.getElementById(startNodeId).data());
+  }
+
   const cyStartNode = await ensureAlgorithmNodeVisible(cy, startNode, null, signal);
 
   if (isStartNew && startNodeId !== String(result.startNode)) {

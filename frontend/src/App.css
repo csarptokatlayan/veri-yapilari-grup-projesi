@@ -646,6 +646,7 @@ html, body, #root {
   width: 100%;
   border-collapse: collapse;
   margin-top: 2px;
+  table-layout: fixed; 
 }
 
 .prop-row td {
@@ -659,7 +660,6 @@ html, body, #root {
   font-family: var(--font-mono);
   font-size: 10px;
   color: var(--text-muted);
-  white-space: nowrap;
   width: 40%;
   letter-spacing: 0.03em;
 }
@@ -668,6 +668,9 @@ html, body, #root {
   color: var(--text-secondary);
   font-family: var(--font-mono);
   font-size: 11px;
+  word-wrap: break-word;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
 }
 
 .prop-skeleton {
