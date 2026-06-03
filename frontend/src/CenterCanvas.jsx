@@ -1758,22 +1758,31 @@ async function runShortestPathAnimation(cy, result, signal) {
  * Sol panel algoritma sonucunu iptal edilebilir tek animasyon runner ile isler.
  * @author Semih Tuncel
  */
-async function runAlgorithmAnimation(cy, result, signal) {
+async function runAlgorithmAnimation(cy, result, expansionRecords, signal) {
   if (!cy || !result) {
     return;
   }
 
   clearAlgorithmVisualState(cy);
 
+  // Başlangıç düğümü için hafızada bir kayıt yoksa oluşturalım
+  const startNodeId = String(result.startNode);
+  if (!expansionRecords.has(startNodeId)) {
+    expansionRecords.set(startNodeId, { nodeIds: [], edgeIds: [] });
+  }
+  const record = expansionRecords.get(startNodeId);
+
   const traversalMode = getAlgorithmTraversalMode(result.type);
 
   if (traversalMode) {
-    await runTraversalAnimation(cy, result, traversalMode, signal);
+
+    await runTraversalAnimation(cy, result, traversalMode, record, signal);
     return;
   }
 
   if (result.type === 'shortest') {
-    await runShortestPathAnimation(cy, result, signal);
+
+    await runShortestPathAnimation(cy, result, record, signal);
   }
 }
 
@@ -1785,6 +1794,7 @@ async function runAlgorithmAnimation(cy, result, signal) {
 export default function CenterCanvas({ algorithmResult, searchSelection, onNodeSelect, onGraphStatsChange }) {
   const [activeTool, setActiveTool] = useState('select');
   const [cameraState, setCameraState] = useState(INITIAL_CAMERA);
+  const [isAnimating, setIsAnimating] = useState(false);
   const canvasRef = useRef(null);
   const cyRef = useRef(null);
   const seedGraphCacheRef = useRef({
@@ -1818,9 +1828,17 @@ export default function CenterCanvas({ algorithmResult, searchSelection, onNodeS
     algorithmAbortRef.current?.abort();
 
     const abortController = new AbortController();
-
     algorithmAbortRef.current = abortController;
     isAlgorithmAnimatingRef.current = true;
+    setIsAnimating(true);
+
+
+    const startNodeId = algorithmResult.startNode ? String(algorithmResult.startNode) : null;
+    if (startNodeId && cy.getElementById(startNodeId).empty()) {
+      cy.elements().remove();
+      expansionRecordsRef.current.clear();
+      canvasGenerationRef.current += 1;
+    }
 
     runAlgorithmAnimation(cy, algorithmResult, abortController.signal)
         .catch((error) => {
@@ -1830,6 +1848,7 @@ export default function CenterCanvas({ algorithmResult, searchSelection, onNodeS
           if (algorithmAbortRef.current === abortController) {
             algorithmAbortRef.current = null;
             isAlgorithmAnimatingRef.current = false;
+            setIsAnimating(false);
           }
 
           if (!cy.destroyed()) {
@@ -1955,7 +1974,7 @@ export default function CenterCanvas({ algorithmResult, searchSelection, onNodeS
 
       onNodeSelectRef.current?.(createSelectedNodePayload(event.target));
 
-      if (isExpandingRef.current || isAlgorithmAnimatingRef.current) {
+      if (isExpandingRef.current || isAnimating) {
         return;
       }
 
@@ -2144,6 +2163,35 @@ export default function CenterCanvas({ algorithmResult, searchSelection, onNodeS
               onClick={() => handleToolClick('fit')}
           >
             <FitIcon />
+
+          </button>
+          {/* DURDUR BUTONU  */}
+          {isAnimating && (
+              <button
+                  className="canvas-tool-btn active"
+                  title="Animasyonu Durdur"
+                  onClick={() => {
+                    algorithmAbortRef.current?.abort();
+                    isAlgorithmAnimatingRef.current = false;
+                    setIsAnimating(false);
+                  }}
+                  style={{ color: '#f44336' }}
+              >
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor">
+                  <rect x="3" y="3" width="8" height="8" rx="1" />
+                </svg>
+              </button>
+          )}
+
+          {/* VURGULARI TEMIZLE BUTONU */}
+          <button
+              className="canvas-tool-btn"
+              title="Vurguları Temizle"
+              onClick={() => clearAlgorithmVisualState(cyRef.current)}
+          >
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+              <path d="M2.5 11.5L11.5 2.5M11.5 2.5H6.5M11.5 2.5V7.5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
           </button>
 
           <span className="canvas-tool-label">GRAPH CANVAS</span>
