@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-const SEARCH_MIN_LENGTH = 2;
+const SEARCH_MIN_LENGTH = 1;
 const SEARCH_DEBOUNCE_MS = 300;
 const BLUR_CLOSE_DELAY_MS = 120;
 

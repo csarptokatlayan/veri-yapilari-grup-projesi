@@ -2156,6 +2156,53 @@ export default function CenterCanvas({ algorithmResult, searchSelection, onNodeS
   useEffect(() => {
     applyCanvasMode(cyRef.current, activeTool);
   }, [activeTool]);
+  /**
+   * Ekrani ve hafizayi tamamen temizler, kanvasi ilk acilis (Root Node) haline dondurur.
+   * @author Semih Tuncel
+   */
+  function handleResetCanvas() {
+    const cy = cyRef.current;
+    if (!cy) return;
+
+    // 1. Varsa calisan animasyonlari durdur
+    algorithmAbortRef.current?.abort();
+    isAlgorithmAnimatingRef.current = false;
+    setIsAnimating(false);
+
+    // 2. Kanvasi sil, expand hafizasini sifirla
+    cy.elements().remove();
+    expansionRecordsRef.current.clear();
+    canvasGenerationRef.current += 1;
+
+    const currentGen = canvasGenerationRef.current;
+    const abortController = new AbortController();
+
+    // 3. Ilk (Root) komsuluk grafigini bastan cek ve ekrana bas
+    fetchInitialGraph(abortController.signal)
+        .then((graph) => {
+          if (cy.destroyed() || canvasGenerationRef.current !== currentGen) return;
+          const normalizedGraph = normalizeGraphResponse(graph);
+          renderInitialGraph(cy, normalizedGraph);
+          registerRenderedExpansion(cy, expansionRecordsRef.current, ROOT_NODE_ID, normalizedGraph);
+          setCameraState(createCameraSnapshot(cy));
+        })
+        .catch((error) => {
+          if (error.name !== 'AbortError') {
+            // Backend yoksa Seed uzerinden toparla
+            loadSeedGraphIndex(seedGraphCacheRef.current, abortController.signal).then(graphIndex => {
+              if (cy.destroyed() || canvasGenerationRef.current !== currentGen) return;
+              const rootNodeId = getSeedRootNodeId(graphIndex);
+              const initialGraph = createLocalInitialGraph(graphIndex);
+              renderInitialGraph(cy, initialGraph);
+              if (rootNodeId) {
+                registerRenderedExpansion(cy, expansionRecordsRef.current, rootNodeId, initialGraph);
+              }
+              setCameraState(createCameraSnapshot(cy));
+            });
+          }
+        });
+  }
+
 
   /**
    * Toolbar tiklamalarini motor komutuna cevirir; select ve pan mod olarak saklanir.
@@ -2237,6 +2284,17 @@ export default function CenterCanvas({ algorithmResult, searchSelection, onNodeS
           >
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
               <path d="M2.5 11.5L11.5 2.5M11.5 2.5H6.5M11.5 2.5V7.5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </button>
+          {/* RESET / SIFIRLA BUTONU */}
+          <button
+              className="canvas-tool-btn"
+              title="Kanvası Sıfırla (Başlangıca Dön)"
+              onClick={handleResetCanvas}
+          >
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+              <path d="M2.5 7a4.5 4.5 0 1 1 .9 2.7L2 11" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M2 7.5V11h3.5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
           </button>
 
