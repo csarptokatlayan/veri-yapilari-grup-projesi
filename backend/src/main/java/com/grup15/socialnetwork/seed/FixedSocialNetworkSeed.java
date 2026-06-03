@@ -334,7 +334,7 @@ public final class FixedSocialNetworkSeed {
             throw new IllegalArgumentException("Visitor cannot be null.");
         }
 
-        // ── ARKADAŞLIK BAĞLANTILARI ──────────────────────────────────────────
+        // ── ARKADAŞLIK BAĞLANTILARI (Çift Yönlü - false) ─────────────────────
 
         // Halka: her kullanıcı bir sonrakiyle arkadaş (yakın çevre)
         for (int i = 0; i < USER_COUNT; i++) {
@@ -354,39 +354,35 @@ public final class FixedSocialNetworkSeed {
                     EdgeType.FRIEND, false);
         }
 
-        // ── PAYLAŞIM BAĞLANTILARI ────────────────────────────────────────────
+        // ── PAYLAŞIM BAĞLANTILARI (Çift Yönlü - false) ───────────────────────
 
         // İlk 70 kullanıcının her biri 1 post paylaşır
         for (int i = 0; i < POST_COUNT; i++) {
             visitor.visit(userIdAtIndex(i), POST_FIRST_ID + i,
-                    EdgeType.POSTED, true);
+                    EdgeType.POSTED, false);
         }
 
         // 25 kullanıcı birer fotoğraf paylaşır (döngüsel eşleme)
         for (int i = 0; i < PHOTO_COUNT; i++) {
             visitor.visit(userIdAtIndex((POST_COUNT + i) % USER_COUNT),
-                    PHOTO_FIRST_ID + i, EdgeType.POSTED, true);
+                    PHOTO_FIRST_ID + i, EdgeType.POSTED, false);
         }
 
-        // ── BEĞENİ BAĞLANTILARI ──────────────────────────────────────────────
-        // Her kullanıcı 3 içeriği beğenir.
-        // Asal katsayılar (7, 23) dağılımı eşit kılar; kuadratik terim (k²×3)
-        // aynı kullanıcının birbirinin çok yakınındaki içerikleri beğenmesini engeller.
+        // ── BEĞENİ BAĞLANTILARI (Çift Yönlü - false) ─────────────────────────
         for (int u = 0; u < USER_COUNT; u++) {
             int uid = userIdAtIndex(u);
             for (int k = 0; k < 3; k++) {
                 int idx = Math.floorMod(u * 7 + k * 23 + k * k * 3, CONTENT_COUNT);
-                visitor.visit(uid, contentIdAtIndex(idx), EdgeType.LIKES, true);
+                visitor.visit(uid, contentIdAtIndex(idx), EdgeType.LIKES, false);
             }
         }
 
-        // ── KATILIM BAĞLANTILARI ─────────────────────────────────────────────
-        // Her kullanıcı 2 etkinliğe katılır (asal katsayılar organik dağılım sağlar).
+        // ── KATILIM BAĞLANTILARI (Çift Yönlü - false) ────────────────────────
         for (int u = 0; u < USER_COUNT; u++) {
             int uid = userIdAtIndex(u);
             for (int k = 0; k < 2; k++) {
                 int idx = Math.floorMod(u * 3 + k * 11, EVENT_COUNT);
-                visitor.visit(uid, eventIdAtIndex(idx), EdgeType.ATTENDS, true);
+                visitor.visit(uid, eventIdAtIndex(idx), EdgeType.ATTENDS, false);
             }
         }
     }
