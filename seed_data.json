@@ -3,1002 +3,1892 @@
     "id" : 1,
     "title" : "Semih Tuncel",
     "nodeType" : "USER",
-    "properties" : { }
+    "properties" : {
+      "teamMember" : true,
+      "occupation" : "Bilgisayar Mühendisliği Öğrencisi",
+      "teamMemberNameAscii" : "Semih Tuncel",
+      "location" : "Bursa",
+      "isActive" : false,
+      "age" : 18
+    }
   }, {
     "id" : 2,
     "title" : "Ahmet Efe Gencel",
     "nodeType" : "USER",
-    "properties" : { }
+    "properties" : {
+      "teamMember" : true,
+      "occupation" : "Yazılım Geliştirici",
+      "teamMemberNameAscii" : "Ahmet Efe Gencel",
+      "location" : "İstanbul",
+      "isActive" : true,
+      "age" : 19
+    }
   }, {
     "id" : 3,
     "title" : "Arda Asan",
     "nodeType" : "USER",
-    "properties" : { }
+    "properties" : {
+      "teamMember" : true,
+      "occupation" : "Grafik Tasarımcı",
+      "teamMemberNameAscii" : "Arda Asan",
+      "location" : "Ankara",
+      "isActive" : true,
+      "age" : 20
+    }
   }, {
     "id" : 4,
     "title" : "Fatih Soyer",
     "nodeType" : "USER",
-    "properties" : { }
+    "properties" : {
+      "teamMember" : true,
+      "occupation" : "Veri Bilimcisi",
+      "teamMemberNameAscii" : "Fatih Soyer",
+      "location" : "İzmir",
+      "isActive" : true,
+      "age" : 21
+    }
   }, {
     "id" : 5,
     "title" : "Murat Kutku",
     "nodeType" : "USER",
-    "properties" : { }
+    "properties" : {
+      "teamMember" : true,
+      "occupation" : "Akademisyen",
+      "teamMemberNameAscii" : "Murat Kutku",
+      "location" : "Eskişehir",
+      "isActive" : true,
+      "age" : 22
+    }
   }, {
     "id" : 6,
     "title" : "Zeynep Arslan",
     "nodeType" : "USER",
-    "properties" : { }
+    "properties" : {
+      "occupation" : "Serbest Çalışan (Freelancer)",
+      "location" : "Antalya",
+      "isActive" : true,
+      "age" : 23
+    }
   }, {
     "id" : 7,
     "title" : "Elif Kaya",
     "nodeType" : "USER",
-    "properties" : { }
+    "properties" : {
+      "occupation" : "Bilgisayar Mühendisliği Öğrencisi",
+      "location" : "Çanakkale",
+      "isActive" : true,
+      "age" : 24
+    }
   }, {
     "id" : 8,
     "title" : "Ayşe Demir",
     "nodeType" : "USER",
-    "properties" : { }
+    "properties" : {
+      "occupation" : "Yazılım Geliştirici",
+      "location" : "Bursa",
+      "isActive" : false,
+      "age" : 25
+    }
   }, {
     "id" : 9,
     "title" : "Mehmet Yılmaz",
     "nodeType" : "USER",
-    "properties" : { }
+    "properties" : {
+      "occupation" : "Grafik Tasarımcı",
+      "location" : "İstanbul",
+      "isActive" : true,
+      "age" : 26
+    }
   }, {
     "id" : 10,
     "title" : "Emre Çelik",
     "nodeType" : "USER",
-    "properties" : { }
+    "properties" : {
+      "occupation" : "Veri Bilimcisi",
+      "location" : "Ankara",
+      "isActive" : true,
+      "age" : 27
+    }
   }, {
     "id" : 11,
     "title" : "Selin Öztürk",
     "nodeType" : "USER",
-    "properties" : { }
+    "properties" : {
+      "occupation" : "Akademisyen",
+      "location" : "İzmir",
+      "isActive" : true,
+      "age" : 28
+    }
   }, {
     "id" : 12,
     "title" : "Can Şahin",
     "nodeType" : "USER",
-    "properties" : { }
+    "properties" : {
+      "occupation" : "Serbest Çalışan (Freelancer)",
+      "location" : "Eskişehir",
+      "isActive" : true,
+      "age" : 29
+    }
   }, {
     "id" : 13,
     "title" : "Deniz Aydın",
     "nodeType" : "USER",
-    "properties" : { }
+    "properties" : {
+      "occupation" : "Bilgisayar Mühendisliği Öğrencisi",
+      "location" : "Antalya",
+      "isActive" : true,
+      "age" : 30
+    }
   }, {
     "id" : 14,
     "title" : "Berk Koç",
     "nodeType" : "USER",
-    "properties" : { }
+    "properties" : {
+      "occupation" : "Yazılım Geliştirici",
+      "location" : "Çanakkale",
+      "isActive" : true,
+      "age" : 31
+    }
   }, {
     "id" : 15,
     "title" : "Pınar Doğan",
     "nodeType" : "USER",
-    "properties" : { }
+    "properties" : {
+      "occupation" : "Grafik Tasarımcı",
+      "location" : "Bursa",
+      "isActive" : false,
+      "age" : 32
+    }
   }, {
     "id" : 16,
     "title" : "Ali Yıldız",
     "nodeType" : "USER",
-    "properties" : { }
+    "properties" : {
+      "occupation" : "Veri Bilimcisi",
+      "location" : "İstanbul",
+      "isActive" : true,
+      "age" : 18
+    }
   }, {
     "id" : 17,
     "title" : "Merve Şimşek",
     "nodeType" : "USER",
-    "properties" : { }
+    "properties" : {
+      "occupation" : "Akademisyen",
+      "location" : "Ankara",
+      "isActive" : true,
+      "age" : 19
+    }
   }, {
     "id" : 18,
     "title" : "Oğuz Kurt",
     "nodeType" : "USER",
-    "properties" : { }
+    "properties" : {
+      "occupation" : "Serbest Çalışan (Freelancer)",
+      "location" : "İzmir",
+      "isActive" : true,
+      "age" : 20
+    }
   }, {
     "id" : 19,
     "title" : "Ceren Erdoğan",
     "nodeType" : "USER",
-    "properties" : { }
+    "properties" : {
+      "occupation" : "Bilgisayar Mühendisliği Öğrencisi",
+      "location" : "Eskişehir",
+      "isActive" : true,
+      "age" : 21
+    }
   }, {
     "id" : 20,
     "title" : "Burak Özdemir",
     "nodeType" : "USER",
-    "properties" : { }
+    "properties" : {
+      "occupation" : "Yazılım Geliştirici",
+      "location" : "Antalya",
+      "isActive" : true,
+      "age" : 22
+    }
   }, {
     "id" : 21,
     "title" : "Tuğba Çakır",
     "nodeType" : "USER",
-    "properties" : { }
+    "properties" : {
+      "occupation" : "Grafik Tasarımcı",
+      "location" : "Çanakkale",
+      "isActive" : true,
+      "age" : 23
+    }
   }, {
     "id" : 22,
     "title" : "Serkan Güneş",
     "nodeType" : "USER",
-    "properties" : { }
+    "properties" : {
+      "occupation" : "Veri Bilimcisi",
+      "location" : "Bursa",
+      "isActive" : false,
+      "age" : 24
+    }
   }, {
     "id" : 23,
     "title" : "Hande Polat",
     "nodeType" : "USER",
-    "properties" : { }
+    "properties" : {
+      "occupation" : "Akademisyen",
+      "location" : "İstanbul",
+      "isActive" : true,
+      "age" : 25
+    }
   }, {
     "id" : 24,
     "title" : "Volkan Aksoy",
     "nodeType" : "USER",
-    "properties" : { }
+    "properties" : {
+      "occupation" : "Serbest Çalışan (Freelancer)",
+      "location" : "Ankara",
+      "isActive" : true,
+      "age" : 26
+    }
   }, {
     "id" : 25,
     "title" : "Gizem Kaplan",
     "nodeType" : "USER",
-    "properties" : { }
+    "properties" : {
+      "occupation" : "Bilgisayar Mühendisliği Öğrencisi",
+      "location" : "İzmir",
+      "isActive" : true,
+      "age" : 27
+    }
   }, {
     "id" : 26,
     "title" : "Kaan Akar",
     "nodeType" : "USER",
-    "properties" : { }
+    "properties" : {
+      "occupation" : "Yazılım Geliştirici",
+      "location" : "Eskişehir",
+      "isActive" : true,
+      "age" : 28
+    }
   }, {
     "id" : 27,
     "title" : "Dilan Bulut",
     "nodeType" : "USER",
-    "properties" : { }
+    "properties" : {
+      "occupation" : "Grafik Tasarımcı",
+      "location" : "Antalya",
+      "isActive" : true,
+      "age" : 29
+    }
   }, {
     "id" : 28,
     "title" : "Ege Demirci",
     "nodeType" : "USER",
-    "properties" : { }
+    "properties" : {
+      "occupation" : "Veri Bilimcisi",
+      "location" : "Çanakkale",
+      "isActive" : true,
+      "age" : 30
+    }
   }, {
     "id" : 29,
     "title" : "Yasemin Göktaş",
     "nodeType" : "USER",
-    "properties" : { }
+    "properties" : {
+      "occupation" : "Akademisyen",
+      "location" : "Bursa",
+      "isActive" : false,
+      "age" : 31
+    }
   }, {
     "id" : 30,
     "title" : "Mert Kılıç",
     "nodeType" : "USER",
-    "properties" : { }
+    "properties" : {
+      "occupation" : "Serbest Çalışan (Freelancer)",
+      "location" : "İstanbul",
+      "isActive" : true,
+      "age" : 32
+    }
   }, {
     "id" : 31,
     "title" : "Seda Yalçın",
     "nodeType" : "USER",
-    "properties" : { }
+    "properties" : {
+      "occupation" : "Bilgisayar Mühendisliği Öğrencisi",
+      "location" : "Ankara",
+      "isActive" : true,
+      "age" : 18
+    }
   }, {
     "id" : 32,
     "title" : "Onur Tekin",
     "nodeType" : "USER",
-    "properties" : { }
+    "properties" : {
+      "occupation" : "Yazılım Geliştirici",
+      "location" : "İzmir",
+      "isActive" : true,
+      "age" : 19
+    }
   }, {
     "id" : 33,
     "title" : "Ece Özer",
     "nodeType" : "USER",
-    "properties" : { }
+    "properties" : {
+      "occupation" : "Grafik Tasarımcı",
+      "location" : "Eskişehir",
+      "isActive" : true,
+      "age" : 20
+    }
   }, {
     "id" : 34,
     "title" : "Taha Uysal",
     "nodeType" : "USER",
-    "properties" : { }
+    "properties" : {
+      "occupation" : "Veri Bilimcisi",
+      "location" : "Antalya",
+      "isActive" : true,
+      "age" : 21
+    }
   }, {
     "id" : 35,
     "title" : "Nida Başaran",
     "nodeType" : "USER",
-    "properties" : { }
+    "properties" : {
+      "occupation" : "Akademisyen",
+      "location" : "Çanakkale",
+      "isActive" : true,
+      "age" : 22
+    }
   }, {
     "id" : 36,
     "title" : "Alper Türk",
     "nodeType" : "USER",
-    "properties" : { }
+    "properties" : {
+      "occupation" : "Serbest Çalışan (Freelancer)",
+      "location" : "Bursa",
+      "isActive" : false,
+      "age" : 23
+    }
   }, {
     "id" : 37,
     "title" : "Şeyma Güler",
     "nodeType" : "USER",
-    "properties" : { }
+    "properties" : {
+      "occupation" : "Bilgisayar Mühendisliği Öğrencisi",
+      "location" : "İstanbul",
+      "isActive" : true,
+      "age" : 24
+    }
   }, {
     "id" : 38,
     "title" : "Uğur Çavuş",
     "nodeType" : "USER",
-    "properties" : { }
+    "properties" : {
+      "occupation" : "Yazılım Geliştirici",
+      "location" : "Ankara",
+      "isActive" : true,
+      "age" : 25
+    }
   }, {
     "id" : 39,
     "title" : "Dilara Işık",
     "nodeType" : "USER",
-    "properties" : { }
+    "properties" : {
+      "occupation" : "Grafik Tasarımcı",
+      "location" : "İzmir",
+      "isActive" : true,
+      "age" : 26
+    }
   }, {
     "id" : 40,
     "title" : "Kemal Saygın",
     "nodeType" : "USER",
-    "properties" : { }
+    "properties" : {
+      "occupation" : "Veri Bilimcisi",
+      "location" : "Eskişehir",
+      "isActive" : true,
+      "age" : 27
+    }
   }, {
     "id" : 41,
     "title" : "Rüya Uçar",
     "nodeType" : "USER",
-    "properties" : { }
+    "properties" : {
+      "occupation" : "Akademisyen",
+      "location" : "Antalya",
+      "isActive" : true,
+      "age" : 28
+    }
   }, {
     "id" : 42,
     "title" : "Barış Ercan",
     "nodeType" : "USER",
-    "properties" : { }
+    "properties" : {
+      "occupation" : "Serbest Çalışan (Freelancer)",
+      "location" : "Çanakkale",
+      "isActive" : true,
+      "age" : 29
+    }
   }, {
     "id" : 43,
     "title" : "Nazlı Pekcan",
     "nodeType" : "USER",
-    "properties" : { }
+    "properties" : {
+      "occupation" : "Bilgisayar Mühendisliği Öğrencisi",
+      "location" : "Bursa",
+      "isActive" : false,
+      "age" : 30
+    }
   }, {
     "id" : 44,
     "title" : "Tolga Güven",
     "nodeType" : "USER",
-    "properties" : { }
+    "properties" : {
+      "occupation" : "Yazılım Geliştirici",
+      "location" : "İstanbul",
+      "isActive" : true,
+      "age" : 31
+    }
   }, {
     "id" : 45,
     "title" : "Leyla Bozkurt",
     "nodeType" : "USER",
-    "properties" : { }
+    "properties" : {
+      "occupation" : "Grafik Tasarımcı",
+      "location" : "Ankara",
+      "isActive" : true,
+      "age" : 32
+    }
   }, {
     "id" : 46,
     "title" : "Cem Bayram",
     "nodeType" : "USER",
-    "properties" : { }
+    "properties" : {
+      "occupation" : "Veri Bilimcisi",
+      "location" : "İzmir",
+      "isActive" : true,
+      "age" : 18
+    }
   }, {
     "id" : 47,
     "title" : "İrem Altun",
     "nodeType" : "USER",
-    "properties" : { }
+    "properties" : {
+      "occupation" : "Akademisyen",
+      "location" : "Eskişehir",
+      "isActive" : true,
+      "age" : 19
+    }
   }, {
     "id" : 48,
     "title" : "Furkan Soydan",
     "nodeType" : "USER",
-    "properties" : { }
+    "properties" : {
+      "occupation" : "Serbest Çalışan (Freelancer)",
+      "location" : "Antalya",
+      "isActive" : true,
+      "age" : 20
+    }
   }, {
     "id" : 49,
     "title" : "Sevgi Karadağ",
     "nodeType" : "USER",
-    "properties" : { }
+    "properties" : {
+      "occupation" : "Bilgisayar Mühendisliği Öğrencisi",
+      "location" : "Çanakkale",
+      "isActive" : true,
+      "age" : 21
+    }
   }, {
     "id" : 50,
     "title" : "Hüseyin Aktaş",
     "nodeType" : "USER",
-    "properties" : { }
+    "properties" : {
+      "occupation" : "Yazılım Geliştirici",
+      "location" : "Bursa",
+      "isActive" : false,
+      "age" : 22
+    }
   }, {
     "id" : 51,
     "title" : "Esra Önder",
     "nodeType" : "USER",
-    "properties" : { }
+    "properties" : {
+      "occupation" : "Grafik Tasarımcı",
+      "location" : "İstanbul",
+      "isActive" : true,
+      "age" : 23
+    }
   }, {
     "id" : 52,
     "title" : "Doruk Seçkin",
     "nodeType" : "USER",
-    "properties" : { }
+    "properties" : {
+      "occupation" : "Veri Bilimcisi",
+      "location" : "Ankara",
+      "isActive" : true,
+      "age" : 24
+    }
   }, {
     "id" : 53,
     "title" : "Aysun Yavuz",
     "nodeType" : "USER",
-    "properties" : { }
+    "properties" : {
+      "occupation" : "Akademisyen",
+      "location" : "İzmir",
+      "isActive" : true,
+      "age" : 25
+    }
   }, {
     "id" : 54,
     "title" : "Cihan Özkan",
     "nodeType" : "USER",
-    "properties" : { }
+    "properties" : {
+      "occupation" : "Serbest Çalışan (Freelancer)",
+      "location" : "Eskişehir",
+      "isActive" : true,
+      "age" : 26
+    }
   }, {
     "id" : 55,
     "title" : "Simge Korkmaz",
     "nodeType" : "USER",
-    "properties" : { }
+    "properties" : {
+      "occupation" : "Bilgisayar Mühendisliği Öğrencisi",
+      "location" : "Antalya",
+      "isActive" : true,
+      "age" : 27
+    }
   }, {
     "id" : 56,
     "title" : "Bekir Atan",
     "nodeType" : "USER",
-    "properties" : { }
+    "properties" : {
+      "occupation" : "Yazılım Geliştirici",
+      "location" : "Çanakkale",
+      "isActive" : true,
+      "age" : 28
+    }
   }, {
     "id" : 57,
     "title" : "Funda Küçük",
     "nodeType" : "USER",
-    "properties" : { }
+    "properties" : {
+      "occupation" : "Grafik Tasarımcı",
+      "location" : "Bursa",
+      "isActive" : false,
+      "age" : 29
+    }
   }, {
     "id" : 58,
     "title" : "Yasin Erdem",
     "nodeType" : "USER",
-    "properties" : { }
+    "properties" : {
+      "occupation" : "Veri Bilimcisi",
+      "location" : "İstanbul",
+      "isActive" : true,
+      "age" : 30
+    }
   }, {
     "id" : 59,
     "title" : "Neslihan Çetin",
     "nodeType" : "USER",
-    "properties" : { }
+    "properties" : {
+      "occupation" : "Akademisyen",
+      "location" : "Ankara",
+      "isActive" : true,
+      "age" : 31
+    }
   }, {
     "id" : 60,
     "title" : "İlker Durmaz",
     "nodeType" : "USER",
-    "properties" : { }
+    "properties" : {
+      "occupation" : "Serbest Çalışan (Freelancer)",
+      "location" : "İzmir",
+      "isActive" : true,
+      "age" : 32
+    }
   }, {
     "id" : 61,
     "title" : "Burcu Sever",
     "nodeType" : "USER",
-    "properties" : { }
+    "properties" : {
+      "occupation" : "Bilgisayar Mühendisliği Öğrencisi",
+      "location" : "Eskişehir",
+      "isActive" : true,
+      "age" : 18
+    }
   }, {
     "id" : 62,
     "title" : "Çağrı Bostan",
     "nodeType" : "USER",
-    "properties" : { }
+    "properties" : {
+      "occupation" : "Yazılım Geliştirici",
+      "location" : "Antalya",
+      "isActive" : true,
+      "age" : 19
+    }
   }, {
     "id" : 63,
     "title" : "Tülin Arsoy",
     "nodeType" : "USER",
-    "properties" : { }
+    "properties" : {
+      "occupation" : "Grafik Tasarımcı",
+      "location" : "Çanakkale",
+      "isActive" : true,
+      "age" : 20
+    }
   }, {
     "id" : 64,
     "title" : "Haluk Memiş",
     "nodeType" : "USER",
-    "properties" : { }
+    "properties" : {
+      "occupation" : "Veri Bilimcisi",
+      "location" : "Bursa",
+      "isActive" : false,
+      "age" : 21
+    }
   }, {
     "id" : 65,
     "title" : "Arzu Gürbüz",
     "nodeType" : "USER",
-    "properties" : { }
+    "properties" : {
+      "occupation" : "Akademisyen",
+      "location" : "İstanbul",
+      "isActive" : true,
+      "age" : 22
+    }
   }, {
     "id" : 66,
     "title" : "Koray Temel",
     "nodeType" : "USER",
-    "properties" : { }
+    "properties" : {
+      "occupation" : "Serbest Çalışan (Freelancer)",
+      "location" : "Ankara",
+      "isActive" : true,
+      "age" : 23
+    }
   }, {
     "id" : 67,
     "title" : "Serap Dinçer",
     "nodeType" : "USER",
-    "properties" : { }
+    "properties" : {
+      "occupation" : "Bilgisayar Mühendisliği Öğrencisi",
+      "location" : "İzmir",
+      "isActive" : true,
+      "age" : 24
+    }
   }, {
     "id" : 68,
     "title" : "Mustafa Boz",
     "nodeType" : "USER",
-    "properties" : { }
+    "properties" : {
+      "occupation" : "Yazılım Geliştirici",
+      "location" : "Eskişehir",
+      "isActive" : true,
+      "age" : 25
+    }
   }, {
     "id" : 69,
     "title" : "Vildan Yurtsever",
     "nodeType" : "USER",
-    "properties" : { }
+    "properties" : {
+      "occupation" : "Grafik Tasarımcı",
+      "location" : "Antalya",
+      "isActive" : true,
+      "age" : 26
+    }
   }, {
     "id" : 70,
     "title" : "Aydın Tokat",
     "nodeType" : "USER",
-    "properties" : { }
+    "properties" : {
+      "occupation" : "Veri Bilimcisi",
+      "location" : "Çanakkale",
+      "isActive" : true,
+      "age" : 27
+    }
   }, {
     "id" : 71,
     "title" : "Hatice Sarıkaya",
     "nodeType" : "USER",
-    "properties" : { }
+    "properties" : {
+      "occupation" : "Akademisyen",
+      "location" : "Bursa",
+      "isActive" : false,
+      "age" : 28
+    }
   }, {
     "id" : 72,
     "title" : "Selim Pala",
     "nodeType" : "USER",
-    "properties" : { }
+    "properties" : {
+      "occupation" : "Serbest Çalışan (Freelancer)",
+      "location" : "İstanbul",
+      "isActive" : true,
+      "age" : 29
+    }
   }, {
     "id" : 73,
     "title" : "Yağmur Ergin",
     "nodeType" : "USER",
-    "properties" : { }
+    "properties" : {
+      "occupation" : "Bilgisayar Mühendisliği Öğrencisi",
+      "location" : "Ankara",
+      "isActive" : true,
+      "age" : 30
+    }
   }, {
     "id" : 74,
     "title" : "Engin Başar",
     "nodeType" : "USER",
-    "properties" : { }
+    "properties" : {
+      "occupation" : "Yazılım Geliştirici",
+      "location" : "İzmir",
+      "isActive" : true,
+      "age" : 31
+    }
   }, {
     "id" : 75,
     "title" : "İlknur Avcı",
     "nodeType" : "USER",
-    "properties" : { }
+    "properties" : {
+      "occupation" : "Grafik Tasarımcı",
+      "location" : "Eskişehir",
+      "isActive" : true,
+      "age" : 32
+    }
   }, {
     "id" : 76,
     "title" : "Ramazan Topçu",
     "nodeType" : "USER",
-    "properties" : { }
+    "properties" : {
+      "occupation" : "Veri Bilimcisi",
+      "location" : "Antalya",
+      "isActive" : true,
+      "age" : 18
+    }
   }, {
     "id" : 77,
     "title" : "Gülay Şen",
     "nodeType" : "USER",
-    "properties" : { }
+    "properties" : {
+      "occupation" : "Akademisyen",
+      "location" : "Çanakkale",
+      "isActive" : true,
+      "age" : 19
+    }
   }, {
     "id" : 78,
     "title" : "Tarık Ölmez",
     "nodeType" : "USER",
-    "properties" : { }
+    "properties" : {
+      "occupation" : "Serbest Çalışan (Freelancer)",
+      "location" : "Bursa",
+      "isActive" : false,
+      "age" : 20
+    }
   }, {
     "id" : 79,
     "title" : "Nihal Duman",
     "nodeType" : "USER",
-    "properties" : { }
+    "properties" : {
+      "occupation" : "Bilgisayar Mühendisliği Öğrencisi",
+      "location" : "İstanbul",
+      "isActive" : true,
+      "age" : 21
+    }
   }, {
     "id" : 80,
     "title" : "Ozan Kıraç",
     "nodeType" : "USER",
-    "properties" : { }
+    "properties" : {
+      "occupation" : "Yazılım Geliştirici",
+      "location" : "Ankara",
+      "isActive" : true,
+      "age" : 22
+    }
   }, {
     "id" : 81,
     "title" : "İstanbul'da gün batımı – bu şehri her zaman sevdim",
     "nodeType" : "POST",
-    "properties" : { }
+    "properties" : {
+      "isPublic" : false,
+      "category" : "Teknoloji",
+      "views" : 100
+    }
   }, {
     "id" : 82,
     "title" : "Bugün yeni bir projeye başladım, çok heyecanlıyım!",
     "nodeType" : "POST",
-    "properties" : { }
+    "properties" : {
+      "isPublic" : true,
+      "category" : "Günlük Yaşam",
+      "views" : 113
+    }
   }, {
     "id" : 83,
     "title" : "Kahve + kitap = mükemmel Pazar sabahı",
     "nodeType" : "POST",
-    "properties" : { }
+    "properties" : {
+      "isPublic" : true,
+      "category" : "Eğitim",
+      "views" : 126
+    }
   }, {
     "id" : 84,
     "title" : "Yılın en güzel konseri dün geceydi",
     "nodeType" : "POST",
-    "properties" : { }
+    "properties" : {
+      "isPublic" : true,
+      "category" : "Eğlence",
+      "views" : 139
+    }
   }, {
     "id" : 85,
     "title" : "Sınavlar bitti, sonunda nefes alabiliyorum",
     "nodeType" : "POST",
-    "properties" : { }
+    "properties" : {
+      "isPublic" : true,
+      "category" : "Gezi",
+      "views" : 152
+    }
   }, {
     "id" : 86,
     "title" : "Boğaz'da tekne turu – bu manzaraya doyum olmaz",
     "nodeType" : "POST",
-    "properties" : { }
+    "properties" : {
+      "isPublic" : false,
+      "category" : "Kültür & Sanat",
+      "views" : 165
+    }
   }, {
     "id" : 87,
     "title" : "Yeni tarif denedim: ev yapımı mercimek çorbası",
     "nodeType" : "POST",
-    "properties" : { }
+    "properties" : {
+      "isPublic" : true,
+      "category" : "Teknoloji",
+      "views" : 178
+    }
   }, {
     "id" : 88,
     "title" : "Spor salonunda kişisel rekorum kırdım",
     "nodeType" : "POST",
-    "properties" : { }
+    "properties" : {
+      "isPublic" : true,
+      "category" : "Günlük Yaşam",
+      "views" : 191
+    }
   }, {
     "id" : 89,
     "title" : "Annem pişirdi, teşekkürler anne",
     "nodeType" : "POST",
-    "properties" : { }
+    "properties" : {
+      "isPublic" : true,
+      "category" : "Eğitim",
+      "views" : 204
+    }
   }, {
     "id" : 90,
     "title" : "Üniversite anıları bitmek bilmiyor, 4 yıl çabuk geçti",
     "nodeType" : "POST",
-    "properties" : { }
+    "properties" : {
+      "isPublic" : true,
+      "category" : "Eğlence",
+      "views" : 217
+    }
   }, {
     "id" : 91,
     "title" : "Film önerisi: Babam ve Oğlum – herkese izleyin",
     "nodeType" : "POST",
-    "properties" : { }
+    "properties" : {
+      "isPublic" : false,
+      "category" : "Gezi",
+      "views" : 230
+    }
   }, {
     "id" : 92,
     "title" : "Doğa yürüyüşü yaptım, ruhum yerine geldi",
     "nodeType" : "POST",
-    "properties" : { }
+    "properties" : {
+      "isPublic" : true,
+      "category" : "Kültür & Sanat",
+      "views" : 243
+    }
   }, {
     "id" : 93,
     "title" : "Yeni iş yerim harika, ekip muhteşem",
     "nodeType" : "POST",
-    "properties" : { }
+    "properties" : {
+      "isPublic" : true,
+      "category" : "Teknoloji",
+      "views" : 256
+    }
   }, {
     "id" : 94,
     "title" : "Ramazan pidesi kuyruğu 2 saat ama değdi",
     "nodeType" : "POST",
-    "properties" : { }
+    "properties" : {
+      "isPublic" : true,
+      "category" : "Günlük Yaşam",
+      "views" : 269
+    }
   }, {
     "id" : 95,
     "title" : "Tatil planları yapıyorum – Kapadokya mı, Bodrum mu?",
     "nodeType" : "POST",
-    "properties" : { }
+    "properties" : {
+      "isPublic" : true,
+      "category" : "Eğitim",
+      "views" : 282
+    }
   }, {
     "id" : 96,
     "title" : "Mezuniyet fotoğraflarım nihayet hazır",
     "nodeType" : "POST",
-    "properties" : { }
+    "properties" : {
+      "isPublic" : false,
+      "category" : "Eğlence",
+      "views" : 295
+    }
   }, {
     "id" : 97,
     "title" : "Trafik berbat bugün, 2 saat yolda kaldım",
     "nodeType" : "POST",
-    "properties" : { }
+    "properties" : {
+      "isPublic" : true,
+      "category" : "Gezi",
+      "views" : 308
+    }
   }, {
     "id" : 98,
     "title" : "Konsere gitmeden önce heyecan dorukta",
     "nodeType" : "POST",
-    "properties" : { }
+    "properties" : {
+      "isPublic" : true,
+      "category" : "Kültür & Sanat",
+      "views" : 321
+    }
   }, {
     "id" : 99,
     "title" : "Yeni roman okumaya başladım: Masumiyet Müzesi",
     "nodeType" : "POST",
-    "properties" : { }
+    "properties" : {
+      "isPublic" : true,
+      "category" : "Teknoloji",
+      "views" : 334
+    }
   }, {
     "id" : 100,
     "title" : "Sahil kenarında sabah koşusu – tavsiye ederim",
     "nodeType" : "POST",
-    "properties" : { }
+    "properties" : {
+      "isPublic" : true,
+      "category" : "Günlük Yaşam",
+      "views" : 347
+    }
   }, {
     "id" : 101,
     "title" : "Kedi sahiplendim, adını Pamuq koydum",
     "nodeType" : "POST",
-    "properties" : { }
+    "properties" : {
+      "isPublic" : false,
+      "category" : "Eğitim",
+      "views" : 360
+    }
   }, {
     "id" : 102,
     "title" : "Arkadaşlarımla piknik – harika bir gün geçirdik",
     "nodeType" : "POST",
-    "properties" : { }
+    "properties" : {
+      "isPublic" : true,
+      "category" : "Eğlence",
+      "views" : 373
+    }
   }, {
     "id" : 103,
     "title" : "Kod yazarken müzik şart, bugün lo-fi playlist",
     "nodeType" : "POST",
-    "properties" : { }
+    "properties" : {
+      "isPublic" : true,
+      "category" : "Gezi",
+      "views" : 386
+    }
   }, {
     "id" : 104,
     "title" : "Hava kötü ama içimde güneş var",
     "nodeType" : "POST",
-    "properties" : { }
+    "properties" : {
+      "isPublic" : true,
+      "category" : "Kültür & Sanat",
+      "views" : 399
+    }
   }, {
     "id" : 105,
     "title" : "Galata Kulesi'ne çıktım, İstanbul üstten bambaşka",
     "nodeType" : "POST",
-    "properties" : { }
+    "properties" : {
+      "isPublic" : true,
+      "category" : "Teknoloji",
+      "views" : 412
+    }
   }, {
     "id" : 106,
     "title" : "Nohutlu pilav yaptım, mükemmel oldu",
     "nodeType" : "POST",
-    "properties" : { }
+    "properties" : {
+      "isPublic" : false,
+      "category" : "Günlük Yaşam",
+      "views" : 425
+    }
   }, {
     "id" : 107,
     "title" : "Burs aldım, ailem çok mutlu",
     "nodeType" : "POST",
-    "properties" : { }
+    "properties" : {
+      "isPublic" : true,
+      "category" : "Eğitim",
+      "views" : 438
+    }
   }, {
     "id" : 108,
     "title" : "Yarın final var, dua edin lütfen",
     "nodeType" : "POST",
-    "properties" : { }
+    "properties" : {
+      "isPublic" : true,
+      "category" : "Eğlence",
+      "views" : 451
+    }
   }, {
     "id" : 109,
     "title" : "Deniz kenarında çay içmek dünyanın en güzel şeyi",
     "nodeType" : "POST",
-    "properties" : { }
+    "properties" : {
+      "isPublic" : true,
+      "category" : "Gezi",
+      "views" : 464
+    }
   }, {
     "id" : 110,
     "title" : "Yeni kulaklık aldım, ses kalitesi inanılmaz",
     "nodeType" : "POST",
-    "properties" : { }
+    "properties" : {
+      "isPublic" : true,
+      "category" : "Kültür & Sanat",
+      "views" : 477
+    }
   }, {
     "id" : 111,
     "title" : "Arkadaşım evlendi, düğün muhteşemdi",
     "nodeType" : "POST",
-    "properties" : { }
+    "properties" : {
+      "isPublic" : false,
+      "category" : "Teknoloji",
+      "views" : 490
+    }
   }, {
     "id" : 112,
     "title" : "Çarşamba akşamı basketbol maçı, kazandık",
     "nodeType" : "POST",
-    "properties" : { }
+    "properties" : {
+      "isPublic" : true,
+      "category" : "Günlük Yaşam",
+      "views" : 503
+    }
   }, {
     "id" : 113,
     "title" : "Felsefe kitabı okuyorum, kafa çok yoruluyor",
     "nodeType" : "POST",
-    "properties" : { }
+    "properties" : {
+      "isPublic" : true,
+      "category" : "Eğitim",
+      "views" : 516
+    }
   }, {
     "id" : 114,
     "title" : "Şehir dışına çıktım, sessizliğe ihtiyacım vardı",
     "nodeType" : "POST",
-    "properties" : { }
+    "properties" : {
+      "isPublic" : true,
+      "category" : "Eğlence",
+      "views" : 529
+    }
   }, {
     "id" : 115,
     "title" : "Vegan tarif denemesi: mercimekli köfte",
     "nodeType" : "POST",
-    "properties" : { }
+    "properties" : {
+      "isPublic" : true,
+      "category" : "Gezi",
+      "views" : 542
+    }
   }, {
     "id" : 116,
     "title" : "Deprem bölgesine yardım toplandı, herkese teşekkür",
     "nodeType" : "POST",
-    "properties" : { }
+    "properties" : {
+      "isPublic" : false,
+      "category" : "Kültür & Sanat",
+      "views" : 555
+    }
   }, {
     "id" : 117,
     "title" : "Yazılım geliştirme bootcamp'ini tamamladım",
     "nodeType" : "POST",
-    "properties" : { }
+    "properties" : {
+      "isPublic" : true,
+      "category" : "Teknoloji",
+      "views" : 568
+    }
   }, {
     "id" : 118,
     "title" : "Balkon bahçesi kuruyorum, ilk domates filizi çıktı",
     "nodeType" : "POST",
-    "properties" : { }
+    "properties" : {
+      "isPublic" : true,
+      "category" : "Günlük Yaşam",
+      "views" : 581
+    }
   }, {
     "id" : 119,
     "title" : "Arkadaşlarımla Kapadokya road trip – efsane bir hafta!",
     "nodeType" : "POST",
-    "properties" : { }
+    "properties" : {
+      "isPublic" : true,
+      "category" : "Eğitim",
+      "views" : 594
+    }
   }, {
     "id" : 120,
     "title" : "Yağmurlu havada sıcak çorba içmek ayrı güzel",
     "nodeType" : "POST",
-    "properties" : { }
+    "properties" : {
+      "isPublic" : true,
+      "category" : "Eğlence",
+      "views" : 607
+    }
   }, {
     "id" : 121,
     "title" : "Yeni şarkım çıktı, dinleyin ve görüşlerinizi yazın",
     "nodeType" : "POST",
-    "properties" : { }
+    "properties" : {
+      "isPublic" : false,
+      "category" : "Gezi",
+      "views" : 620
+    }
   }, {
     "id" : 122,
     "title" : "Eski İstanbul fotoğrafları – şehir ne kadar değişmiş",
     "nodeType" : "POST",
-    "properties" : { }
+    "properties" : {
+      "isPublic" : true,
+      "category" : "Kültür & Sanat",
+      "views" : 633
+    }
   }, {
     "id" : 123,
     "title" : "Hafta sonu seramik atölyesine katıldım, çok eğlenceliydi",
     "nodeType" : "POST",
-    "properties" : { }
+    "properties" : {
+      "isPublic" : true,
+      "category" : "Teknoloji",
+      "views" : 646
+    }
   }, {
     "id" : 124,
     "title" : "Kütüphaneye üye oldum, artık kitap satın almıyorum",
     "nodeType" : "POST",
-    "properties" : { }
+    "properties" : {
+      "isPublic" : true,
+      "category" : "Günlük Yaşam",
+      "views" : 659
+    }
   }, {
     "id" : 125,
     "title" : "Futbol maçı izledik – gol geldi herkes çıldırdı",
     "nodeType" : "POST",
-    "properties" : { }
+    "properties" : {
+      "isPublic" : true,
+      "category" : "Eğitim",
+      "views" : 672
+    }
   }, {
     "id" : 126,
     "title" : "Sabah erken kalktım, gün çok verimli geçti",
     "nodeType" : "POST",
-    "properties" : { }
+    "properties" : {
+      "isPublic" : false,
+      "category" : "Eğlence",
+      "views" : 685
+    }
   }, {
     "id" : 127,
     "title" : "Tatilde çektiğim fotoğrafları düzenliyorum",
     "nodeType" : "POST",
-    "properties" : { }
+    "properties" : {
+      "isPublic" : true,
+      "category" : "Gezi",
+      "views" : 698
+    }
   }, {
     "id" : 128,
     "title" : "Yoga yapmaya başladım, 1 ay oldu, çok iyi geliyor",
     "nodeType" : "POST",
-    "properties" : { }
+    "properties" : {
+      "isPublic" : true,
+      "category" : "Kültür & Sanat",
+      "views" : 711
+    }
   }, {
     "id" : 129,
     "title" : "Uzaktan çalışmak bazen zor ama bugün verimliydi",
     "nodeType" : "POST",
-    "properties" : { }
+    "properties" : {
+      "isPublic" : true,
+      "category" : "Teknoloji",
+      "views" : 724
+    }
   }, {
     "id" : 130,
     "title" : "Anneannemin tarifiyle börek – hayatımın en güzel tadı",
     "nodeType" : "POST",
-    "properties" : { }
+    "properties" : {
+      "isPublic" : true,
+      "category" : "Günlük Yaşam",
+      "views" : 737
+    }
   }, {
     "id" : 131,
     "title" : "Lisemdeki öğretmenimle karşılaştım, çok duygulandım",
     "nodeType" : "POST",
-    "properties" : { }
+    "properties" : {
+      "isPublic" : false,
+      "category" : "Eğitim",
+      "views" : 750
+    }
   }, {
     "id" : 132,
     "title" : "Teknoloji haberleri takip ediyorum, yapay zeka çağı geldi",
     "nodeType" : "POST",
-    "properties" : { }
+    "properties" : {
+      "isPublic" : true,
+      "category" : "Eğlence",
+      "views" : 763
+    }
   }, {
     "id" : 133,
     "title" : "Tiyatroya gittim, oyunculuk muhteşemdi",
     "nodeType" : "POST",
-    "properties" : { }
+    "properties" : {
+      "isPublic" : true,
+      "category" : "Gezi",
+      "views" : 776
+    }
   }, {
     "id" : 134,
     "title" : "Sabah rutini oluşturdum, hayat kolaylaştı",
     "nodeType" : "POST",
-    "properties" : { }
+    "properties" : {
+      "isPublic" : true,
+      "category" : "Kültür & Sanat",
+      "views" : 789
+    }
   }, {
     "id" : 135,
     "title" : "Kamp ateşi başında gitar çaldık – saf nostalji",
     "nodeType" : "POST",
-    "properties" : { }
+    "properties" : {
+      "isPublic" : true,
+      "category" : "Teknoloji",
+      "views" : 802
+    }
   }, {
     "id" : 136,
     "title" : "İş görüşmesinden döndüm, parmak falan çarpıyor",
     "nodeType" : "POST",
-    "properties" : { }
+    "properties" : {
+      "isPublic" : false,
+      "category" : "Günlük Yaşam",
+      "views" : 815
+    }
   }, {
     "id" : 137,
     "title" : "Balık tutmaya gittim, ilk defa bir şey yakaladım",
     "nodeType" : "POST",
-    "properties" : { }
+    "properties" : {
+      "isPublic" : true,
+      "category" : "Eğitim",
+      "views" : 828
+    }
   }, {
     "id" : 138,
     "title" : "Koşu bandında 10 km tamamladım",
     "nodeType" : "POST",
-    "properties" : { }
+    "properties" : {
+      "isPublic" : true,
+      "category" : "Eğlence",
+      "views" : 841
+    }
   }, {
     "id" : 139,
     "title" : "Arkadaşlarımla trivia gecesi – çok güldük",
     "nodeType" : "POST",
-    "properties" : { }
+    "properties" : {
+      "isPublic" : true,
+      "category" : "Gezi",
+      "views" : 854
+    }
   }, {
     "id" : 140,
     "title" : "Yeni bir dil öğrenmeye karar verdim: İspanyolca",
     "nodeType" : "POST",
-    "properties" : { }
+    "properties" : {
+      "isPublic" : true,
+      "category" : "Kültür & Sanat",
+      "views" : 867
+    }
   }, {
     "id" : 141,
     "title" : "Bu hafta sonu ormanda yürüyüş yapacağız",
     "nodeType" : "POST",
-    "properties" : { }
+    "properties" : {
+      "isPublic" : false,
+      "category" : "Teknoloji",
+      "views" : 880
+    }
   }, {
     "id" : 142,
     "title" : "Emekliye ayrılan müdürümüze veda ettik, üzücüydü",
     "nodeType" : "POST",
-    "properties" : { }
+    "properties" : {
+      "isPublic" : true,
+      "category" : "Günlük Yaşam",
+      "views" : 893
+    }
   }, {
     "id" : 143,
     "title" : "Kurabiye pişirdim, hepsi bitti bile",
     "nodeType" : "POST",
-    "properties" : { }
+    "properties" : {
+      "isPublic" : true,
+      "category" : "Eğitim",
+      "views" : 906
+    }
   }, {
     "id" : 144,
     "title" : "Yaz okulu başladı, yoğun ama değiyor",
     "nodeType" : "POST",
-    "properties" : { }
+    "properties" : {
+      "isPublic" : true,
+      "category" : "Eğlence",
+      "views" : 919
+    }
   }, {
     "id" : 145,
     "title" : "Doğum günüm! 24 yaş nasıl bir his",
     "nodeType" : "POST",
-    "properties" : { }
+    "properties" : {
+      "isPublic" : true,
+      "category" : "Gezi",
+      "views" : 932
+    }
   }, {
     "id" : 146,
     "title" : "Eski fotoğraf albümlerini karıştırdım, çok güldüm",
     "nodeType" : "POST",
-    "properties" : { }
+    "properties" : {
+      "isPublic" : false,
+      "category" : "Kültür & Sanat",
+      "views" : 945
+    }
   }, {
     "id" : 147,
     "title" : "Şirketimiz hackathon düzenledi, 2. olduk",
     "nodeType" : "POST",
-    "properties" : { }
+    "properties" : {
+      "isPublic" : true,
+      "category" : "Teknoloji",
+      "views" : 958
+    }
   }, {
     "id" : 148,
     "title" : "Sağlıklı yaşam için ilk adım: şeker bıraktım",
     "nodeType" : "POST",
-    "properties" : { }
+    "properties" : {
+      "isPublic" : true,
+      "category" : "Günlük Yaşam",
+      "views" : 971
+    }
   }, {
     "id" : 149,
     "title" : "Yazın planlarım epey dolu, sabırsızlanıyorum",
     "nodeType" : "POST",
-    "properties" : { }
+    "properties" : {
+      "isPublic" : true,
+      "category" : "Eğitim",
+      "views" : 984
+    }
   }, {
     "id" : 150,
     "title" : "Arkadaşım şehre geldi, İstanbul'u ona gösterdim",
     "nodeType" : "POST",
-    "properties" : { }
+    "properties" : {
+      "isPublic" : true,
+      "category" : "Eğlence",
+      "views" : 997
+    }
   }, {
     "id" : 151,
     "title" : "Günbatımı — Çeşme Sahili",
     "nodeType" : "PHOTO",
-    "properties" : { }
+    "properties" : {
+      "filter" : "Clarendon",
+      "camera" : "iPhone 14 Pro",
+      "resolution" : "1080x1080"
+    }
   }, {
     "id" : 152,
     "title" : "Balkon Çiçekleri — Bahar 2024",
     "nodeType" : "PHOTO",
-    "properties" : { }
+    "properties" : {
+      "filter" : "Juno",
+      "camera" : "Canon EOS R5",
+      "resolution" : "1920x1080"
+    }
   }, {
     "id" : 153,
     "title" : "Uludağ Kayak Tatili — Arkadaşlarla",
     "nodeType" : "PHOTO",
-    "properties" : { }
+    "properties" : {
+      "filter" : "Lark",
+      "camera" : "Sony A7 III",
+      "resolution" : "1080x1080"
+    }
   }, {
     "id" : 154,
     "title" : "Galata Kulesi — Gece Görünümü",
     "nodeType" : "PHOTO",
-    "properties" : { }
+    "properties" : {
+      "filter" : "Gingham",
+      "camera" : "Samsung S23 Ultra",
+      "resolution" : "1920x1080"
+    }
   }, {
     "id" : 155,
     "title" : "Kapadokya Balon Turu Sabahı",
     "nodeType" : "PHOTO",
-    "properties" : { }
+    "properties" : {
+      "filter" : "Filtresiz (No Filter)",
+      "camera" : "FujiFilm X-T4",
+      "resolution" : "1080x1080"
+    }
   }, {
     "id" : 156,
     "title" : "Ev Yapımı Baklava — Ramazan Özel",
     "nodeType" : "PHOTO",
-    "properties" : { }
+    "properties" : {
+      "filter" : "Clarendon",
+      "camera" : "iPhone 14 Pro",
+      "resolution" : "1920x1080"
+    }
   }, {
     "id" : 157,
     "title" : "Boğaz Köprüsü — Uzun Pozlama",
     "nodeType" : "PHOTO",
-    "properties" : { }
+    "properties" : {
+      "filter" : "Juno",
+      "camera" : "Canon EOS R5",
+      "resolution" : "1080x1080"
+    }
   }, {
     "id" : 158,
     "title" : "Aile Yemeği — Kurban Bayramı",
     "nodeType" : "PHOTO",
-    "properties" : { }
+    "properties" : {
+      "filter" : "Lark",
+      "camera" : "Sony A7 III",
+      "resolution" : "1920x1080"
+    }
   }, {
     "id" : 159,
     "title" : "Kamp Ateşi — Abant Gölü",
     "nodeType" : "PHOTO",
-    "properties" : { }
+    "properties" : {
+      "filter" : "Gingham",
+      "camera" : "Samsung S23 Ultra",
+      "resolution" : "1080x1080"
+    }
   }, {
     "id" : 160,
     "title" : "Mezuniyet Töreni 2024",
     "nodeType" : "PHOTO",
-    "properties" : { }
+    "properties" : {
+      "filter" : "Filtresiz (No Filter)",
+      "camera" : "FujiFilm X-T4",
+      "resolution" : "1920x1080"
+    }
   }, {
     "id" : 161,
     "title" : "Stüdyo Çalışması — Müzik Kaydı",
     "nodeType" : "PHOTO",
-    "properties" : { }
+    "properties" : {
+      "filter" : "Clarendon",
+      "camera" : "iPhone 14 Pro",
+      "resolution" : "1080x1080"
+    }
   }, {
     "id" : 162,
     "title" : "Emirgan Lale Bahçesi — İlkbahar",
     "nodeType" : "PHOTO",
-    "properties" : { }
+    "properties" : {
+      "filter" : "Juno",
+      "camera" : "Canon EOS R5",
+      "resolution" : "1920x1080"
+    }
   }, {
     "id" : 163,
     "title" : "Sahil Sabah Koşusu",
     "nodeType" : "PHOTO",
-    "properties" : { }
+    "properties" : {
+      "filter" : "Lark",
+      "camera" : "Sony A7 III",
+      "resolution" : "1080x1080"
+    }
   }, {
     "id" : 164,
     "title" : "Pazar Yeri Meyveleri — Kadıköy",
     "nodeType" : "PHOTO",
-    "properties" : { }
+    "properties" : {
+      "filter" : "Gingham",
+      "camera" : "Samsung S23 Ultra",
+      "resolution" : "1920x1080"
+    }
   }, {
     "id" : 165,
     "title" : "Dağda Gün Doğumu — Kaçkar",
     "nodeType" : "PHOTO",
-    "properties" : { }
+    "properties" : {
+      "filter" : "Filtresiz (No Filter)",
+      "camera" : "FujiFilm X-T4",
+      "resolution" : "1080x1080"
+    }
   }, {
     "id" : 166,
     "title" : "Köy Kahvaltısı — Bolu",
     "nodeType" : "PHOTO",
-    "properties" : { }
+    "properties" : {
+      "filter" : "Clarendon",
+      "camera" : "iPhone 14 Pro",
+      "resolution" : "1920x1080"
+    }
   }, {
     "id" : 167,
     "title" : "Kitap Kafeden Çalışma Anı",
     "nodeType" : "PHOTO",
-    "properties" : { }
+    "properties" : {
+      "filter" : "Juno",
+      "camera" : "Canon EOS R5",
+      "resolution" : "1080x1080"
+    }
   }, {
     "id" : 168,
     "title" : "Kar Altında Boğaziçi",
     "nodeType" : "PHOTO",
-    "properties" : { }
+    "properties" : {
+      "filter" : "Lark",
+      "camera" : "Sony A7 III",
+      "resolution" : "1920x1080"
+    }
   }, {
     "id" : 169,
     "title" : "El Yapımı Pizza — Akşam Yemeği",
     "nodeType" : "PHOTO",
-    "properties" : { }
+    "properties" : {
+      "filter" : "Gingham",
+      "camera" : "Samsung S23 Ultra",
+      "resolution" : "1080x1080"
+    }
   }, {
     "id" : 170,
     "title" : "Yaban Hayatı — Flamingo — Manyas",
     "nodeType" : "PHOTO",
-    "properties" : { }
+    "properties" : {
+      "filter" : "Filtresiz (No Filter)",
+      "camera" : "FujiFilm X-T4",
+      "resolution" : "1920x1080"
+    }
   }, {
     "id" : 171,
     "title" : "Konser Anı — Harbiye Açık Hava",
     "nodeType" : "PHOTO",
-    "properties" : { }
+    "properties" : {
+      "filter" : "Clarendon",
+      "camera" : "iPhone 14 Pro",
+      "resolution" : "1080x1080"
+    }
   }, {
     "id" : 172,
     "title" : "Belgrad Ormanı Bahar Pikniği",
     "nodeType" : "PHOTO",
-    "properties" : { }
+    "properties" : {
+      "filter" : "Juno",
+      "camera" : "Canon EOS R5",
+      "resolution" : "1920x1080"
+    }
   }, {
     "id" : 173,
     "title" : "Kapalıçarşı Gezisi",
     "nodeType" : "PHOTO",
-    "properties" : { }
+    "properties" : {
+      "filter" : "Lark",
+      "camera" : "Sony A7 III",
+      "resolution" : "1080x1080"
+    }
   }, {
     "id" : 174,
     "title" : "Yeni Kedi Pamuq — İlk Gün",
     "nodeType" : "PHOTO",
-    "properties" : { }
+    "properties" : {
+      "filter" : "Gingham",
+      "camera" : "Samsung S23 Ultra",
+      "resolution" : "1920x1080"
+    }
   }, {
     "id" : 175,
     "title" : "Spor Salonu — Kişisel Rekor",
     "nodeType" : "PHOTO",
-    "properties" : { }
+    "properties" : {
+      "filter" : "Filtresiz (No Filter)",
+      "camera" : "FujiFilm X-T4",
+      "resolution" : "1080x1080"
+    }
   }, {
     "id" : 176,
     "title" : "TechFest İstanbul 2024 — Yapay Zeka Zirvesi",
     "nodeType" : "EVENT",
-    "properties" : { }
+    "properties" : {
+      "date" : "2026-06-10",
+      "ticketPrice" : 0.0,
+      "capacity" : 50
+    }
   }, {
     "id" : 177,
     "title" : "Üniversitelerarası Yazılım Yarışması",
     "nodeType" : "EVENT",
-    "properties" : { }
+    "properties" : {
+      "date" : "2026-07-11",
+      "ticketPrice" : 65.0,
+      "capacity" : 60
+    }
   }, {
     "id" : 178,
     "title" : "Açık Hava Sinema Gecesi — Boğaz Kıyısı",
     "nodeType" : "EVENT",
-    "properties" : { }
+    "properties" : {
+      "date" : "2026-08-12",
+      "ticketPrice" : 80.0,
+      "capacity" : 70
+    }
   }, {
     "id" : 179,
     "title" : "Ramazan İftarı — Topluluk Buluşması",
     "nodeType" : "EVENT",
-    "properties" : { }
+    "properties" : {
+      "date" : "2026-09-13",
+      "ticketPrice" : 0.0,
+      "capacity" : 80
+    }
   }, {
     "id" : 180,
     "title" : "Bisiklet Turu — Adalar Günübirlik",
     "nodeType" : "EVENT",
-    "properties" : { }
+    "properties" : {
+      "date" : "2026-06-14",
+      "ticketPrice" : 110.0,
+      "capacity" : 90
+    }
   }, {
     "id" : 181,
     "title" : "Kariyer Günleri 2024 — Kampüste",
     "nodeType" : "EVENT",
-    "properties" : { }
+    "properties" : {
+      "date" : "2026-07-15",
+      "ticketPrice" : 125.0,
+      "capacity" : 100
+    }
   }, {
     "id" : 182,
     "title" : "Caz Festivali — Zorlu PSM",
     "nodeType" : "EVENT",
-    "properties" : { }
+    "properties" : {
+      "date" : "2026-08-16",
+      "ticketPrice" : 0.0,
+      "capacity" : 110
+    }
   }, {
     "id" : 183,
     "title" : "Hackathon İstanbul 48 Saat",
     "nodeType" : "EVENT",
-    "properties" : { }
+    "properties" : {
+      "date" : "2026-09-17",
+      "ticketPrice" : 155.0,
+      "capacity" : 120
+    }
   }, {
     "id" : 184,
     "title" : "Boğaz Sahili Çevre Temizliği",
     "nodeType" : "EVENT",
-    "properties" : { }
+    "properties" : {
+      "date" : "2026-06-18",
+      "ticketPrice" : 170.0,
+      "capacity" : 130
+    }
   }, {
     "id" : 185,
     "title" : "Kitap Kulübü Toplantısı — Haziran",
     "nodeType" : "EVENT",
-    "properties" : { }
+    "properties" : {
+      "date" : "2026-07-19",
+      "ticketPrice" : 0.0,
+      "capacity" : 140
+    }
   }, {
     "id" : 186,
     "title" : "Startup Weekend İstanbul",
     "nodeType" : "EVENT",
-    "properties" : { }
+    "properties" : {
+      "date" : "2026-08-20",
+      "ticketPrice" : 200.0,
+      "capacity" : 150
+    }
   }, {
     "id" : 187,
     "title" : "Kırkpınar Yağlı Güreş İzleme Etkinliği",
     "nodeType" : "EVENT",
-    "properties" : { }
+    "properties" : {
+      "date" : "2026-09-21",
+      "ticketPrice" : 215.0,
+      "capacity" : 160
+    }
   }, {
     "id" : 188,
     "title" : "Başlangıç Fotoğrafçılık Atölyesi",
     "nodeType" : "EVENT",
-    "properties" : { }
+    "properties" : {
+      "date" : "2026-06-22",
+      "ticketPrice" : 0.0,
+      "capacity" : 170
+    }
   }, {
     "id" : 189,
     "title" : "Köy Okulunda Gönüllü Ders",
     "nodeType" : "EVENT",
-    "properties" : { }
+    "properties" : {
+      "date" : "2026-07-23",
+      "ticketPrice" : 245.0,
+      "capacity" : 180
+    }
   }, {
     "id" : 190,
     "title" : "Yılbaşı Partisi — Rooftop",
     "nodeType" : "EVENT",
-    "properties" : { }
+    "properties" : {
+      "date" : "2026-08-24",
+      "ticketPrice" : 260.0,
+      "capacity" : 190
+    }
   }, {
     "id" : 191,
     "title" : "Arkadaş Ligi Futbol Turnuvası",
     "nodeType" : "EVENT",
-    "properties" : { }
+    "properties" : {
+      "date" : "2026-09-25",
+      "ticketPrice" : 0.0,
+      "capacity" : 200
+    }
   }, {
     "id" : 192,
     "title" : "Hafta Sonu Seramik Kursu",
     "nodeType" : "EVENT",
-    "properties" : { }
+    "properties" : {
+      "date" : "2026-06-26",
+      "ticketPrice" : 290.0,
+      "capacity" : 210
+    }
   }, {
     "id" : 193,
     "title" : "Belgrad Ormanı Doğa Fotoğrafçılığı",
     "nodeType" : "EVENT",
-    "properties" : { }
+    "properties" : {
+      "date" : "2026-07-27",
+      "ticketPrice" : 305.0,
+      "capacity" : 220
+    }
   }, {
     "id" : 194,
     "title" : "Boğaziçi Mezunlar Günü",
     "nodeType" : "EVENT",
-    "properties" : { }
+    "properties" : {
+      "date" : "2026-08-28",
+      "ticketPrice" : 0.0,
+      "capacity" : 230
+    }
   }, {
     "id" : 195,
     "title" : "Film Gösterimi ve Tartışma Gecesi",
     "nodeType" : "EVENT",
-    "properties" : { }
+    "properties" : {
+      "date" : "2026-09-29",
+      "ticketPrice" : 335.0,
+      "capacity" : 240
+    }
   }, {
     "id" : 196,
     "title" : "Kadıköy Gastronomi Festivali",
     "nodeType" : "EVENT",
-    "properties" : { }
+    "properties" : {
+      "date" : "2026-06-10",
+      "ticketPrice" : 50.0,
+      "capacity" : 250
+    }
   }, {
     "id" : 197,
     "title" : "Online Girişimcilik Webinarı",
     "nodeType" : "EVENT",
-    "properties" : { }
+    "properties" : {
+      "date" : "2026-07-11",
+      "ticketPrice" : 0.0,
+      "capacity" : 260
+    }
   }, {
     "id" : 198,
     "title" : "Üniversite Satranç Turnuvası",
     "nodeType" : "EVENT",
-    "properties" : { }
+    "properties" : {
+      "date" : "2026-08-12",
+      "ticketPrice" : 80.0,
+      "capacity" : 270
+    }
   }, {
     "id" : 199,
     "title" : "Kan Bağışı Kampanyası",
     "nodeType" : "EVENT",
-    "properties" : { }
+    "properties" : {
+      "date" : "2026-09-13",
+      "ticketPrice" : 95.0,
+      "capacity" : 280
+    }
   }, {
     "id" : 200,
     "title" : "Spor Salonu Açılış Etkinliği",
     "nodeType" : "EVENT",
-    "properties" : { }
+    "properties" : {
+      "date" : "2026-06-14",
+      "ticketPrice" : 0.0,
+      "capacity" : 290
+    }
   } ],
   "edges" : [ {
     "directed" : false,

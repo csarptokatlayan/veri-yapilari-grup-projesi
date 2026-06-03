@@ -1,5 +1,7 @@
 package com.grup15.socialnetwork.model;
 
+import com.fasterxml.jackson.annotation.JsonValue;
+
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -61,6 +63,7 @@ public class PropertyMap {
      * Tum propertyleri donduruyor. Defensive copy yapiyoruz boylece disaridan propertyleri degistirilemiyor..
      */
     //  @author Semih Tuncel
+    @JsonValue
     public Map<String, Object> getAll() {
         return new ConcurrentHashMap<>(properties);
     }
