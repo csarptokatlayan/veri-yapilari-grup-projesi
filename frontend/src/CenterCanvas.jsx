@@ -1592,12 +1592,22 @@ function clearAlgorithmVisualState(cy) {
  * Traversal adimini uygular; node spawn ve edge highlight tek yerde islenir.
  * @author Semih Tuncel
  */
-async function applyTraversalStep(cy, step, nodesById, startNodeId, signal) {
+async function applyTraversalStep(cy, step, nodesById, startNodeId, record, signal) {
   const node = nodesById.get(step.nodeId) ?? createFallbackAlgorithmNode(step.nodeId);
+
+  const isNodeNew = cy.getElementById(node.id).empty();
+
   const cyNode = await ensureAlgorithmNodeVisible(cy, node, step.parentNodeId, signal);
 
   if (!cyNode || cyNode.empty()) {
     return;
+  }
+
+
+  if (isNodeNew && node.id !== startNodeId) {
+    if (!record.nodeIds.includes(node.id)) {
+      record.nodeIds.push(node.id);
+    }
   }
 
   cyNode.addClass('highlighted');
@@ -1606,25 +1616,30 @@ async function applyTraversalStep(cy, step, nodesById, startNodeId, signal) {
     cyNode.addClass('algo-start');
   }
 
-  const cyEdge = ensureAlgorithmEdgeVisible(cy, step.edge);
+  if (step.edge) {
+    const isEdgeNew = cy.getElementById(step.edge.id).empty();
+    const cyEdge = ensureAlgorithmEdgeVisible(cy, step.edge);
 
-  if (cyEdge && !cyEdge.empty()) {
-    cyEdge.addClass('highlighted');
+    if (cyEdge && !cyEdge.empty()) {
+      cyEdge.addClass('highlighted');
+      if (isEdgeNew && !record.edgeIds.includes(step.edge.id)) {
+        record.edgeIds.push(step.edge.id);
+      }
+    }
   }
 }
-
 /**
  * BFS/DFS graph sonucunu 400ms araliklarla sahneye uygular.
  * @author Semih Tuncel
  */
-async function runTraversalAnimation(cy, result, mode, signal) {
+async function runTraversalAnimation(cy, result, mode, record, signal) {
   const graph = normalizeGraphResponse(result.data);
   const startNodeId = String(result.startNode);
   const { nodesById, steps } = createTraversalSteps(graph, mode, startNodeId);
 
   for (const step of steps) {
     throwIfAlgorithmAborted(signal);
-    await applyTraversalStep(cy, step, nodesById, startNodeId, signal);
+    await applyTraversalStep(cy, step, nodesById, startNodeId, record, signal);
     await waitForAlgorithmStep(signal);
   }
 }
@@ -1671,7 +1686,7 @@ async function fetchPathSegmentGraph(fromNodeId, signal) {
  * Path node'u eksikse parent komsularindan sadece gerekli node ve edge'i ekler.
  * @author Semih Tuncel
  */
-async function ensureShortestPathNodeVisible(cy, fromNodeId, toNodeId, signal) {
+async function ensureShortestPathNodeVisible(cy, fromNodeId, toNodeId, record, signal) {
   const existingNode = cy.getElementById(toNodeId);
 
   if (!existingNode.empty()) {
@@ -1682,10 +1697,27 @@ async function ensureShortestPathNodeVisible(cy, fromNodeId, toNodeId, signal) {
   const nodesById = createNodeMap(segmentGraph.nodes);
   const nextNode = nodesById.get(toNodeId) ?? createFallbackAlgorithmNode(toNodeId);
   const connectingEdge = findConnectingEdge(segmentGraph.edges, fromNodeId, toNodeId);
+
+  const isNodeNew = cy.getElementById(nextNode.id).empty();
   const cyNode = await ensureAlgorithmNodeVisible(cy, nextNode, fromNodeId, signal);
 
+
+  if (isNodeNew && record) {
+    if (!record.nodeIds.includes(nextNode.id)) {
+      record.nodeIds.push(nextNode.id);
+    }
+  }
+
   if (connectingEdge) {
+    const isEdgeNew = cy.getElementById(connectingEdge.id).empty();
     ensureAlgorithmEdgeVisible(cy, connectingEdge)?.addClass('highlighted');
+
+
+    if (isEdgeNew && record) {
+      if (!record.edgeIds.includes(connectingEdge.id)) {
+        record.edgeIds.push(connectingEdge.id);
+      }
+    }
   }
 
   return cyNode;
@@ -1720,7 +1752,7 @@ function addShortestPathOverlayEdge(cy, fromNodeId, toNodeId, index) {
  * Shortest path sonucunu segment segment spawn eder ve path yonunu overlay okla gosterir.
  * @author Semih Tuncel
  */
-async function runShortestPathAnimation(cy, result, signal) {
+async function runShortestPathAnimation(cy, result, record, signal) {
   const path = Array.isArray(result.data?.path) ? result.data.path.map((id) => String(id)) : [];
 
   if (path.length === 0) {
@@ -1728,10 +1760,15 @@ async function runShortestPathAnimation(cy, result, signal) {
   }
 
   const startNodeId = path[0];
+  const isStartNew = cy.getElementById(startNodeId).empty();
   const startNode = cy.getElementById(startNodeId).empty()
       ? createFallbackAlgorithmNode(startNodeId)
       : normalizeNode(cy.getElementById(startNodeId).data());
   const cyStartNode = await ensureAlgorithmNodeVisible(cy, startNode, null, signal);
+
+  if (isStartNew && startNodeId !== String(result.startNode)) {
+    if (!record.nodeIds.includes(startNodeId)) record.nodeIds.push(startNodeId);
+  }
 
   cyStartNode?.addClass('highlighted algo-start');
   await waitForAlgorithmStep(signal);
@@ -1741,7 +1778,8 @@ async function runShortestPathAnimation(cy, result, signal) {
 
     const fromNodeId = path[index - 1];
     const toNodeId = path[index];
-    const cyNode = await ensureShortestPathNodeVisible(cy, fromNodeId, toNodeId, signal);
+
+    const cyNode = await ensureShortestPathNodeVisible(cy, fromNodeId, toNodeId, record, signal);
 
     cyNode?.addClass('highlighted');
 
@@ -1749,7 +1787,15 @@ async function runShortestPathAnimation(cy, result, signal) {
       cyNode?.addClass('algo-end');
     }
 
+    const overlayEdgeId = `${ALGORITHM_OVERLAY_PREFIX}-${index}-${fromNodeId}-${toNodeId}`;
+    const isOverlayNew = cy.getElementById(overlayEdgeId).empty();
     addShortestPathOverlayEdge(cy, fromNodeId, toNodeId, index);
+
+   
+    if (isOverlayNew && record) {
+      record.edgeIds.push(overlayEdgeId);
+    }
+
     await waitForAlgorithmStep(signal);
   }
 }
@@ -1840,7 +1886,7 @@ export default function CenterCanvas({ algorithmResult, searchSelection, onNodeS
       canvasGenerationRef.current += 1;
     }
 
-    runAlgorithmAnimation(cy, algorithmResult, abortController.signal)
+    runAlgorithmAnimation(cy, algorithmResult, expansionRecordsRef.current, abortController.signal)
         .catch((error) => {
           reportGraphLoadError(error, 'Algoritma animasyonu');
         })
