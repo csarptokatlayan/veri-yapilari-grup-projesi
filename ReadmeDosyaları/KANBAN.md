@@ -6,17 +6,18 @@ Scope Dışı: Job queue, broker, snapshot sistemi, deterministik seed engine, f
 Definition of Done: Her task feature branch + PR ile kapanır, test kanıtı eklenir, Big-O/code defense notu güncellenir.
 
 🔌 Interfaces (Arayüzler)
-GET /api/search?q=&type=: Trie prefix search.
 
-GET /api/nodes/{id}: Hash Table üzerinden inspector detayları.
+GET /nodes/search: Trie veri yapısı ile harf bazlı (prefix) hızlı arama yapar ve q parametresini alır. (Eski GET /api/search yerine)
 
-GET /api/nodes/{id}/expand?depth=&limit=&relation=: Canvas node genişletme.
+GET /nodes/{id}/neighbors: Arayüzde bir düğüme tıklandığında sadece o düğümün 1. derece (doğrudan bağlı) komşularını döndürür. (Eski GET /api/nodes/{id}/expand yerine)
 
-POST /api/query/traverse: Sınırlı zincirleme sorgu şablonları.
+GET /traversal/dynamic-chain-bfs ve GET /traversal/dynamic-chain-dfs: Arayüzden gelen parametrelere (startId, edgeType, targetType, depth) göre kısıtlanmış akıllı arama algoritmalarıdır. (Eski POST /api/query/traverse yerine)
 
-POST /api/algorithms/bfs|dfs|shortest-path|degrees: Algoritma paneli.
+GET /chain/{userId}/friends-likes ve GET /chain/{userId}/friends-events: Önceden tanımlanmış zincirleme şablonları (öneri motoru) için kullanılır.
 
-DTO’lar: GraphNodeDto, GraphEdgeDto, GraphViewDto, QueryRequestDto, AlgorithmResultDto.
+GET /traversal/bfs/{startId}, GET /traversal/dfs/{startId}, ve GET /traversal/shortest-path: Algoritma paneli işlemleri için ayrılmış GET metodlu gezinme (traversal) uçlarıdır. (Eski POST /api/algorithms/... yerine)
+
+GET /filter/node/type/{nodeType}, GET /filter/node/property, ve GET /filter/edge/type/{edgeType}: Veri filtreleme (tip, özellik, ilişki tipi) işlemleri için kullanılan yeni uçlardır.
 
 🚀 Epic 1: Faz 1 - Veri Yapıları
 F1-US1
@@ -29,7 +30,7 @@ F1-US2
 
 Task'lar: Custom HashTable<K,V>; collision handling; resize/load factor; node registry.
 
-Kabul Kriterleri: Ortalama O(1) erişim sağlanır; core’da hazır HashMap kullanılmaz; inspector bu yapıdan veri çeker; unit test vardır.
+Kabul Kriterleri: Ortalama O(1) erişim sağlanır; inspector bu yapıdan veri çeker; unit test vardır.
 
 F1-US3
 
@@ -76,16 +77,12 @@ Kabul Kriterleri: Filtreli traversal doğru sonuç verir; boş sonuç durumu UI/
 
 F2-US6
 
-Task'lar: Triadic closure arkadaş önerisi; basit degree centrality.
-
-Kabul Kriterleri: Opsiyonel kalır; zorunlu algoritmalar tamamlanmadan başlanmaz; karmaşıklık analizi kısa şekilde rapora eklenir.
-
 💻 Epic 3: Faz 3 - UI, DevOps ve Teslim
 F3-US1
 
 Task'lar: Üst search; sol sorgu/algoritma paneli; orta canvas; sağ inspector.
 
-Kabul Kriterleri: İlk ekran doğrudan çalışan araçtır; sosyal medya feed’i yapılmaz; responsive temel kullanım sağlanır.
+Kabul Kriterleri: İlk ekran doğrudan çalışan araçtır; sosyal medya feed’i yapılmaz.
 
 F3-US2
 
@@ -97,7 +94,7 @@ F3-US3
 
 Task'lar: Inspector panel; GET /api/nodes/{id} entegrasyonu; property table.
 
-Kabul Kriterleri: Veri Hash Table registry’den gelir; ortalama O(1) erişim raporda belirtilir; bulunamayan node hatası gösterilir.
+Kabul Kriterleri: Veri Hash Table registry’den gelir; ortalama O(1) erişim raporda belirtilir.
 
 F3-US4
 
@@ -122,7 +119,7 @@ Unit: HashTable, Trie normalizasyonu, Queue, Graph adjacency, BFS, DFS, shortest
 
 Integration: Search, inspector, expand, fixed chain query, algoritma endpointleri.
 
-UI Demo: “Ah” araması, maksimum 50 node render, expand-on-click, inspector fetch, BFS/DFS/path highlight.
+UI Demo: “Ah” araması, expand-on-click, inspector fetch, BFS/DFS/path highlight.
 
 Performance Evidence: Tek yaklaşık 150-200 node veri setinde temel çalışma gösterilir; formal benchmark değil, Big-O analizi raporda verilir.
 
