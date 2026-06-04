@@ -56,6 +56,11 @@ veri-yapilari-grup-projesi/
 
 ---
 ## Mimari Ve Veri Yapısı
+
+> 🎥 Projenin git geçmişinin Gource görselleştirmesi:
+> <img width="1280" height="763" alt="Screenshot_604" src="https://github.com/user-attachments/assets/d8ea97fe-eac5-47bb-86ee-8b143c90fc35" />
+
+
 ### 🏗️ Sistem Sınıf (UML) Diyagramı
 
 Sistemimizin temel veri yapıları ve servis mimarisi arasındaki ilişkiler aşağıdaki UML diyagramında gösterilmiştir:
