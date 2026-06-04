@@ -1,11 +1,11 @@
-version: '3.8'
-
 services:
   backend:
     build: ./backend
     container_name: socialnetwork-backend
     ports:
       - "8080:8080"
+    volumes:
+      - ./seed_data.json:/app/seed_data.json
     restart: unless-stopped
 
   frontend:
