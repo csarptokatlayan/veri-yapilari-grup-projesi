@@ -282,8 +282,8 @@ Arka plandaki tüm bağımlılıklar otomatik olarak çözülür.
 git clone https://github.com/csarptokatlayan/veri-yapilari-grup-projesi.git
 cd veri-yapilari-grup-projesi
 
-# 2. Tüm sistemi (Backend + Frontend) arka planda tek tıkla ayağa kaldırın
-docker-compose up -d
+# 2. Tüm sistemi (Backend + Frontend) ayağa kaldırın
+docker-compose up
 ```
 
 > **Not:** `docker` ve `docker-compose` yüklü olduğundan emin olun.
@@ -316,9 +316,6 @@ GET /chain/1/friends-likes
 ```http
 # Sadece "User" tipindeki düğümleri getirir
 GET /filter/node/type/USER
-
-# Sadece "Yaşı 21 olanları" getirir
-GET /filter/node/property?key=age&value=21
 
 # Sadece "Beğeni" ilişkilerini getirir
 GET /filter/edge/type/LIKES
